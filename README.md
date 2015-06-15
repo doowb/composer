@@ -118,10 +118,6 @@ app.task('watch', function() {
 });
 ```
 
-## Related projects
-
-{%= related(['verb', 'template', 'assemble', 'generate', 'update']) %}
-
 ## Running tests
 
 Install dev dependencies:
