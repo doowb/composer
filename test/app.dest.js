@@ -13,7 +13,7 @@ var app;
 describe('app output stream', function() {
   describe('minimal config - enabled', function () {
     beforeEach(function (done) {
-      app = new application.App();
+      app = new application.Composer();
       app.enable('minimal config');
       rimraf(dest, done);
     });
@@ -30,7 +30,7 @@ describe('app output stream', function() {
       done();
     });
 
-    it.only('should return an output stream that writes files', function (done) {
+    it('should return an output stream that writes files', function (done) {
       var instream = app.src(path.join(__dirname, 'fixtures/copy/*.txt'));
       var outstream = app.dest(dest);
       instream.pipe(outstream);
@@ -145,7 +145,7 @@ describe('app output stream', function() {
 
   describe('minimal config - disabled', function () {
     beforeEach(function (done) {
-      app = new application.App();
+      app = new application.Composer();
       app.option('ext', '.txt');
       rimraf(dest, done);
     });
@@ -170,7 +170,7 @@ describe('app output stream', function() {
 
       outstream.on('error', done);
       outstream.on('data', function (file) {
-        
+
         should.exist(file);
         should.exist(file.path);
         should.exist(file.contents);
@@ -196,7 +196,7 @@ describe('app output stream', function() {
 
       outstream.on('error', done);
       outstream.on('data', function (file) {
-        
+
         should.exist(file);
         should.exist(file.path);
         should.not.exist(file.contents);
@@ -219,32 +219,32 @@ describe('app output stream', function() {
 
       instream.on('error', function (err) {
         console.log('error in instream', err);
-        
-        
+
+
       });
       instream.on('data', function () {
-        
-        
+
+
       });
 
       outstream.on('error', function (err) {
         console.log('error in outstream', err);
-        
-        
+
+
       });
       outstream.on('data', function () {
-        
-        
+
+
       });
 
       output.on('error', function (err) {
         console.log('error in output', err);
-        
-        
+
+
       });
       output.on('data', function () {
-        
-        
+
+
       });
       output.on('end', done);
     });
@@ -256,7 +256,7 @@ describe('app output stream', function() {
 
       outstream.on('error', done);
       outstream.on('data', function (file) {
-        
+
         should.exist(file);
         should.exist(file.path);
         should.exist(file.contents);

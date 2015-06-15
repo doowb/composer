@@ -6,7 +6,7 @@ var app;
 
 describe('assets', function () {
   beforeEach(function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('assets path', function () {
@@ -19,7 +19,7 @@ describe('assets', function () {
 
     it('should calculate the assets path relative to dest.path.', function () {
       app.page('c.hbs', {
-        path: 'a/b/c.hbs', 
+        path: 'a/b/c.hbs',
         content: '---\ntitle: BBB\n---\nThis is content',
         data: {dest: {path: 'a/b/c.html'}}
       });
@@ -39,7 +39,7 @@ describe('assets', function () {
 
     it('should calculate the public path relative to dest.path.', function () {
       app.page('c.hbs', {
-        path: 'a/b/c.hbs', 
+        path: 'a/b/c.hbs',
         content: '---\ntitle: BBB\n---\nThis is content',
         data: {dest: {path: 'a/b/c.html'}}
       });

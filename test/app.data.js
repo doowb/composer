@@ -6,7 +6,7 @@ var app;
 
 describe('app data', function() {
   beforeEach(function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('.data()', function() {

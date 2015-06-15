@@ -8,7 +8,7 @@ describe('app data', function () {
   var app = null;
   describe('.namespace()', function() {
     beforeEach(function () {
-      app = new application.App();
+      app = new application.Composer();
     });
 
     it('should namespace data using the `:basename` of the file.', function() {
@@ -21,7 +21,7 @@ describe('app data', function () {
       app.get('data').should.have.property('alert');
       app.get('data').should.have.property('test');
 
-      
+
       app.get('data').should.not.have.property('data');
     });
 
@@ -30,7 +30,7 @@ describe('app data', function () {
       app.get('data').should.have.property('alert');
       app.get('data').should.have.property('test');
 
-      
+
       app.get('data').should.not.have.property('data');
     });
 

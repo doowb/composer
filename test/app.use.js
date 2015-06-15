@@ -12,7 +12,7 @@ describe('app use', function () {
   describe('app.use()', function () {
     var app = null;
     beforeEach(function (done) {
-      app = new application.App();
+      app = new application.Composer();
       rimraf(outpath, done);
     });
     afterEach(function (done) {

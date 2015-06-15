@@ -10,7 +10,7 @@ var actual = __dirname + '/drafts-actual';
 
 describe('app drafts plugin', function() {
   before (function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('drafts()', function() {

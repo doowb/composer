@@ -1,46 +1,51 @@
 'use strict';
 
+var path = require('path');
 var assert = require('assert');
+var toTemplate = require('to-template');
+var through = require('through2');
 var should = require('should');
-var application = require('..');
+var composer = require('..');
 var app;
 
-describe('.getCollection', function () {
-  describe('when a collection name is specified.', function () {
-    beforeEach(function () {
-      app = new application.App();
-    });
+describe('.getViews', function () {
+  beforeEach(function () {
+    app = new composer.Composer();
+  });
 
-    it('should get the specified collection:', function (cb) {
+  describe('when a collection name is specified.', function () {
+    it('should get the specified collection:', function () {
       app.page('foo', 'this is foo...');
       app.page('bar', 'this is bar...');
       app.page('baz', 'this is baz...');
 
-      var pages = app.getCollection('pages');
+      var pages = app.getViews('pages');
       pages.should.have.properties(['foo', 'bar', 'baz']);
-      cb();
     });
   });
 
   describe('when a task is running.', function () {
-    beforeEach(function () {
-      app = new application.App();
-    });
-
-    it.only('should get files from the specified task collection', function (cb) {
+    it.only('should get files from the specified task collection', function (done) {
       app.task('test_one', function () {
         var stream = app.src('test/fixtures/templates/partials/*.hbs');
-        stream.on('end', function () {
-          var collection = app.getCollection();
+        stream.on('error', function (err) {
+          console.log(err);
+          done();
+        });
+        stream.on('data', function () {
+          // var collection = app.getViews('files');
+          // console.log(collection)
           // assert(Object.keys(collection).length === 3);
           // assert(Object.keys(app.files).length === 3);
           // collection.should.have.properties(['a', 'b', 'c']);
           // app.files.should.have.properties(['a', 'b', 'c']);
           // app.files.should.equal(collection);
+          done()
         });
         return stream;
-      });
-      app.task('default', ['test_one'], function () { cb(); });
+
+      }); 
+      app.task('default', ['test_one'], function () { done(); });
       app.run('default');
     });
 
@@ -48,7 +53,7 @@ describe('.getCollection', function () {
       app.task('test_one', function () {
         var stream = app.src('test/fixtures/templates/partials/*.hbs');
         stream.on('end', function () {
-          var collection = app.getCollection();
+          var collection = app.getViews();
           assert(Object.keys(collection).length === 3);
           assert(Object.keys(app.files).length === 3);
           collection.should.have.properties(['a', 'b', 'c']);
@@ -61,7 +66,7 @@ describe('.getCollection', function () {
       app.task('test_two', function () {
         var stream = app.src('test/fixtures/templates/partials/*.hbs');
         stream.on('end', function () {
-          var collection = app.getCollection();
+          var collection = app.getViews();
           assert(Object.keys(collection).length === 3);
           assert(Object.keys(app.files).length === 3);
           collection.should.have.properties(['a', 'b', 'c']);

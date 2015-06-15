@@ -7,7 +7,7 @@ var app;
 
 describe('.engine()', function () {
   beforeEach(function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   it('should register an engine to the given extension', function () {

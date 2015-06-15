@@ -11,7 +11,7 @@ var actual = __dirname + '/helpers-actual';
 describe('app helpers', function () {
   var app = null;
   beforeEach(function (done) {
-    app = new application.App();
+    app = new application.Composer();
     rimraf(actual, done);
   });
 

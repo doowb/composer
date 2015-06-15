@@ -10,7 +10,7 @@ var app;
 
 describe('.renderFile', function () {
   beforeEach(function() {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   it('should return a stream:', function () {

@@ -8,7 +8,7 @@ var application = require('..');
 describe('app omit', function () {
   var app = null;
   beforeEach(function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('.omit()', function () {
@@ -17,12 +17,12 @@ describe('app omit', function () {
       app.set('a', 'b');
       app.set('b', 'c');
 
-      
+
       app.get('a').should.equal('b');
       app.get('b').should.equal('c');
       app.omit('a');
 
-      
+
       assert.equal(typeof app.get('a'), 'undefined');
       assert.equal(app.get('b'), 'c');
     });
@@ -35,7 +35,7 @@ describe('app omit', function () {
       	.set('d', 'd')
         .set('e', 'e');
 
-      
+
       app.get('a').should.equal('a');
       app.get('b').should.equal('b');
       app.get('c').should.equal('c');
@@ -44,7 +44,7 @@ describe('app omit', function () {
 
       app.omit(['a', 'b', 'c', 'd']);
 
-      
+
       assert(app.get('a') == undefined);
       assert(app.get('b') == undefined);
       assert(app.get('c') == undefined);

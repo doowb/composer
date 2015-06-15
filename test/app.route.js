@@ -14,7 +14,7 @@ var outpath = join(__dirname, './out-fixtures');
 describe.skip('app route', function() {
   describe('route()', function() {
     beforeEach(function (done) {
-      app = new application.App();
+      app = new application.Composer();
       rimraf(outpath, done);
     });
     afterEach(function (done) {

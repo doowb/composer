@@ -7,7 +7,7 @@ var app;
 describe('app.template', function () {
   describe('.init()', function () {
     beforeEach(function () {
-      app = new application.App();
+      app = new application.Composer();
     });
 
     it('should create new template type methods on Assemble.prototype.', function () {

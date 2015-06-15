@@ -10,25 +10,25 @@ describe('app input stream', function() {
   describe('src()', function() {
     describe('minimal config - enabled', function () {
       beforeEach(function () {
-        app = new application.App();
+        app = new application.Composer();
         app.enable('minimal config');
       });
 
       it('should return a stream', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'));
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'));
         should.exist(stream);
         should.exist(stream.on);
         done();
       });
       it('should return an input stream from a flat glob', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'));
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'));
         stream.on('error', done);
         stream.on('data', function (file) {
           should.exist(file);
           should.exist(file.path);
           should.exist(file.contents);
-          path.join(file.path, '').should.equal(path.join(__dirname, './fixtures/test.coffee'));
-          String(file.contents).should.equal('this is a test');
+          path.join(file.path, '').should.equal(path.join(__dirname, './fixtures/a.txt'));
+          String(file.contents).should.equal('a');
         });
         stream.on('end', function () {
           done();
@@ -80,20 +80,20 @@ describe('app input stream', function() {
       });
 
       it('should return an input stream with no contents when read is false', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'), {read: false});
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'), {read: false});
         stream.on('error', done);
         stream.on('data', function (file) {
           should.exist(file);
           should.exist(file.path);
           should.not.exist(file.contents);
-          path.join(file.path, '').should.equal(path.join(__dirname, './fixtures/test.coffee'));
+          path.join(file.path, '').should.equal(path.join(__dirname, './fixtures/a.txt'));
         });
         stream.on('end', function () {
           done();
         });
       });
       it('should return an input stream with contents as stream when buffer is false', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'), {buffer: false});
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'), {buffer: false});
         stream.on('error', done);
         stream.on('data', function (file) {
           should.exist(file);
@@ -104,10 +104,10 @@ describe('app input stream', function() {
             buf += d;
           });
           file.contents.on('end', function () {
-            buf.should.equal('this is a test');
+            buf.should.equal('a');
             done();
           });
-          path.join(file.path, '').should.equal(path.join(__dirname, './fixtures/test.coffee'));
+          path.join(file.path, '').should.equal(path.join(__dirname, './fixtures/a.txt'));
         });
       });
       it('should return an input stream from a deep glob', function (done) {
@@ -139,15 +139,15 @@ describe('app input stream', function() {
 
       it('should return a file stream from a flat path', function (done) {
         var a = 0;
-        var stream = app.src(path.join(__dirname, './fixtures/test.coffee'));
+        var stream = app.src(path.join(__dirname, './fixtures/a.txt'));
         stream.on('error', done);
         stream.on('data', function (file) {
           ++a;
           should.exist(file);
           should.exist(file.path);
           should.exist(file.contents);
-          path.join(file.path, '').should.equal(path.resolve(__dirname, './fixtures/test.coffee'));
-          String(file.contents).should.equal('this is a test');
+          path.join(file.path, '').should.equal(path.resolve(__dirname, './fixtures/a.txt'));
+          String(file.contents).should.equal('a');
         });
         stream.on('end', function () {
           a.should.equal(1);
@@ -158,24 +158,24 @@ describe('app input stream', function() {
 
     describe('minimal config - disabled', function () {
       beforeEach(function () {
-        app = new application.App();
+        app = new application.Composer();
       });
 
       it('should return a stream', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'));
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'));
         should.exist(stream);
         should.exist(stream.on);
         done();
       });
       it('should return an input stream from a flat glob', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'));
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'));
         stream.on('error', done);
         stream.on('data', function (file) {
           should.exist(file);
           should.exist(file.path);
           should.exist(file.contents);
-          path.join(file.path, '').should.equal(path.resolve('test/fixtures/test.coffee'));
-          String(file.contents).should.equal('this is a test');
+          path.join(file.path, '').should.equal(path.resolve('test/fixtures/a.txt'));
+          String(file.contents).should.equal('a');
         });
         stream.on('end', function () {
           done();
@@ -228,24 +228,26 @@ describe('app input stream', function() {
       it('should return an input stream with no contents when read is false', function (done) {
         app.option({read: false});
 
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'), {read: false});
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'), {read: false});
         stream.on('error', done);
         stream.on('data', function (file) {
           should.exist(file);
           should.exist(file.path);
           should.not.exist(file.contents);
-          path.join(file.path, '').should.equal(path.resolve('test/fixtures/test.coffee'));
+          path.join(file.path, '').should.equal(path.resolve('test/fixtures/a.txt'));
         });
         stream.on('end', function () {
           done();
         });
       });
 
-      it.skip('should return a throw an error when buffer is false', function (done) {
-        var stream = app.src(path.join(__dirname, './fixtures/*.coffee'), {buffer: false});
-        stream.on('error', function () {
+      it('should return a throw an error when buffer is false', function (done) {
+        var stream = app.src(path.join(__dirname, './fixtures/*.txt'), {buffer: false});
+        stream.on('error', function (err) {
+          err.message.should.equal('Streaming is not supported.');
           done();
         });
+
         stream.on('data', function () {
           done(new Error('should have thrown an error'));
         });
@@ -280,15 +282,15 @@ describe('app input stream', function() {
 
       it('should return a file stream from a flat path', function (done) {
         var a = 0;
-        var stream = app.src(path.join(__dirname, './fixtures/test.coffee'));
+        var stream = app.src(path.join(__dirname, './fixtures/a.txt'));
         stream.on('error', done);
         stream.on('data', function (file) {
           ++a;
           should.exist(file);
           should.exist(file.path);
           should.exist(file.contents);
-          path.join(file.path, '').should.equal(path.resolve('test/fixtures/test.coffee'));
-          String(file.contents).should.equal('this is a test');
+          path.join(file.path, '').should.equal(path.resolve('test/fixtures/a.txt'));
+          String(file.contents).should.equal('a');
         });
         stream.on('end', function () {
           a.should.equal(1);

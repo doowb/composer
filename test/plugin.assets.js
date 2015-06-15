@@ -11,7 +11,7 @@ var actual = __dirname + '/assets-actual';
 
 describe('app assets plugin', function() {
   before (function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('assets()', function() {

@@ -7,7 +7,7 @@ var application = require('..');
 describe('app cache', function () {
   var app = null;
   beforeEach(function() {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('.set()', function () {
@@ -53,14 +53,6 @@ describe('app cache', function () {
       app.get('cc').should.equal('dd');
     });
 
-    it('should expand template strings in the config.', function () {
-      app
-        .set('l', 'm')
-        .set('j', {k: '${l}'}, true);
-      app.cache.j.k.should.eql('m');
-      app.get('j.k').should.eql('m');
-    });
-
     it('should return undefined when not set', function () {
       app.set('a', undefined).should.equal(app);
     });
@@ -74,18 +66,6 @@ describe('app cache', function () {
     it('should otherwise return the value', function () {
       app.set('a', 'b');
       app.get('a').should.equal('b');
-    });
-  });
-
-
-  describe('.exists()', function () {
-    it('should return `false` when not set', function () {
-      app.exists('alsjls').should.be.false;
-    });
-
-    it('should return `true` when set.', function () {
-      app.set('baba', 'zz');
-      app.exists('baba').should.be.ok;
     });
   });
 

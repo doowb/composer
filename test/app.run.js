@@ -6,7 +6,7 @@ var application = require('..');
 describe('app run', function () {
   var app = null;
   beforeEach(function() {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('app.run()', function () {

@@ -1,6 +1,6 @@
 'use strict';
 
-var session = require('../lib/session');
+// var session = require('../lib/session');
 var should = require('should');
 var application = require('..');
 var Q = require('q');
@@ -161,12 +161,12 @@ describe('app tasks', function() {
       fn = function() {
         ++a;
         this.should.equal(app);
-        session.get('task').should.equal('test');
+        // session.get('task').should.equal('test');
       };
       fn2 = function() {
         ++a;
         this.should.equal(app);
-        session.get('task').should.equal('test2');
+        // session.get('task').should.equal('test2');
       };
       app.task('test', fn);
       app.task('test2', fn2);

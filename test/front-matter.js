@@ -6,7 +6,7 @@ var app;
 
 describe('front matter', function () {
   beforeEach(function () {
-    app = new application.App();
+    app = new application.Composer();
   });
 
   describe('options', function () {

@@ -9,7 +9,7 @@ var app;
 
 describe('app layouts', function () {
   beforeEach(function (done) {
-    app = new application.App();
+    app = new application.Composer();
     rimraf(actual, done);
   });
   afterEach(function (done) {
