@@ -1,6 +1,5 @@
 var extend = require('extend-shallow');
 var through = require('through2');
-var render = app.plugin('render');
 var dest = require('dest');
 var app = require('./');
 
@@ -9,8 +8,8 @@ app.engine('tmpl', require('engine-lodash'));
 app.data({name: 'Composer'});
 
 app.task('default', function () {
-  app.src('*.tmpl')
-    .pipe(app.dest('foo/'))
+  app.src('test/fixtures/*.tmpl')
+    .pipe(app.dest('test/actual/'))
 });
 
 // app.run();
@@ -20,22 +19,23 @@ var opts = { viewType: 'renderable', loaderType: 'stream' }
 app.create('post', opts);
 app.create('page', opts);
 
+var render = app.plugin('render');
 
 // app.posts('test/fixtures/*.tmpl', ['toVinyl'])
 //   .on('error', console.error)
 //   .pipe(render())
-//   .pipe(dest('foo/'))
+//   .pipe(dest('test/actual/'))
 
 
 app.task('posts', function () {
   app.posts('test/fixtures/*.tmpl', ['toVinyl'])
     .on('error', console.error)
     .pipe(render())
-    .pipe(dest('foo/'))
+    .pipe(dest('test/actual/'))
 });
 
 app.task('copy', function () {
-  app.copy('*.json', 'foo/');
+  app.copy('*.json', 'test/actual/');
 });
 
 app.task('pages', function () {
