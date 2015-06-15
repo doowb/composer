@@ -1,16 +1,17 @@
 'use strict';
 
 // require('time-require');
-var _ = require('lodash');
 var extend = require('extend-shallow');
 var merge = require('mixin-deep');
 var es = require('event-stream');
 var Task = require('orchestrator');
+var pretty = require('pretty-hrtime');
 var Template = require('template');
 var through = require('through2');
-var typeOf = require('kind-of');
 var vfs = require('vinyl-fs');
 var init = require('./lib/init');
+var sessionify = require('sessionify');
+var session = require('./lib/session');
 
 /**
  * Create an instance of `Composer`
@@ -19,12 +20,13 @@ var init = require('./lib/init');
 function Composer() {
   Template.apply(this, arguments);
   Task.apply(this, arguments);
+  this.session = session;
   this.plugins = {};
   init(this);
 }
 
 extend(Composer.prototype, Task.prototype);
-extend(Composer.prototype, Template.prototype);
+Template.mixin(Composer.prototype);
 
 /**
  * Register a plugin by `name`
@@ -59,8 +61,9 @@ Composer.prototype.pipeline = function(pipeline) {
   if (!pipeline.length) {
     pipeline = [through.obj()];
   }
-  var results = es.pipe.apply(es, pipeline);
-  return stream.pipe(results);
+  var res = es.pipe.apply(es, pipeline);
+  sessionify(res, session, this);
+  return stream.pipe(res);
 };
 
 /**
@@ -75,14 +78,18 @@ Composer.prototype.pipeline = function(pipeline) {
  * @api public
  */
 
-Composer.prototype.src = function(glob, opts) {
-  opts = merge({}, this.options, opts);
-  var app = this;
+Composer.prototype.src = function(glob, options) {
+  var opts = merge({}, this.options, options);
+  this.session.set('src', options || {});
+
+  if (opts.minimal || this.enabled('minimal config')) {
+    return this.plugin('src')(glob, opts);
+  }
 
   return this.pipeline([
-    app.plugin('src')(glob, opts),
-    app.plugin('init')(app)
-  ], opts);
+    this.plugin('src')(glob, opts),
+    this.plugin('file')(this)
+  ], opts)
 };
 
 /**
@@ -99,12 +106,15 @@ Composer.prototype.src = function(glob, opts) {
 
 Composer.prototype.dest = function(dest, opts) {
   opts = merge({}, this.options, opts);
-  var app = this;
+
+  if (opts.minimal || this.enabled('minimal config')) {
+    return this.plugin('dest')(dest, opts);
+  }
 
   return this.pipeline([
-    app.plugin('paths')(opts),
-    app.plugin('render')(opts),
-    app.plugin('dest')(dest, opts),
+    this.plugin('paths')(opts),
+    this.plugin('render')(opts),
+    this.plugin('dest')(dest, opts),
   ], opts);
 };
 
@@ -155,9 +165,37 @@ Composer.prototype.task = Composer.prototype.add;
 
 Composer.prototype.run = function() {
   var tasks = arguments.length ? arguments : ['default'];
+  this.on('err', console.log);
+
+  if (this.enabled('verbose')) {
+    this.on('task_start', function (data) {
+      console.log('Starting', '\'' + data.task + '\'...');
+    });
+
+    this.on('task_stop', function (data) {
+      var time = pretty(data.hrDuration);
+      console.log('Finished', '\'' + data.task + '\'', 'after', time);
+    });
+  }
+
   process.nextTick(function () {
     this.start.apply(this, tasks);
   }.bind(this));
+};
+
+/**
+ * Wrapper around Task._runTask to enable `sessions`
+ *
+ * @param  {Object} `task` Task to run
+ * @api private
+ */
+
+Composer.prototype._runTask = function(task) {
+  var composer = this;
+  composer.session.run(function () {
+    composer.session.set('task', task.name);
+    Task.prototype._runTask.call(composer, task);
+  });
 };
 
 /**
