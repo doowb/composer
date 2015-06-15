@@ -26,12 +26,6 @@ app.task('posts', function () {
     .on('error', console.error)
     .pipe(render())
     .pipe(dest('foo/'))
-    .pipe(through.obj(function(file, enc, cb) {
-      this.push(file);
-      return cb();
-    }))
-
-    .pages('*.tmpl', ['toVinyl'])
 });
 
 app.task('copy', function () {
