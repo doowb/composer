@@ -1,6 +1,9 @@
 'use strict';
 
+// require('time-require');
 var _ = require('lodash');
+var extend = require('extend-shallow');
+var merge = require('mixin-deep');
 var es = require('event-stream');
 var Task = require('orchestrator');
 var Template = require('template');
@@ -10,10 +13,7 @@ var vfs = require('vinyl-fs');
 var init = require('./lib/init');
 
 /**
- * Initialize `Composer`
- *
- * @param {Object} `context`
- * @api private
+ * Create an instance of `Composer`
  */
 
 function Composer() {
@@ -23,8 +23,8 @@ function Composer() {
   init(this);
 }
 
-_.extend(Composer.prototype, Task.prototype);
-Template.extend(Composer.prototype);
+extend(Composer.prototype, Task.prototype);
+extend(Composer.prototype, Template.prototype);
 
 /**
  * Register a plugin by `name`
@@ -54,21 +54,13 @@ Composer.prototype.plugin = function(name, fn) {
  * @api public
  */
 
-Composer.prototype.pipeline = function(plugins, options) {
-  var res = [];
-  for (var i = 0; i < plugins.length; i++) {
-    var val = plugins[i];
-    if (typeOf(val) === 'function') {
-      res.push(val.call(this, options));
-    } else if (typeOf(val) === 'object') {
-      res.push(val);
-    } else if (this.plugins.hasOwnProperty(val) && !this.isFalse('plugin ' + val)) {
-      res.push(this.plugins[val].call(this, options));
-    } else {
-      res.push(through.obj());
-    }
+Composer.prototype.pipeline = function(pipeline) {
+  var stream = through.obj();
+  if (!pipeline.length) {
+    pipeline = [through.obj()];
   }
-  return es.pipe.apply(es, res);
+  var results = es.pipe.apply(es, pipeline);
+  return stream.pipe(results);
 };
 
 /**
@@ -84,11 +76,11 @@ Composer.prototype.pipeline = function(plugins, options) {
  */
 
 Composer.prototype.src = function(glob, opts) {
-  opts = _.merge({}, this.options, opts);
+  opts = merge({}, this.options, opts);
   var app = this;
 
   return this.pipeline([
-    app.plugin('src')(app, glob, opts),
+    app.plugin('src')(glob, opts),
     app.plugin('init')(app)
   ], opts);
 };
@@ -106,11 +98,11 @@ Composer.prototype.src = function(glob, opts) {
  */
 
 Composer.prototype.dest = function(dest, opts) {
-  opts = _.merge({}, this.options, opts);
+  opts = merge({}, this.options, opts);
   var app = this;
 
   return this.pipeline([
-    app.plugin('paths')(dest, opts),
+    app.plugin('paths')(opts),
     app.plugin('render')(opts),
     app.plugin('dest')(dest, opts),
   ], opts);
@@ -186,11 +178,9 @@ Composer.prototype.watch = function(glob, opts, fn) {
   if (Array.isArray(opts) || typeof opts === 'function') {
     fn = opts; opts = null;
   }
-
   if (!Array.isArray(fn)) {
     return vfs.watch(glob, opts, fn);
   }
-
   return vfs.watch(glob, opts, function () {
     this.start.apply(this, fn);
   }.bind(this));

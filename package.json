@@ -3,21 +3,15 @@
   "description": "The build system used to create verb, assemble and generate.",
   "version": "0.1.0",
   "homepage": "https://github.com/jonschlinkert/composer",
-  "author": {
-    "name": "Jon Schlinkert",
-    "url": "https://github.com/jonschlinkert"
-  },
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jonschlinkert/composer.git"
+    "url": "git+https://github.com/jonschlinkert/composer.git"
   },
   "bugs": {
     "url": "https://github.com/jonschlinkert/composer/issues"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/jonschlinkert/composer/blob/master/LICENSE"
-  },
+  "license": "MIT",
   "files": [
     "index.js"
   ],
@@ -34,19 +28,27 @@
     "data-store": "^0.6.1",
     "event-stream": "^3.3.1",
     "export-files": "^2.0.1",
+    "extend-shallow": "^1.1.4",
+    "glob": "^5.0.10",
     "gulp-dest-paths": "^0.1.1",
     "kind-of": "^1.1.0",
     "lodash": "^3.9.3",
+    "mixin-deep": "^1.1.1",
     "orchestrator": "^0.3.7",
     "parse-filepath": "^0.5.0",
     "plugin-error": "^0.1.1",
     "template": "^0.14.3",
     "through2": "^0.6.5",
+    "vinyl": "^0.5.0",
     "vinyl-fs": "^1.0.0"
   },
   "devDependencies": {
+    "engine-lodash": "^0.7.1",
     "mocha": "*",
     "should": "*"
   },
-  "keywords": []
+  "keywords": [],
+  "directories": {
+    "test": "test"
+  }
 }
