@@ -1,54 +1,88 @@
 'use strict';
 
+var Emitter = require('component-emitter');
+var Task = require('./lib/task');
+var Scheduler = require('./lib/scheduler');
+
 function Composer (config) {
+  Emitter.call(this);
   this.config = config || {}
   this.tasks = {};
+  this.scheduler = new Scheduler(this);
 }
+
+require('util').inherits(Composer, Emitter);
 
 /*
  * Tasks
  */
 
-Composer.prototype.register = function(name, fn) {
-  if (typeof name !== 'string') {
-    throw new Error('Expected a string for `name` but got ' + typeof name);
+Composer.prototype.register = function(name, options, fn) {
+  var deps = [];
+  if (typeof options === 'function') {
+    fn = options;
+    options = {};
   }
-  if (typeof fn !== 'function') {
-    throw new Error('Expected a function for `fn` but got ' + typeof fn);
+  if (Array.isArray(options)) {
+    deps = options;
+    options = {};
   }
-  this.tasks[name] = fn;
+  fn = fn || function () {};
+
+  var task = {};
+  task.name = name;
+  task.options = options || {};
+  task.deps = options.deps || deps;
+  task.deps = Array.isArray(task.deps) ? task.deps : [task.deps];
+  task.fn = fn;
+
+  this.tasks[name] = new Task(task);
   return this;
 };
 
 Composer.prototype.compose = function(name/* list of tasks/functions */) {
   var args = [].slice.call(arguments, 1);
-  return this.register(name, function () {
-    return this.run.apply(this, args);
-  });
+  this.tasks[name] = {
+    name: name,
+    args: args
+  };
+  return this;
+  // return this.register(name, options, function (done) {
+  //   console.log('running', args[0].toString());
+  //   this.run.call(this, args.concat([done]));
+  // });
+};
+
+Composer.prototype.lookup = function(tasks) {
+  var self = this;
+  return Object.keys(this.tasks)
+    .filter(function (key) {
+      return tasks.indexOf(key) !== -1;
+    })
+    .map(function (key) {
+      return self.tasks[key];
+    });
 };
 
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
   var args = [].slice.call(arguments);
-  var len = args.length, i = 0;
-  var results;
-  while (len--) {
-    var name;
-    var task = args[i++];
-    if (typeof task === 'string') {
-      name = task;
-      task = this.tasks[task];
-    }
-    if (typeof task === 'undefined') {
-      throw new Error('Cannot run task "' + name + '". Make sure it was registered before calling `.run`.');
-    }
-    if (typeof task === 'function') {
-      results = task.call(this, results);
-    }
-    if (Array.isArray(task)) {
-      results = this.run.apply(this, task);
-    }
-  }
-  return results;
+  var done = args.pop();
+  var self = this;
+  var schedule = this.scheduler.schedule.apply(this.scheduler, args);
+  schedule.on('task.error', function (err, task) {
+    self.emit('error', err, task);
+  });
+  schedule.on('task.starting', function (task) {
+    self.emit('task.starting', task);
+  });
+  schedule.on('task.finished', function (task) {
+    self.emit('task.finished', task);
+  });
+  schedule.on('finished', function () {
+    self.emit('finished');
+    done();
+  });
+  schedule.start();
 };
 
 module.exports = new Composer();

@@ -1,29 +1,64 @@
 'use strict';
-
+var Promise = require('bluebird');
+var through = require('through2');
 var composer = require('./');
+
+// composer.on('task.starting', function (task) {
+//   console.log('starting', task.name);
+// });
+// composer.on('task.finished', function (task) {
+//   console.log('finished', task.name);
+// });
+
+composer.on('error', function (err, task) {
+  console.log('error', task.name, err);
+});
 var i = 0;
 
-composer.register('writeln', function (obj) {
-  console.log(obj);
-  return obj;
+composer.register('foo-sync', function () {
+  console.log('foo-sync', (i++));
 });
 
-composer.register('newline', function () {
-  console.log();
+composer.register('foo-async', function (done) {
+  setTimeout(function () {
+    console.log('foo-async', (i++));
+    done();
+  }, 3500);
 });
 
-composer.compose('foo', function () {
-  return 'FOO ' + (i++);
-}, 'writeln');
+composer.register('foo-promise', function () {
+  var promise = new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      console.log('foo-promise', (i++));
+      resolve();
+    }, 1000);
+  });
+  return promise;
+});
 
-composer.compose('bar', function () {
-  return 'BAR ' + (i++);
-}, 'writeln');
+composer.register('foo-stream', function () {
+  var stream = through.obj();
+  setTimeout(function () {
+    console.log('foo-stream', (i++));
+    stream.end();
+  }, 500);
+  return stream;
+});
 
-composer.compose('baz', ['foo', 'bar']);
+composer.compose('beep', ['foo-async'], function (done) {
+  setTimeout(function () {
+    console.log('beep', (i++));
+    done();
+  }, 2000);
+});
 
-composer.run('baz', function () {
-  return 'INLINE ' + (i++);
-}, 'writeln', 'newline');
+composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
+  var self = this;
+  setTimeout(function () {
+    console.log('baz-with-deps', (i++));
+    // console.log(self);
+    done();
+  }, 1000);
+});
 
-composer.run(['foo', 'bar', ['newline', 'foo', 'bar', ['newline', 'baz']]], 'newline');
+composer.run(['beep', 'baz-with-deps'], console.log);

@@ -26,8 +26,8 @@
     "test": "mocha"
   },
   "dependencies": {
+    "component-emitter": "^1.2.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "keywords": []
 }
