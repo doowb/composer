@@ -44,6 +44,9 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
     if (typeof task === 'function') {
       results = task.call(this, results);
     }
+    if (Array.isArray(task)) {
+      results = this.run.apply(this, task);
+    }
   }
   return results;
 };
