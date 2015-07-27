@@ -28,6 +28,9 @@
   "dependencies": {
     "component-emitter": "^1.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "bluebird": "^2.9.34",
+    "through2": "^2.0.0"
+  },
   "keywords": []
 }
