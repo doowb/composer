@@ -75,3 +75,36 @@ composer.run(['default'], function () {
   console.log('done');
   // process.exit();
 });
+
+// runSchedule(1);
+
+function runSchedule (max) {
+  max = typeof max === 'undefined' ? 2 : max;
+  var count = 0;
+  var schedule = composer.schedule('default');
+  schedule.on('task.error', function (err, task) {
+    console.log('error', err, task.name);
+    console.log();
+  });
+  schedule.on('task.starting', function (task) {
+    console.log('task.starting', task.name);
+  });
+  schedule.on('task.finished', function (task) {
+    console.log('task.finished', task.name);
+    console.log();
+  });
+  schedule.on('finished', function () {
+    console.log('finished', count++);
+    console.log(schedule.history);
+    console.log();
+    if (count < max) {
+      setTimeout(function () {
+        schedule.start();
+      }, 1000);
+    }
+  });
+
+  if (count < max) {
+    schedule.start();
+  }
+};

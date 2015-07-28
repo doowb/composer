@@ -68,11 +68,15 @@ Composer.prototype.lookup = function(tasks) {
     });
 };
 
+Composer.prototype.schedule = function(/* list of tasks/functions to schedule */) {
+  return this.scheduler.schedule.apply(this.scheduler, arguments);
+};
+
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
   var args = [].slice.call(arguments);
   var done = args.pop();
   var self = this;
-  var schedule = this.scheduler.schedule.apply(this.scheduler, args);
+  var schedule = this.schedule.apply(this, args);
   schedule.on('task.error', function (err, task) {
     self.emit('error', err, task);
   });
