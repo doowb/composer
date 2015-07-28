@@ -26,7 +26,8 @@
     "test": "mocha"
   },
   "dependencies": {
-    "component-emitter": "^1.2.0"
+    "component-emitter": "^1.2.0",
+    "node-uuid": "^1.4.3"
   },
   "devDependencies": {
     "bluebird": "^2.9.34",

@@ -1,5 +1,7 @@
 'use strict';
 
+var uuid = require('node-uuid');
+var flatten = require('arr-flatten');
 var Emitter = require('component-emitter');
 var Task = require('./lib/task');
 var Scheduler = require('./lib/scheduler');
@@ -34,23 +36,25 @@ Composer.prototype.register = function(name, options, fn) {
   task.options = options || {};
   task.deps = options.deps || deps;
   task.deps = Array.isArray(task.deps) ? task.deps : [task.deps];
-  task.fn = fn;
+  task.deps = task.deps.map(function (dep) {
+    if (typeof dep === 'function') {
+      var depName = dep.name || dep.taskName || uuid.v1();
+      this.register(depName, dep);
+      return depName;
+    }
+    return dep;
+  }.bind(this));
 
+  task.fn = fn;
   this.tasks[name] = new Task(task);
   return this;
 };
 
 Composer.prototype.compose = function(name/* list of tasks/functions */) {
+  var self = this;
   var args = [].slice.call(arguments, 1);
-  this.tasks[name] = {
-    name: name,
-    args: args
-  };
+  this.register(name, flatten(args), function () {});
   return this;
-  // return this.register(name, options, function (done) {
-  //   console.log('running', args[0].toString());
-  //   this.run.call(this, args.concat([done]));
-  // });
 };
 
 Composer.prototype.lookup = function(tasks) {

@@ -16,12 +16,12 @@ composer.on('error', function (err, task) {
 var i = 0;
 
 composer.register('foo-sync', function () {
-  console.log('foo-sync', (i++));
+  console.log('foo-sync');
 });
 
 composer.register('foo-async', function (done) {
   setTimeout(function () {
-    console.log('foo-async', (i++));
+    console.log('foo-async');
     done();
   }, 3500);
 });
@@ -29,7 +29,7 @@ composer.register('foo-async', function (done) {
 composer.register('foo-promise', function () {
   var promise = new Promise(function (resolve, reject) {
     setTimeout(function () {
-      console.log('foo-promise', (i++));
+      console.log('foo-promise');
       resolve();
     }, 1000);
   });
@@ -39,7 +39,7 @@ composer.register('foo-promise', function () {
 composer.register('foo-stream', function () {
   var stream = through.obj();
   setTimeout(function () {
-    console.log('foo-stream', (i++));
+    console.log('foo-stream');
     stream.end();
   }, 500);
   return stream;
@@ -47,18 +47,25 @@ composer.register('foo-stream', function () {
 
 composer.compose('beep', ['foo-async'], function (done) {
   setTimeout(function () {
-    console.log('beep', (i++));
+    console.log('beep');
     done();
   }, 2000);
 });
 
 composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
+  console.log('baz-with-deps dependencies finished');
   var self = this;
   setTimeout(function () {
-    console.log('baz-with-deps', (i++));
+    console.log('baz-with-deps');
     // console.log(self);
     done();
-  }, 1000);
+  }, 3000);
 });
 
-composer.run(['beep', 'baz-with-deps'], console.log);
+
+composer.compose('default', 'beep', 'baz-with-deps');
+
+composer.run(['default'], function () {
+  console.log('done');
+  // process.exit();
+});
