@@ -19,6 +19,7 @@ composer.on('task.finished', function (task) {
 composer.on('error', function (err, task) {
   console.log(red('[' + task.name + '] ERROR:'), err);
 });
+
 var i = 0;
 
 composer.register('foo-sync', function () {
@@ -26,73 +27,56 @@ composer.register('foo-sync', function () {
 });
 
 composer.register('foo-async', function (done) {
-  setTimeout(function () {
-    console.log('foo-async');
-    done();
-  }, 3500);
+  logAfter('foo-async', 3500, done);
 });
 
 composer.register('foo-promise', function () {
   var promise = new Promise(function (resolve, reject) {
-    setTimeout(function () {
-      console.log('foo-promise');
-      resolve();
-    }, 1000);
+    logAfter('foo-promise', 1000, resolve);
   });
   return promise;
 });
 
 composer.register('foo-stream', function () {
   var stream = through.obj();
-  setTimeout(function () {
-    console.log('foo-stream');
-    stream.end();
-  }, 500);
+  logAfter('foo-stream', 500, stream.end.bind(stream));
   return stream;
 });
 
 composer.compose('beep', ['foo-async'], function (done) {
-  setTimeout(function () {
-    console.log('beep');
-    done();
-  }, 2000);
+  logAfter('beep', 2000, done);
 });
 
 composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
   console.log('baz-with-deps dependencies finished');
-  var self = this;
-  setTimeout(function () {
-    console.log('baz-with-deps');
-    // console.log(self);
-    done();
-  }, 3000);
+  logAfter('baz-with-deps', 3000, done);
 });
 
 
 composer.compose('default', 'beep', 'baz-with-deps');
 
-composer.run(['default'], function () {
-  console.log('done');
-  // process.exit();
-});
+// composer.run(['default'], function () {
+//   console.log('done');
+//   // process.exit();
+// });
 
-// runSchedule(1);
+runSchedule(5);
 
 function runSchedule (max) {
   max = typeof max === 'undefined' ? 2 : max;
   var count = 0;
   var schedule = composer.schedule('default');
-  schedule.on('task.error', function (err, task) {
-    console.log('error', err, task.name);
-    console.log();
-  });
-  schedule.on('task.starting', function (task) {
-    console.log('task.starting', task.name);
-  });
-  schedule.on('task.finished', function (task) {
-    console.log('task.finished', task.name);
-    console.log();
-  });
+  // schedule.on('task.error', function (err, task) {
+  //   console.log('error', err, task.name);
+  //   console.log();
+  // });
+  // schedule.on('task.starting', function (task) {
+  //   console.log('task.starting', task.name);
+  // });
+  // schedule.on('task.finished', function (task) {
+  //   console.log('task.finished', task.name);
+  //   console.log();
+  // });
   schedule.on('finished', function () {
     console.log('finished', count++);
     console.log(schedule.history);
@@ -108,3 +92,10 @@ function runSchedule (max) {
     schedule.start();
   }
 };
+
+function logAfter(msg, ms, done) {
+  setTimeout(function () {
+    console.log(msg);
+    done();
+  }, ms);
+}
