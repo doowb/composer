@@ -26,6 +26,9 @@
     "test": "mocha"
   },
   "dependencies": {
+    "ansi-green": "^0.1.1",
+    "ansi-red": "^0.1.1",
+    "ansi-yellow": "^0.1.1",
     "component-emitter": "^1.2.0",
     "node-uuid": "^1.4.3"
   },

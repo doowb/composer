@@ -1,17 +1,23 @@
 'use strict';
 var Promise = require('bluebird');
 var through = require('through2');
+var green = require('ansi-green');
+var yellow = require('ansi-yellow');
+var red = require('ansi-red');
+
 var composer = require('./');
 
-// composer.on('task.starting', function (task) {
-//   console.log('starting', task.name);
-// });
-// composer.on('task.finished', function (task) {
-//   console.log('finished', task.name);
-// });
+composer.on('task.starting', function (task) {
+  var start = new Date();
+  console.log(green('starting [' + task.name + ']'), start.toTimeString());
+});
+composer.on('task.finished', function (task) {
+  var end = new Date();
+  console.log(yellow('finished [' + task.name + ']'), end.toTimeString());
+});
 
 composer.on('error', function (err, task) {
-  console.log('error', task.name, err);
+  console.log(red('[' + task.name + '] ERROR:'), err);
 });
 var i = 0;
 
