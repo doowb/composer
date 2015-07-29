@@ -7,6 +7,7 @@ var red = require('ansi-red');
 
 var composer = require('./');
 
+// setup some listeners
 composer.on('task.starting', function (task) {
   var start = new Date();
   console.log(green('starting [' + task.name + ']'), start.toTimeString());
@@ -20,8 +21,9 @@ composer.on('error', function (err, task) {
   console.log(red('[' + task.name + '] ERROR:'), err);
 });
 
-var i = 0;
 
+// register some tasks
+// var i = 0;
 composer.register('foo-sync', function () {
   console.log('foo-sync');
 });
@@ -43,7 +45,7 @@ composer.register('foo-stream', function () {
   return stream;
 });
 
-composer.compose('beep', ['foo-async'], function (done) {
+composer.register('beep', ['foo-async'], function (done) {
   logAfter('beep', 2000, done);
 });
 
@@ -52,15 +54,56 @@ composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo
   logAfter('baz-with-deps', 3000, done);
 });
 
+// composer.register('website', ['styles', 'scripts', 'templates'], function (done) {
+//   // async.series([
+//   //   composer.register('foo', [''])
+//   //   composer.run('styles');
+//   //   composer.run('scripts');
+//   //   composer.run('templates')
+//   // ]);
+// });
 
-composer.compose('default', 'beep', 'baz-with-deps');
 
-// composer.run(['default'], function () {
+// composers.register('foo', ['a', 'b', 'c'], function () {
+
+// })
+
+// composers.register('bar', ['a', 'b', 'c'], function () {
+
+// })
+
+// composer.register('watcher', function () {
+//   composer.watch(['**/*.js'], ['foo']);
+// });
+
+// composer.run('watcher');
+
+// composer.register('baz', ['foo', 'bar']);
+
+// var queue = [];
+
+// {
+//   'foo': ['a', 'b', 'c'],
+//   'bar': ['a', 'b', 'c'],
+//   'baz': ['foo', 'bar']
+// }
+
+
+// composer.register('blog', {site: 'This is my blog'}, require('website-boilerplate')());
+
+
+composer.register('default', 'beep', 'baz-with-deps');
+
+// composer.run('beep', function () {
+//   console.log('done');
+// });
+
+// composer.run('default', function () {
 //   console.log('done');
 //   // process.exit();
 // });
 
-runSchedule(5);
+runSchedule(2);
 
 function runSchedule (max) {
   max = typeof max === 'undefined' ? 2 : max;

@@ -19,23 +19,17 @@ require('util').inherits(Composer, Emitter);
  * Tasks
  */
 
-Composer.prototype.register = function(name, options, fn) {
-  var deps = [];
-  if (typeof options === 'function') {
-    fn = options;
-    options = {};
+Composer.prototype.register = function(name/*, dependencies and task */) {
+  var deps = [].concat.apply([], [].slice.call(arguments, 1));
+  var fn = function () {};
+  var len = deps.length;
+  if (typeof deps[len-1] === 'function') {
+    fn = deps.pop();
   }
-  if (Array.isArray(options)) {
-    deps = options;
-    options = {};
-  }
-  fn = fn || function () {};
 
   var task = {};
   task.name = name;
-  task.options = options || {};
-  task.deps = options.deps || deps;
-  task.deps = Array.isArray(task.deps) ? task.deps : [task.deps];
+  task.deps = deps;
   task.deps = task.deps.map(function (dep) {
     if (typeof dep === 'function') {
       var depName = dep.name || dep.taskName || uuid.v1();
@@ -47,13 +41,6 @@ Composer.prototype.register = function(name, options, fn) {
 
   task.fn = fn;
   this.tasks[name] = new Task(task);
-  return this;
-};
-
-Composer.prototype.compose = function(name/* list of tasks/functions */) {
-  var self = this;
-  var args = [].slice.call(arguments, 1);
-  this.register(name, flatten(args), function () {});
   return this;
 };
 
