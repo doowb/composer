@@ -45,9 +45,13 @@ composer.register('foo-stream', function () {
   return stream;
 });
 
-composer.register('beep', ['foo-async'], function (done) {
-  logAfter('beep', 2000, done);
-});
+composer.register('beep', [
+    function () { console.log(this.name); },
+    function annony () { console.log(this.name); },
+    'foo-async'
+  ], function (done) {
+    logAfter('beep', 2000, done);
+  });
 
 composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
   console.log('baz-with-deps dependencies finished');
@@ -98,12 +102,14 @@ composer.register('default', 'beep', 'baz-with-deps');
 //   console.log('done');
 // });
 
-// composer.run('default', function () {
-//   console.log('done');
-//   // process.exit();
-// });
+console.log(composer.tasks);
 
-runSchedule(2);
+composer.run(['foo-sync', 'foo-async'], function () {
+  console.log('done');
+  // process.exit();
+});
+
+// runSchedule(2);
 
 function runSchedule (max) {
   max = typeof max === 'undefined' ? 2 : max;

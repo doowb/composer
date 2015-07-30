@@ -1,19 +1,21 @@
 'use strict';
 
-var uuid = require('node-uuid');
 var flatten = require('arr-flatten');
 var Emitter = require('component-emitter');
 var Task = require('./lib/task');
-var Scheduler = require('./lib/scheduler');
+var bach = require('bach');
+// var Scheduler = require('./lib/scheduler');
 
 function Composer (config) {
   Emitter.call(this);
   this.config = config || {}
   this.tasks = {};
-  this.scheduler = new Scheduler(this);
+  // this.scheduler = new Scheduler(this);
 }
 
 require('util').inherits(Composer, Emitter);
+
+var annonyomousCount = 0;
 
 /*
  * Tasks
@@ -27,20 +29,22 @@ Composer.prototype.register = function(name/*, dependencies and task */) {
     fn = deps.pop();
   }
 
-  var task = {};
-  task.name = name;
-  task.deps = deps;
-  task.deps = task.deps.map(function (dep) {
+  deps = deps.map(function (dep) {
     if (typeof dep === 'function') {
-      var depName = dep.name || dep.taskName || uuid.v1();
+      var depName = dep.name || dep.taskName || '[annonyomous (' + (++annonyomousCount) + ')]';
       this.register(depName, dep);
-      return depName;
+      dep = depName;
     }
-    return dep;
+    return this.lookup([dep]);
   }.bind(this));
 
-  task.fn = fn;
-  this.tasks[name] = new Task(task);
+  var arr = deps.concat([fn]);
+  if (arr.length === 1) {
+    this.tasks[name] = arr.pop();
+    return this;
+  }
+
+  this.tasks[name] = bach.series.apply(bach, arr);
   return this;
 };
 
@@ -55,29 +59,48 @@ Composer.prototype.lookup = function(tasks) {
     });
 };
 
-Composer.prototype.schedule = function(/* list of tasks/functions to schedule */) {
-  return this.scheduler.schedule.apply(this.scheduler, arguments);
-};
+// Composer.prototype.schedule = function(/* list of tasks/functions to schedule */) {
+//   return this.scheduler.schedule.apply(this.scheduler, arguments);
+// };
 
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
-  var args = [].slice.call(arguments);
-  var done = args.pop();
-  var self = this;
-  var schedule = this.schedule.apply(this, args);
-  schedule.on('task.error', function (err, task) {
-    self.emit('error', err, task);
-  });
-  schedule.on('task.starting', function (task) {
-    self.emit('task.starting', task);
-  });
-  schedule.on('task.finished', function (task) {
-    self.emit('task.finished', task);
-  });
-  schedule.on('finished', function () {
-    self.emit('finished');
-    done();
-  });
-  schedule.start();
+  var args = [].concat.apply([], [].slice.call(arguments));
+  var len = args.length, i = 0;
+  var fns = new Array(len);
+  while (len--) {
+    var fn = args[i];
+    if (typeof fn === 'string') {
+      fn = this.tasks[fn];
+    }
+    fns[i] = fn;
+    i++;
+  }
+  var last = fns.pop();
+
+  console.log(fns, last);
+  if (fns.length === 1) {
+    return fns[0](last);
+  }
+  var batch =  bach.series.apply(bach, fns);
+  return batch(last);
+
+  // var done = args.pop();
+  // var self = this;
+  // var schedule = this.schedule.apply(this, args);
+  // schedule.on('task.error', function (err, task) {
+  //   self.emit('error', err, task);
+  // });
+  // schedule.on('task.starting', function (task) {
+  //   self.emit('task.starting', task);
+  // });
+  // schedule.on('task.finished', function (task) {
+  //   self.emit('task.finished', task);
+  // });
+  // schedule.on('finished', function () {
+  //   self.emit('finished');
+  //   done();
+  // });
+  // schedule.start();
 };
 
 module.exports = new Composer();

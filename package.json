@@ -29,6 +29,7 @@
     "ansi-green": "^0.1.1",
     "ansi-red": "^0.1.1",
     "ansi-yellow": "^0.1.1",
+    "bach": "^0.4.1",
     "clone-deep": "^0.2.0",
     "component-emitter": "^1.2.0",
     "node-uuid": "^1.4.3"
