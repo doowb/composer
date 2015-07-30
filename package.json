@@ -31,6 +31,7 @@
     "ansi-yellow": "^0.1.1",
     "arr-flatten": "^1.0.1",
     "bach": "^0.4.1",
+    "chokidar": "^1.0.5",
     "clone-deep": "^0.2.0",
     "component-emitter": "^1.2.0",
     "isobject": "^2.0.0",

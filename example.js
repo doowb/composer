@@ -114,10 +114,23 @@ composer.register('default', 'beep', 'baz-with-deps');
 //   // process.exit();
 // });
 
-composer.run('default', function () {
-  console.log('done');
-  // process.exit();
+// composer.run('default', function () {
+//   console.log('done');
+//   // process.exit();
+// });
+
+composer.register('js', function (done) {
+  console.log('javascript files changed');
+  done();
 });
+
+composer.register('md', function (done) {
+  console.log('markdown files changed');
+  done();
+});
+
+composer.watch('*.js', 'js');
+composer.watch('*.md', 'md');
 
 // runSchedule(2);
 

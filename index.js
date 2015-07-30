@@ -3,6 +3,7 @@
 var Emitter = require('component-emitter');
 var flatten = require('arr-flatten');
 var isObject = require('isobject');
+var chokidar = require('chokidar');
 var bach = require('bach');
 
 var Task = require('./lib/task');
@@ -55,6 +56,30 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
   }
   var batch =  bach.parallel.apply(bach, fns);
   return batch(last);
+};
+
+Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
+  var self = this;
+  var len = arguments.length - 1, i = 0;
+  var args = new Array(len + 1);
+  while (len--) args[i] = arguments[++i];
+  args[i] = done;
+
+  var running = true;
+  function done (err) {
+    running = false;
+    if (err) console.error(err);
+  }
+
+  chokidar.watch(glob)
+    .on('ready', function () {
+      running = false;
+    })
+    .on('all', function () {
+      if (running) return;
+      running = true;
+      self.run.apply(self, args);
+    });
 };
 
 module.exports = new Composer();
