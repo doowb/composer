@@ -26,14 +26,12 @@
     "test": "mocha"
   },
   "dependencies": {
+    "component-emitter": "^1.2.0"
+  },
+  "devDependencies": {
     "ansi-green": "^0.1.1",
     "ansi-red": "^0.1.1",
     "ansi-yellow": "^0.1.1",
-    "clone-deep": "^0.2.0",
-    "component-emitter": "^1.2.0",
-    "node-uuid": "^1.4.3"
-  },
-  "devDependencies": {
     "bluebird": "^2.9.34",
     "through2": "^2.0.0"
   },
