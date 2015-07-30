@@ -45,9 +45,13 @@ composer.register('foo-stream', function () {
   return stream;
 });
 
-composer.register('beep', ['foo-async'], function (done) {
-  logAfter('beep', 2000, done);
-});
+composer.register('beep', [
+    function () { console.log(this.name); },
+    'foo-async',
+    function inline () { console.log(this.name); }
+  ], function (done) {
+    logAfter('beep', 2000, done);
+  });
 
 composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
   console.log('baz-with-deps dependencies finished');

@@ -1,10 +1,11 @@
 'use strict';
 
-var uuid = require('node-uuid');
 var flatten = require('arr-flatten');
 var Emitter = require('component-emitter');
 var Task = require('./lib/task');
 var Scheduler = require('./lib/scheduler');
+
+var anonymousCount = 0;
 
 function Composer (config) {
   Emitter.call(this);
@@ -32,7 +33,7 @@ Composer.prototype.register = function(name/*, dependencies and task */) {
   task.deps = deps;
   task.deps = task.deps.map(function (dep) {
     if (typeof dep === 'function') {
-      var depName = dep.name || dep.taskName || uuid.v1();
+      var depName = dep.name || dep.taskName || '[anonymous (' + (++anonymousCount) + ')]';
       this.register(depName, dep);
       return depName;
     }

@@ -26,6 +26,7 @@
     "test": "mocha"
   },
   "dependencies": {
+    "arr-flatten": "^1.0.1",
     "component-emitter": "^1.2.0"
   },
   "devDependencies": {
