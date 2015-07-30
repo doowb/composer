@@ -1,16 +1,17 @@
 'use strict';
 
-var flatten = require('arr-flatten');
 var Emitter = require('component-emitter');
-var Task = require('./lib/task');
+var flatten = require('arr-flatten');
+var isObject = require('isobject');
 var bach = require('bach');
-// var Scheduler = require('./lib/scheduler');
+
+var Task = require('./lib/task');
+var noop = require('./lib/noop');
 
 function Composer (config) {
   Emitter.call(this);
   this.config = config || {}
   this.tasks = {};
-  // this.scheduler = new Scheduler(this);
 }
 
 require('util').inherits(Composer, Emitter);
@@ -21,30 +22,38 @@ var annonyomousCount = 0;
  * Tasks
  */
 
-Composer.prototype.register = function(name/*, dependencies and task */) {
+Composer.prototype.register = function(name, options/*, dependencies and task */) {
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
-  var fn = function () {};
-  var len = deps.length;
-  if (typeof deps[len-1] === 'function') {
+  var fn = noop;
+  if (typeof deps[deps.length-1] === 'function') {
     fn = deps.pop();
   }
+
+  if (deps.length && isObject(deps[0])) {
+    // remove `options` from deps
+    deps.shift();
+  }
+
+  options = options || {};
+
+  deps = deps.concat(options.deps || []);
 
   deps = deps.map(function (dep) {
     if (typeof dep === 'function') {
       var depName = dep.name || dep.taskName || '[annonyomous (' + (++annonyomousCount) + ')]';
       this.register(depName, dep);
-      dep = depName;
+      return depName;
     }
-    return this.lookup([dep]);
+    return dep;
   }.bind(this));
 
-  var arr = deps.concat([fn]);
-  if (arr.length === 1) {
-    this.tasks[name] = arr.pop();
-    return this;
-  }
-
-  this.tasks[name] = bach.series.apply(bach, arr);
+  var task = new Task({
+    name: name,
+    options: options,
+    deps: deps,
+    fn: fn
+  });
+  this.tasks[name] = task;
   return this;
 };
 
@@ -59,9 +68,13 @@ Composer.prototype.lookup = function(tasks) {
     });
 };
 
-// Composer.prototype.schedule = function(/* list of tasks/functions to schedule */) {
-//   return this.scheduler.schedule.apply(this.scheduler, arguments);
-// };
+Composer.prototype.task = function(name) {
+  var task = this.tasks[name];
+  if (!task) return noop;
+  var flow = bach[task.options.flow || 'series'];
+  var deps = task.deps.map(this.task.bind(this));
+  return flow.apply(bach, deps.concat([task.fn]));
+};
 
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
   var args = [].concat.apply([], [].slice.call(arguments));
@@ -70,14 +83,12 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
   while (len--) {
     var fn = args[i];
     if (typeof fn === 'string') {
-      fn = this.tasks[fn];
+      fn = this.task(fn);
     }
-    fns[i] = fn;
-    i++;
+    fns[i++] = fn;
   }
   var last = fns.pop();
 
-  console.log(fns, last);
   if (fns.length === 1) {
     return fns[0](last);
   }

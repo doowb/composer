@@ -24,8 +24,9 @@ composer.on('error', function (err, task) {
 
 // register some tasks
 // var i = 0;
-composer.register('foo-sync', function () {
+composer.register('foo-sync', function (done) {
   console.log('foo-sync');
+  done();
 });
 
 composer.register('foo-async', function (done) {
@@ -46,15 +47,15 @@ composer.register('foo-stream', function () {
 });
 
 composer.register('beep', [
-    function () { console.log(this.name); },
-    function annony () { console.log(this.name); },
-    'foo-async'
+    function (done) { console.log(this.name); done(); },
+    'foo-async',
+    function inline (done) { console.log(this.name); done(); }
   ], function (done) {
     logAfter('beep', 2000, done);
   });
 
-composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
-  console.log('baz-with-deps dependencies finished');
+composer.register('baz-with-deps', {flow: 'series'}, ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
+  console.log('baz-with-deps\' dependencies finished');
   logAfter('baz-with-deps', 3000, done);
 });
 
@@ -96,15 +97,21 @@ composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo
 // composer.register('blog', {site: 'This is my blog'}, require('website-boilerplate')());
 
 
+// composer.register('default', {flow: 'parallel'}, 'beep', 'baz-with-deps');
 composer.register('default', 'beep', 'baz-with-deps');
 
 // composer.run('beep', function () {
 //   console.log('done');
 // });
 
-console.log(composer.tasks);
+// console.log(composer.tasks);
 
-composer.run(['foo-sync', 'foo-async'], function () {
+// composer.run(['foo-sync', 'foo-async'], function () {
+//   console.log('done');
+//   // process.exit();
+// });
+
+composer.run('default', function () {
   console.log('done');
   // process.exit();
 });
