@@ -1,4 +1,7 @@
 'use strict';
+
+// require('time-require');
+
 var Promise = require('bluebird');
 var through = require('through2');
 var green = require('ansi-green');
@@ -153,5 +156,5 @@ function logAfter(msg, ms, done) {
   setTimeout(function () {
     console.log(msg);
     done();
-  }, ms);
+  }, 0);
 }
