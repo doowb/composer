@@ -1,9 +1,26 @@
 'use strict';
 
-var flatten = require('arr-flatten');
 var Emitter = require('component-emitter');
+var lazy = require('lazy-cache')(require);
+
+var isObject = lazy('isobject');
+var chokidar = lazy('chokidar');
+var bach = lazy('bach');
+
+var yellow = lazy('ansi-yellow');
+var green = lazy('ansi-green');
+var red = lazy('ansi-red');
+
 var Task = require('./lib/task');
-var Scheduler = require('./lib/scheduler');
+var noop = require('./lib/noop');
+var map = require('./lib/map-deps');
+var resolve = require('./lib/resolve');
+
+var colors = {
+  'starting': green,
+  'finished': yellow,
+  'error': red
+};
 
 var anonymousCount = 0;
 
@@ -11,74 +28,85 @@ function Composer (config) {
   Emitter.call(this);
   this.config = config || {}
   this.tasks = {};
-  this.scheduler = new Scheduler(this);
 }
 
 require('util').inherits(Composer, Emitter);
 
-/*
- * Tasks
- */
-
-Composer.prototype.register = function(name/*, dependencies and task */) {
+Composer.prototype.register = function(name/*, options, dependencies and task */) {
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
-  var fn = function () {};
-  var len = deps.length;
-  if (typeof deps[len-1] === 'function') {
+  var options = {};
+  var fn = noop;
+  if (typeof deps[deps.length-1] === 'function') {
     fn = deps.pop();
   }
 
-  var task = {};
-  task.name = name;
-  task.deps = deps;
-  task.deps = task.deps.map(function (dep) {
-    if (typeof dep === 'function') {
-      var depName = dep.name || dep.taskName || '[anonymous (' + (++anonymousCount) + ')]';
-      this.register(depName, dep);
-      return depName;
-    }
-    return dep;
-  }.bind(this));
+  if (deps.length && isObject()(deps[0])) {
+    options = deps.shift();
+  }
 
-  task.fn = fn;
-  this.tasks[name] = new Task(task);
+  options.deps = deps
+    .concat(options.deps || [])
+    .map(map.bind(this));
+
+  var task = new Task({
+    name: name,
+    options: options,
+    fn: fn
+  });
+  task.on('starting', this.handleTask.bind(this, 'starting'));
+  task.on('finished', this.handleTask.bind(this, 'finished'));
+  task.on('error', this.handleError.bind(this, 'error'));
+
+  this.tasks[name] = task;
   return this;
 };
 
-Composer.prototype.lookup = function(tasks) {
-  var self = this;
-  return Object.keys(this.tasks)
-    .filter(function (key) {
-      return tasks.indexOf(key) !== -1;
-    })
-    .map(function (key) {
-      return self.tasks[key];
-    });
+Composer.prototype.handleTask = function(event, task, run) {
+  var color = colors[event]();
+  var timeMethod = event === 'starting' ? 'start' : 'end';
+  console.log(color(event.toUpperCase() + ':'), task.name, run[timeMethod].toTimeString());
 };
 
-Composer.prototype.schedule = function(/* list of tasks/functions to schedule */) {
-  return this.scheduler.schedule.apply(this.scheduler, arguments);
-};
+Composer.prototype.handleError = function (event, err, task, run) {
+  var color = colors[event]();
+  console.log(color(event.toUpperCase() + ':'), task.name, run.end.toTimeString());
+  console.log(color(event.toUpperCase() + ':'), err.stack);
+}
 
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
-  var args = [].slice.call(arguments);
-  var done = args.pop();
+  var args = [].concat.apply([], [].slice.call(arguments));
+  var fns = resolve.call(this, args);
+  var last = fns.pop();
+
+  if (fns.length === 1) {
+    return fns[0](last);
+  }
+  var batch =  bach().parallel.apply(bach(), fns);
+  return batch(last);
+};
+
+Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
   var self = this;
-  var schedule = this.schedule.apply(this, args);
-  schedule.on('task.error', function (err, task) {
-    self.emit('error', err, task);
-  });
-  schedule.on('task.starting', function (task) {
-    self.emit('task.starting', task);
-  });
-  schedule.on('task.finished', function (task) {
-    self.emit('task.finished', task);
-  });
-  schedule.on('finished', function () {
-    self.emit('finished');
-    done();
-  });
-  schedule.start();
+  var len = arguments.length - 1, i = 0;
+  var args = new Array(len + 1);
+  while (len--) args[i] = arguments[++i];
+  args[i] = done;
+
+  var running = true;
+  function done (err) {
+    running = false;
+    if (err) console.error(err);
+  }
+
+  chokidar().watch(glob)
+    .on('ready', function () {
+      running = false;
+    })
+    .on('all', function () {
+      if (running) return;
+      running = true;
+      self.run.apply(self, args);
+    });
 };
 
 module.exports = new Composer();

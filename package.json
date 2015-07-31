@@ -33,7 +33,17 @@
     "ansi-green": "^0.1.1",
     "ansi-red": "^0.1.1",
     "ansi-yellow": "^0.1.1",
+    "bach": "^0.4.1",
+    "chokidar": "^1.0.5",
+    "component-emitter": "^1.2.0",
+    "isobject": "^2.0.0",
+    "lazy-cache": "^0.1.0"
+  },
+  "devDependencies": {
     "bluebird": "^2.9.34",
+    "engine-handlebars": "^0.6.1",
+    "gulp-extname": "^0.2.0",
+    "parser-front-matter": "^1.2.3",
     "through2": "^2.0.0"
   },
   "keywords": []

@@ -1,38 +1,43 @@
 'use strict';
-var Promise = require('bluebird');
-var through = require('through2');
-var green = require('ansi-green');
-var yellow = require('ansi-yellow');
-var red = require('ansi-red');
 
-var composer = require('./');
+// require('time-require');
+var lazy = require('lazy-cache')(require);
+var bluebird = lazy('bluebird');
+var through = lazy('through2');
+var green = lazy('ansi-green');
+var yellow = lazy('ansi-yellow');
+var red = lazy('ansi-red');
+
+var composer = require('../');
 
 // setup some listeners
 composer.on('task.starting', function (task) {
   var start = new Date();
-  console.log(green('starting [' + task.name + ']'), start.toTimeString());
+  console.log(green()('starting [' + task.name + ']'), start.toTimeString());
 });
 composer.on('task.finished', function (task) {
   var end = new Date();
-  console.log(yellow('finished [' + task.name + ']'), end.toTimeString());
+  console.log(yellow()('finished [' + task.name + ']'), end.toTimeString());
 });
 
 composer.on('error', function (err, task) {
-  console.log(red('[' + task.name + '] ERROR:'), err);
+  console.log(red()('[' + task.name + '] ERROR:'), err);
 });
 
 
 // register some tasks
 // var i = 0;
-composer.register('foo-sync', function () {
+composer.register('foo-sync', function (done) {
   console.log('foo-sync');
+  done(null, 'foo-sync');
 });
 
 composer.register('foo-async', function (done) {
-  logAfter('foo-async', 3500, done);
+  logAfter('foo-async', 3500, done.bind(null, null));
 });
 
 composer.register('foo-promise', function () {
+  var Promise = bluebird();
   var promise = new Promise(function (resolve, reject) {
     logAfter('foo-promise', 1000, resolve);
   });
@@ -40,22 +45,25 @@ composer.register('foo-promise', function () {
 });
 
 composer.register('foo-stream', function () {
-  var stream = through.obj();
-  logAfter('foo-stream', 500, stream.end.bind(stream));
+  var stream = through().obj();
+  logAfter('foo-stream', 500, function (msg) {
+    stream.write(msg);
+    stream.end();
+  });
   return stream;
 });
 
 composer.register('beep', [
-    function () { console.log(this.name); },
+    function (done) { console.log(this.name); done(null, this.name); },
     'foo-async',
-    function inline () { console.log(this.name); }
+    function inline (done) { console.log(this.name); done(null, this.name); }
   ], function (done) {
-    logAfter('beep', 2000, done);
+    logAfter('beep', 2000, done.bind(null, null));
   });
 
-composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
-  console.log('baz-with-deps dependencies finished');
-  logAfter('baz-with-deps', 3000, done);
+composer.register('baz-with-deps', {flow: 'series'}, ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
+  console.log('baz-with-deps\' dependencies finished');
+  logAfter('baz-with-deps', 3000, done.bind(null, null));
 });
 
 // composer.register('website', ['styles', 'scripts', 'templates'], function (done) {
@@ -96,18 +104,41 @@ composer.register('baz-with-deps', ['foo-sync', 'foo-async', 'foo-promise', 'foo
 // composer.register('blog', {site: 'This is my blog'}, require('website-boilerplate')());
 
 
+// composer.register('default', {flow: 'parallel'}, 'beep', 'baz-with-deps');
 composer.register('default', 'beep', 'baz-with-deps');
 
 // composer.run('beep', function () {
 //   console.log('done');
 // });
 
-// composer.run('default', function () {
+// console.log(composer.tasks);
+
+// composer.run(['foo-sync', 'foo-async'], function () {
 //   console.log('done');
 //   // process.exit();
 // });
 
-runSchedule(2);
+composer.run('default', function (err, results) {
+  console.log('done');
+  console.log(JSON.stringify(results, null, 2));
+  // process.exit();
+});
+
+// composer.register('js', function (done) {
+//   console.log('javascript files changed');
+//   done();
+// });
+
+// composer.register('md', function (done) {
+//   console.log('markdown files changed');
+//   process.exit();
+//   done();
+// });
+
+// composer.watch('*.js', 'js');
+// composer.watch('*.md', 'md');
+// process.exit();
+// runSchedule(2);
 
 function runSchedule (max) {
   max = typeof max === 'undefined' ? 2 : max;
@@ -143,6 +174,6 @@ function runSchedule (max) {
 function logAfter(msg, ms, done) {
   setTimeout(function () {
     console.log(msg);
-    done();
-  }, ms);
+    done(msg);
+  }, 0);
 }
