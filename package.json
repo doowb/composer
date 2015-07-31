@@ -29,6 +29,7 @@
     "ansi-green": "^0.1.1",
     "ansi-red": "^0.1.1",
     "ansi-yellow": "^0.1.1",
+    "async-done": "^1.1.0",
     "bach": "^0.4.1",
     "chokidar": "^1.0.5",
     "component-emitter": "^1.2.0",
