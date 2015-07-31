@@ -22,15 +22,45 @@ var colors = {
   'error': red
 };
 
-var anonymousCount = 0;
+/**
+ * Composer constructor. Create a new Composer
+ *
+ * ```js
+ * var composer = new Composer();
+ * ```
+ *
+ * @api public
+ */
 
-function Composer (config) {
+function Composer () {
   Emitter.call(this);
-  this.config = config || {}
   this.tasks = {};
 }
 
 require('util').inherits(Composer, Emitter);
+
+/**
+ * Register a new task with it's options and dependencies.
+ *
+ * Options:
+ *
+ *  - `deps`: array of dependencies
+ *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, 'settleParallel`)
+ *
+ * ```js
+ * composer.register('site', ['styles'], function () {
+ *   app.src('templates/pages/*.hbs')
+ *     .pipe(app.dest('_gh_pages'));
+ * });
+ * ```
+ *
+ * @param  {String} `name` Name of the task to register
+ * @param {Object} `options` Options to set dependencies or control flow.
+ * @param {String|Array|Function} `deps` Additional dependencies for this task.
+ * @param {Function} `task` Final function is the task to register.
+ * @return {Object} Return `this` for chaining
+ * @api public
+ */
 
 Composer.prototype.register = function(name/*, options, dependencies and task */) {
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
@@ -61,17 +91,59 @@ Composer.prototype.register = function(name/*, options, dependencies and task */
   return this;
 };
 
+/**
+ * Event listener for task events.
+ *
+ * ```js
+ * var task = this.tasks['default'];
+ * task.on('starting', this.handleTask.bind(this, 'starting'));
+ * ```
+ *
+ * @param  {String} `event` Name of the event being handled.
+ * @param  {Object} `task` Task object being handled.
+ * @param  {Object} `run` Current run object for the Task being handled.
+ */
+
 Composer.prototype.handleTask = function(event, task, run) {
   var color = colors[event]();
   var timeMethod = event === 'starting' ? 'start' : 'end';
   console.log(color(event.toUpperCase() + ':'), task.name, run[timeMethod].toTimeString());
 };
 
+/**
+ * Event listener for task error events.
+ *
+ * ```js
+ * var task = this.tasks['default'];
+ * task.on('error', this.handleError.bind(this, 'error'));
+ * ```
+ *
+ * @param  {String} `event` Name of the event being handled.
+ * @param  {Object} `err` Error from the Task being handled.
+ * @param  {Object} `task` Task object being handled.
+ * @param  {Object} `run` Current run object for the Task being handled.
+ */
+
 Composer.prototype.handleError = function (event, err, task, run) {
   var color = colors[event]();
   console.log(color(event.toUpperCase() + ':'), task.name, run.end.toTimeString());
   console.log(color(event.toUpperCase() + ':'), err.stack);
 }
+
+/**
+ * Run a task or list of tasks.
+ *
+ * ```js
+ * composer.run('default', function (err, results) {
+ *   if (err) return console.error(err);
+ *   console.log(results);
+ * });
+ * ```
+ *
+ * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
+ * @param {Function} `cb` Callback function to be called when all tasks are finished running.
+ * @api public
+ */
 
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
   var args = [].concat.apply([], [].slice.call(arguments));
@@ -84,6 +156,20 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
   var batch =  bach().parallel.apply(bach(), fns);
   return batch(last);
 };
+
+/**
+ * Watch a file, directory, or glob pattern for changes and run a task or list of tasks
+ * when changes are made.
+ *
+ * ```js
+ * composer.watch('templates/pages/*.hbs', ['site']);
+ * ```
+ *
+ * @param  {String|Array} `glob` Filename, Directory name, or glob pattern to watch
+ * @param {String|Array|Function} `tasks` Tasks that are passed to `.run` when files in the glob are changed.
+ * @return {Object} Returns `this` for chaining
+ * @api public
+ */
 
 Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
   var self = this;
@@ -107,7 +193,22 @@ Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
       running = true;
       self.run.apply(self, args);
     });
+
+  return this;
 };
 
+/**
+ * Export instance of Composer
+ * @type {Composer}
+ * @api public
+ */
+
 module.exports = new Composer();
+
+/**
+ * Export Composer constructor
+ * @type {Function}
+ * @api public
+ */
+
 module.exports.Composer = Composer;
