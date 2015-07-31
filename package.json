@@ -13,7 +13,8 @@
   },
   "license": "MIT",
   "files": [
-    "index.js"
+    "index.js",
+    "lib"
   ],
   "bin": {
     "compose": "cli.js"
