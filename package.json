@@ -38,6 +38,9 @@
   },
   "devDependencies": {
     "bluebird": "^2.9.34",
+    "engine-handlebars": "^0.6.1",
+    "gulp-extname": "^0.2.0",
+    "parser-front-matter": "^1.2.3",
     "through2": "^2.0.0"
   },
   "keywords": []
