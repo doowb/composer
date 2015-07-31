@@ -7,7 +7,7 @@ var extname = require('gulp-extname');
 var through = require('through2');
 var path = require('path');
 
-var composer = require('./');
+var composer = require('../');
 var Template = require('template');
 var template = new Template();
 
@@ -21,9 +21,9 @@ template.onLoad(/\.hbs$/, function (file, next) {
 });
 
 var paths = {
-  pages: ['examples/templates/pages/**/*.hbs'],
-  layouts: ['examples/templates/layouts/*.hbs'],
-  includes: ['examples/templates/includes/*.hbs']
+  pages: ['./templates/pages/**/*.hbs'],
+  layouts: ['./templates/layouts/*.hbs'],
+  includes: ['./templates/includes/*.hbs']
 };
 
 template.create('pages');
@@ -49,7 +49,7 @@ composer.register('site', function () {
   return loadCollection('pages')
     .pipe(render())
     .pipe(extname())
-    .pipe(dest('examples/dist'));
+    .pipe(dest('dist'));
 });
 
 composer.register('watch', function () {
