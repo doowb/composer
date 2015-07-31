@@ -1,5 +1,7 @@
 'use strict';
 
+// require('time-require');
+
 var matter = require('parser-front-matter');
 var extname = require('gulp-extname');
 var through = require('through2');
@@ -59,7 +61,7 @@ composer.register('watch', function () {
 composer.register('default', ['layouts', 'includes', 'pages', 'site']);
 composer.register('dev', ['default', 'watch']);
 
-composer.run('dev', function (err, results) {
+composer.run('default', function (err, results) {
   if (err) return console.error(err);
   console.log('Finshed');
 });
