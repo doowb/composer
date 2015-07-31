@@ -1,15 +1,14 @@
 'use strict';
 
+var lazy = require('lazy-cache')(require);
 var Emitter = require('component-emitter');
-var flatten = require('arr-flatten');
-var isObject = require('isobject');
-var chokidar = require('chokidar');
-var bach = require('bach');
+var isObject = lazy('isobject');
+var chokidar = lazy('chokidar');
+var bach = lazy('bach');
 
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
-var lookup = require('./lib/lookup');
 var resolve = require('./lib/resolve');
 
 function Composer (config) {
@@ -28,7 +27,7 @@ Composer.prototype.register = function(name/*, options, dependencies and task */
     fn = deps.pop();
   }
 
-  if (deps.length && isObject(deps[0])) {
+  if (deps.length && isObject()(deps[0])) {
     options = deps.shift();
   }
 
@@ -54,7 +53,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
   if (fns.length === 1) {
     return fns[0](last);
   }
-  var batch =  bach.parallel.apply(bach, fns);
+  var batch =  bach().parallel.apply(bach(), fns);
   return batch(last);
 };
 
@@ -71,7 +70,7 @@ Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
     if (err) console.error(err);
   }
 
-  chokidar.watch(glob)
+  chokidar().watch(glob)
     .on('ready', function () {
       running = false;
     })
