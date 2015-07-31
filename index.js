@@ -49,7 +49,7 @@ require('util').inherits(Composer, Emitter);
  *
  * ```js
  * composer.register('site', ['styles'], function () {
- *   app.src('templates/pages/*.hbs')
+ *   return app.src('templates/pages/*.hbs')
  *     .pipe(app.dest('_gh_pages'));
  * });
  * ```
@@ -200,7 +200,6 @@ Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
 /**
  * Export instance of Composer
  * @type {Composer}
- * @api public
  */
 
 module.exports = new Composer();
@@ -208,7 +207,6 @@ module.exports = new Composer();
 /**
  * Export Composer constructor
  * @type {Function}
- * @api public
  */
 
 module.exports.Composer = Composer;
