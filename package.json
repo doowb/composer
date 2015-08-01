@@ -16,9 +16,6 @@
     "index.js",
     "lib"
   ],
-  "bin": {
-    "compose": "cli.js"
-  },
   "main": "index.js",
   "engines": {
     "node": ">=0.10.0"
