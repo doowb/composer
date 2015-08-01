@@ -48,7 +48,7 @@ require('util').inherits(Composer, Emitter);
  *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, 'settleParallel`)
  *
  * ```js
- * composer.register('site', ['styles'], function () {
+ * composer.task('site', ['styles'], function () {
  *   return app.src('templates/pages/*.hbs')
  *     .pipe(app.dest('_gh_pages'));
  * });
@@ -57,12 +57,12 @@ require('util').inherits(Composer, Emitter);
  * @param  {String} `name` Name of the task to register
  * @param {Object} `options` Options to set dependencies or control flow.
  * @param {String|Array|Function} `deps` Additional dependencies for this task.
- * @param {Function} `task` Final function is the task to register.
+ * @param {Function} `fn` Final function is the task to register.
  * @return {Object} Return `this` for chaining
  * @api public
  */
 
-Composer.prototype.register = function(name/*, options, dependencies and task */) {
+Composer.prototype.task = function(name/*, options, dependencies and task */) {
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
   var options = {};
   var fn = noop;

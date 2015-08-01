@@ -30,36 +30,36 @@ template.create('pages');
 template.create('layouts', {viewType: 'layout'});
 template.create('includes', {viewType: 'partial'});
 
-composer.register('layouts', function (done) {
+composer.task('layouts', function (done) {
   template.layouts(paths.layouts);
   done();
 });
 
-composer.register('includes', function (done) {
+composer.task('includes', function (done) {
   template.includes(paths.includes);
   done();
 });
 
-composer.register('pages', function (done) {
+composer.task('pages', function (done) {
   template.pages(paths.pages);
   done();
 });
 
-composer.register('site', function () {
+composer.task('site', function () {
   return loadCollection('pages')
     .pipe(render())
     .pipe(extname())
     .pipe(dest('dist'));
 });
 
-composer.register('watch', function () {
+composer.task('watch', function () {
   composer.watch(paths.layouts, ['layouts', 'pages', 'site']);
   composer.watch(paths.includes, ['includes', 'pages', 'site']);
   composer.watch(paths.pages, ['pages', 'site']);
 });
 
-composer.register('default', ['layouts', 'includes', 'pages', 'site']);
-composer.register('dev', ['default', 'watch']);
+composer.task('default', ['layouts', 'includes', 'pages', 'site']);
+composer.task('dev', ['default', 'watch']);
 
 composer.run('default', function (err, results) {
   if (err) return console.error(err);
