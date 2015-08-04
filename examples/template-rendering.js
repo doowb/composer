@@ -21,9 +21,9 @@ template.onLoad(/\.hbs$/, function (file, next) {
 });
 
 var paths = {
-  pages: ['./templates/pages/**/*.hbs'],
-  layouts: ['./templates/layouts/*.hbs'],
-  includes: ['./templates/includes/*.hbs']
+  pages: './templates/pages/**/*.hbs',
+  layouts: './templates/layouts/*.hbs',
+  includes: './templates/includes/*.hbs'
 };
 
 template.create('pages');
@@ -31,25 +31,43 @@ template.create('layouts', {viewType: 'layout'});
 template.create('includes', {viewType: 'partial'});
 
 composer.task('layouts', function (done) {
-  template.layouts(paths.layouts);
+  try {
+    template.layouts(paths.layouts);
+  } catch (err) {
+    return done(err);
+  }
   done();
 });
 
 composer.task('includes', function (done) {
-  template.includes(paths.includes);
+  try {
+    template.includes(paths.includes);
+  } catch (err) {
+    return done(err);
+  }
   done();
 });
 
 composer.task('pages', function (done) {
-  template.pages(paths.pages);
+  try {
+    template.pages(paths.pages);
+  } catch (err) {
+    return done(err);
+  }
   done();
 });
 
-composer.task('site', function () {
-  return loadCollection('pages')
-    .pipe(render())
-    .pipe(extname())
-    .pipe(dest('dist'));
+composer.task('site', function (done) {
+  var stream;
+  try {
+    stream = loadCollection('pages')
+      .pipe(render())
+      .pipe(extname())
+      .pipe(dest('dist'));
+  } catch (err) {
+    return done(err);
+  }
+  return stream;
 });
 
 composer.task('watch', function () {

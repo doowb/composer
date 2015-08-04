@@ -38,6 +38,7 @@
     "engine-handlebars": "^0.6.1",
     "gulp-extname": "^0.2.0",
     "parser-front-matter": "^1.2.3",
+    "template": "jonschlinkert/template#0.17.0-prep",
     "through2": "^2.0.0"
   },
   "keywords": []
