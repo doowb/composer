@@ -147,14 +147,29 @@ Composer.prototype.handleError = function (event, err, task, run) {
 
 Composer.prototype.run = function(/* list of tasks/functions to run */) {
   var args = [].concat.apply([], [].slice.call(arguments));
-  var fns = resolve.call(this, args);
-  var last = fns.pop();
+  var done = args.pop();
+  if (typeof done !== 'function') {
+    throw new Error('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
+  }
+
+  var fns;
+  try {
+    fns = resolve.call(this, args);
+  } catch (err) {
+    return done(err);
+  }
 
   if (fns.length === 1) {
-    return fns[0](last);
+    return fns[0](done);
   }
-  var batch =  bach().parallel.apply(bach(), fns);
-  return batch(last);
+
+  var batch;
+  try {
+    batch =  bach().parallel.apply(bach(), fns);
+  } catch (err) {
+    return done(err);
+  }
+  return batch(done);
 };
 
 /**
