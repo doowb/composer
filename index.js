@@ -165,7 +165,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
 
   var batch;
   try {
-    batch =  bach().parallel.apply(bach(), fns);
+    batch =  bach().series.apply(bach(), fns);
   } catch (err) {
     return done(err);
   }
