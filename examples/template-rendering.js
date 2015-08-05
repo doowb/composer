@@ -21,9 +21,9 @@ template.onLoad(/\.hbs$/, function (file, next) {
 });
 
 var paths = {
-  pages: './templates/pages/**/*.hbs',
-  layouts: './templates/layouts/*.hbs',
-  includes: './templates/includes/*.hbs'
+  pages: ['./templates/pages/**/*.hbs'],
+  layouts: ['./templates/layouts/*.hbs'],
+  includes: ['./templates/includes/*.hbs']
 };
 
 template.create('pages');
