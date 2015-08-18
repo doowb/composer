@@ -37,7 +37,7 @@ require('util').inherits(Composer, Emitter);
  * Options:
  *
  *  - `deps`: array of dependencies
- *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, 'settleParallel`)
+ *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
  *
  * ```js
  * composer.task('site', ['styles'], function () {

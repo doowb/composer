@@ -35,7 +35,7 @@ Register a new task with it's options and dependencies.
 Options:
 
 * `deps`: array of dependencies
-* `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, 'settleParallel`)
+* `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
 
 **Params**
 
