@@ -4,11 +4,13 @@
 
 var matter = require('parser-front-matter');
 var extname = require('gulp-extname');
+var Template = require('template');
 var through = require('through2');
 var path = require('path');
 
 var composer = require('../');
-var Template = require('template');
+require('./lib/runtimes')(composer);
+
 var template = new Template();
 
 template.engine('hbs', require('engine-handlebars'));

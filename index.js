@@ -7,20 +7,12 @@ var isObject = lazy('isobject');
 var chokidar = lazy('chokidar');
 var bach = lazy('bach');
 
-var yellow = lazy('ansi-yellow');
-var green = lazy('ansi-green');
-var red = lazy('ansi-red');
-
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
 var resolve = require('./lib/resolve');
 
-var colors = {
-  'starting': green,
-  'finished': yellow,
-  'error': red
-};
+
 
 /**
  * Composer constructor. Create a new Composer
@@ -105,9 +97,11 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
  */
 
 Composer.prototype.handleTask = function(event, task, run) {
-  var color = colors[event]();
-  var timeMethod = event === 'starting' ? 'start' : 'end';
-  console.log(color(event.toUpperCase() + ':'), task.name, run[timeMethod].toTimeString());
+  var info = {
+    task: task,
+    run: run
+  };
+  this.emit(['task', event].join('.'), info);
 };
 
 /**
@@ -125,9 +119,11 @@ Composer.prototype.handleTask = function(event, task, run) {
  */
 
 Composer.prototype.handleError = function (event, err, task, run) {
-  var color = colors[event]();
-  console.log(color(event.toUpperCase() + ':'), task.name, run.end.toTimeString());
-  console.log(color(event.toUpperCase() + ':'), err.stack);
+  var info = {
+    task: task,
+    run: run
+  };
+  this.emit(['task', event].join('.'), err, info);
 }
 
 /**

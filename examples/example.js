@@ -4,26 +4,9 @@
 var lazy = require('lazy-cache')(require);
 var bluebird = lazy('bluebird');
 var through = lazy('through2');
-var green = lazy('ansi-green');
-var yellow = lazy('ansi-yellow');
-var red = lazy('ansi-red');
 
 var composer = require('../');
-
-// setup some listeners
-composer.on('task.starting', function (task) {
-  var start = new Date();
-  console.log(green()('starting [' + task.name + ']'), start.toTimeString());
-});
-composer.on('task.finished', function (task) {
-  var end = new Date();
-  console.log(yellow()('finished [' + task.name + ']'), end.toTimeString());
-});
-
-composer.on('error', function (err, task) {
-  console.log(red()('[' + task.name + '] ERROR:'), err);
-});
-
+require('./lib/runtimes')(composer);
 
 // register some tasks
 // var i = 0;
