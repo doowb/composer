@@ -33,43 +33,25 @@ template.create('layouts', {viewType: 'layout'});
 template.create('includes', {viewType: 'partial'});
 
 composer.task('layouts', function (done) {
-  try {
-    template.layouts(paths.layouts);
-  } catch (err) {
-    return done(err);
-  }
+  template.layouts(paths.layouts);
   done();
 });
 
 composer.task('includes', function (done) {
-  try {
-    template.includes(paths.includes);
-  } catch (err) {
-    return done(err);
-  }
+  template.includes(paths.includes);
   done();
 });
 
 composer.task('pages', function (done) {
-  try {
-    template.pages(paths.pages);
-  } catch (err) {
-    return done(err);
-  }
+  template.pages(paths.pages);
   done();
 });
 
-composer.task('site', function (done) {
-  var stream;
-  try {
-    stream = loadCollection('pages')
-      .pipe(render())
-      .pipe(extname())
-      .pipe(dest('dist'));
-  } catch (err) {
-    return done(err);
-  }
-  return stream;
+composer.task('site', function () {
+  return loadCollection('pages')
+    .pipe(render())
+    .pipe(extname())
+    .pipe(dest('dist'));
 });
 
 composer.task('watch', function () {
