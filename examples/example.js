@@ -2,8 +2,8 @@
 
 // require('time-require');
 var lazy = require('lazy-cache')(require);
-var bluebird = lazy('bluebird');
-var through = lazy('through2');
+lazy('bluebird');
+lazy('through2');
 
 var composer = require('../');
 require('./lib/runtimes')(composer);
@@ -18,7 +18,7 @@ composer.task('foo-async', function (done) {
 });
 
 composer.task('foo-promise', function () {
-  var Promise = bluebird();
+  var Promise = lazy.bluebird;
   var promise = new Promise(function (resolve, reject) {
     logAfter('foo-promise', 1000, resolve);
   });
@@ -26,7 +26,7 @@ composer.task('foo-promise', function () {
 });
 
 composer.task('foo-stream', function () {
-  var stream = through().obj();
+  var stream = lazy.through.obj();
   logAfter('foo-stream', 500, function (msg) {
     stream.write(msg);
     stream.end();

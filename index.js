@@ -3,9 +3,9 @@
 var Emitter = require('component-emitter');
 var lazy = require('lazy-cache')(require);
 
-var isObject = lazy('isobject');
-var chokidar = lazy('chokidar');
-var bach = lazy('bach');
+lazy('isobject');
+lazy('chokidar');
+lazy('bach');
 
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
@@ -62,7 +62,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
     fn = deps.pop();
   }
 
-  if (deps.length && isObject()(deps[0])) {
+  if (deps.length && lazy.isobject(deps[0])) {
     options = deps.shift();
   }
 
@@ -161,7 +161,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
 
   var batch;
   try {
-    batch =  bach().series.apply(bach(), fns);
+    batch =  lazy.bach.series.apply(lazy.bach, fns);
   } catch (err) {
     return done(err);
   }
@@ -195,7 +195,7 @@ Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
     if (err) console.error(err);
   }
 
-  chokidar().watch(glob)
+  lazy.chokidar.watch(glob)
     .on('ready', function () {
       running = false;
     })
