@@ -42,5 +42,17 @@
     "template": "jonschlinkert/template#0.17.0-prep",
     "through2": "^2.0.0"
   },
+  "verb": {
+    "related": {
+      "list": [
+        "verb",
+        "template",
+        "assemble",
+        "generate",
+        "update",
+        "scaffold"
+      ]
+    }
+  },
   "keywords": []
 }
