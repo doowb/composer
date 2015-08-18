@@ -18,7 +18,7 @@ module.exports = function (composer) {
     console.log(yellow()('finished'), cyan()('[' + task.name + ']'), end.toTimeString());
   });
 
-  composer.on('error', function (err, info) {
+  composer.on('task.error', function (err, info) {
     var task = info.task;
     console.log(red()('ERROR'), cyan()('[' + task.name + ']'), err);
   });
