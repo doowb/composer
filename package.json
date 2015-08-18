@@ -23,13 +23,6 @@
   "scripts": {
     "test": "mocha"
   },
-  "dependencies": {
-    "bach": "^0.4.1",
-    "chokidar": "^1.0.5",
-    "component-emitter": "^1.2.0",
-    "isobject": "^2.0.0",
-    "lazy-cache": "^0.1.0"
-  },
   "devDependencies": {
     "ansi-cyan": "^0.1.1",
     "ansi-green": "^0.1.1",
@@ -38,7 +31,7 @@
     "bluebird": "^2.9.34",
     "engine-handlebars": "^0.6.1",
     "gulp-extname": "^0.2.0",
-    "parser-front-matter": "^1.2.3",
+    "parser-front-matter": "^1.2.5",
     "template": "jonschlinkert/template#0.17.0-prep",
     "through2": "^2.0.0"
   },
@@ -54,5 +47,12 @@
       ]
     }
   },
-  "keywords": []
+  "keywords": [],
+  "dependencies": {
+    "bach": "^0.4.1",
+    "chokidar": "^1.0.5",
+    "component-emitter": "^1.2.0",
+    "isobject": "^2.0.0",
+    "lazy-cache": "^0.2.0"
+  }
 }
