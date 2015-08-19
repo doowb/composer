@@ -1,237 +1,223 @@
 'use strict';
 
-// require('time-require');
-var extend = require('extend-shallow');
-var merge = require('mixin-deep');
-var es = require('event-stream');
-var Task = require('orchestrator');
-var pretty = require('pretty-hrtime');
-var Template = require('template');
-var through = require('through2');
-var vfs = require('vinyl-fs');
-var init = require('./lib/init');
-var sessionify = require('sessionify');
-var session = require('./lib/session');
+var Emitter = require('component-emitter');
+var lazy = require('lazy-cache')(require);
+
+lazy('isobject');
+lazy('chokidar');
+lazy('bach');
+
+var Task = require('./lib/task');
+var noop = require('./lib/noop');
+var map = require('./lib/map-deps');
+var resolve = require('./lib/resolve');
+
+
 
 /**
- * Create an instance of `Composer`
- */
-
-function Composer() {
-  Template.apply(this, arguments);
-  Task.apply(this, arguments);
-  this.session = session;
-  this.plugins = {};
-  init(this);
-}
-
-extend(Composer.prototype, Task.prototype);
-Template.mixin(Composer.prototype);
-
-/**
- * Register a plugin by `name`
+ * Composer constructor. Create a new Composer
  *
- * @param  {String} `name`
- * @param  {Function} `fn`
+ * ```js
+ * var composer = new Composer();
+ * ```
+ *
  * @api public
  */
 
-Composer.prototype.plugin = function(name, fn) {
-  if (arguments.length === 1) {
-    return this.plugins[name];
+function Composer () {
+  Emitter.call(this);
+  this.tasks = {};
+}
+
+require('util').inherits(Composer, Emitter);
+
+/**
+ * Register a new task with it's options and dependencies.
+ *
+ * Options:
+ *
+ *  - `deps`: array of dependencies
+ *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
+ *
+ * ```js
+ * composer.task('site', ['styles'], function () {
+ *   return app.src('templates/pages/*.hbs')
+ *     .pipe(app.dest('_gh_pages'));
+ * });
+ * ```
+ *
+ * @param  {String} `name` Name of the task to register
+ * @param {Object} `options` Options to set dependencies or control flow.
+ * @param {String|Array|Function} `deps` Additional dependencies for this task.
+ * @param {Function} `fn` Final function is the task to register.
+ * @return {Object} Return `this` for chaining
+ * @api public
+ */
+
+Composer.prototype.task = function(name/*, options, dependencies and task */) {
+  var deps = [].concat.apply([], [].slice.call(arguments, 1));
+  var options = {};
+  var fn = noop;
+  if (typeof deps[deps.length-1] === 'function') {
+    fn = deps.pop();
   }
-  if (typeof fn === 'function') {
-    fn = fn.bind(this);
+
+  if (deps.length && lazy.isobject(deps[0])) {
+    options = deps.shift();
   }
-  this.plugins[name] = fn;
+
+  options.deps = deps
+    .concat(options.deps || [])
+    .map(map.bind(this));
+
+  var task = new Task({
+    name: name,
+    options: options,
+    fn: fn
+  });
+  task.on('starting', this.handleTask.bind(this, 'starting'));
+  task.on('finished', this.handleTask.bind(this, 'finished'));
+  task.on('error', this.handleError.bind(this, 'error'));
+
+  this.tasks[name] = task;
   return this;
 };
 
 /**
- * Create a plugin pipeline from an array of plugins.
- *
- * @param  {Array} `plugins` Functions or names of registered plugins.
- * @param  {Object} `options`
- * @return {Stream}
- * @api public
- */
-
-Composer.prototype.pipeline = function(pipeline) {
-  var stream = through.obj();
-  if (!pipeline.length) {
-    pipeline = [through.obj()];
-  }
-  var res = es.pipe.apply(es, pipeline);
-  sessionify(res, session, this);
-  return stream.pipe(res);
-};
-
-/**
- * Glob patterns or filepaths to source files.
+ * Event listener for task events.
  *
  * ```js
- * app.src('*.js')
+ * var task = this.tasks['default'];
+ * task.on('starting', this.handleTask.bind(this, 'starting'));
  * ```
  *
- * @param {String|Array} `glob` Glob patterns or file paths to source files.
- * @param {Object} `options` Options or locals to merge into the context and/or pass to `src` plugins
- * @api public
+ * @param  {String} `event` Name of the event being handled.
+ * @param  {Object} `task` Task object being handled.
+ * @param  {Object} `run` Current run object for the Task being handled.
  */
 
-Composer.prototype.src = function(glob, options) {
-  var opts = merge({}, this.options, options);
-  this.session.set('src', options || {});
-
-  if (opts.minimal || this.enabled('minimal config')) {
-    return this.plugin('src')(glob, opts);
-  }
-
-  return this.pipeline([
-    this.plugin('src')(glob, opts),
-    this.plugin('file')(this)
-  ], opts)
+Composer.prototype.handleTask = function(event, task, run) {
+  var info = {
+    task: task,
+    run: run
+  };
+  this.emit(['task', event].join('.'), info);
 };
 
 /**
- * Specify a destination for processed files.
+ * Event listener for task error events.
  *
  * ```js
- * app.dest('dist', {ext: '.xml'})
+ * var task = this.tasks['default'];
+ * task.on('error', this.handleError.bind(this, 'error'));
  * ```
  *
- * @param {String|Function} `dest` File path or rename function.
- * @param {Object} `options` Options or locals to pass to `dest` plugins
- * @api public
+ * @param  {String} `event` Name of the event being handled.
+ * @param  {Object} `err` Error from the Task being handled.
+ * @param  {Object} `task` Task object being handled.
+ * @param  {Object} `run` Current run object for the Task being handled.
  */
 
-Composer.prototype.dest = function(dest, opts) {
-  opts = merge({}, this.options, opts);
-
-  if (opts.minimal || this.enabled('minimal config')) {
-    return this.plugin('dest')(dest, opts);
-  }
-
-  return this.pipeline([
-    this.plugin('paths')(opts),
-    this.plugin('render')(opts),
-    this.plugin('dest')(dest, opts),
-  ], opts);
-};
+Composer.prototype.handleError = function (event, err, task, run) {
+  var info = {
+    task: task,
+    run: run
+  };
+  this.emit(['task', event].join('.'), err, info);
+}
 
 /**
- * Copy a `glob` of files to the specified `dest`.
+ * Run a task or list of tasks.
  *
  * ```js
- * app.copy('assets/**', 'dist');
- * ```
- *
- * @param  {String|Array} `glob`
- * @param  {String|Function} `dest`
- * @return {Stream} Stream, to continue processing if necessary.
- * @api public
- */
-
-Composer.prototype.copy = function(glob, dest, opts) {
-  return vfs.src(glob, opts).pipe(vfs.dest(dest, opts));
-};
-
-/**
- * Define a task.
- *
- * ```js
- * app.task('docs', function() {
- *   app.src(['foo.js', 'bar/*.js'])
- *     .pipe(app.dest('./'));
+ * composer.run('default', function (err, results) {
+ *   if (err) return console.error(err);
+ *   console.log(results);
  * });
  * ```
  *
- * @param {String} `name`
- * @param {Function} `fn`
+ * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
+ * @param {Function} `cb` Callback function to be called when all tasks are finished running.
  * @api public
  */
 
-Composer.prototype.task = Composer.prototype.add;
-
-/**
- * Run an array of tasks.
- *
- * ```js
- * app.run(['foo', 'bar']);
- * ```
- *
- * @param {Array} `tasks`
- * @api private
- */
-
-Composer.prototype.run = function() {
-  var tasks = arguments.length ? arguments : ['default'];
-  this.on('err', console.log);
-
-  if (this.enabled('verbose')) {
-    this.on('task_start', function (data) {
-      console.log('Starting', '\'' + data.task + '\'...');
-    });
-
-    this.on('task_stop', function (data) {
-      var time = pretty(data.hrDuration);
-      console.log('Finished', '\'' + data.task + '\'', 'after', time);
-    });
+Composer.prototype.run = function(/* list of tasks/functions to run */) {
+  var args = [].concat.apply([], [].slice.call(arguments));
+  var done = args.pop();
+  if (typeof done !== 'function') {
+    throw new Error('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
   }
 
-  process.nextTick(function () {
-    this.start.apply(this, tasks);
-  }.bind(this));
+  var fns;
+  try {
+    fns = resolve.call(this, args);
+  } catch (err) {
+    return done(err);
+  }
+
+  if (fns.length === 1) {
+    return fns[0](done);
+  }
+
+  var batch;
+  try {
+    batch =  lazy.bach.series.apply(lazy.bach, fns);
+  } catch (err) {
+    return done(err);
+  }
+  return batch(done);
 };
 
 /**
- * Wrapper around Task._runTask to enable `sessions`
- *
- * @param  {Object} `task` Task to run
- * @api private
- */
-
-Composer.prototype._runTask = function(task) {
-  var composer = this;
-  composer.session.run(function () {
-    composer.session.set('task', task.name);
-    Task.prototype._runTask.call(composer, task);
-  });
-};
-
-/**
- * Re-run the specified task(s) when a file changes.
+ * Watch a file, directory, or glob pattern for changes and run a task or list of tasks
+ * when changes are made.
  *
  * ```js
- * app.task('watch', function() {
- *   app.watch('docs/*.md', ['docs']);
- * });
+ * composer.watch('templates/pages/*.hbs', ['site']);
  * ```
  *
- * @param  {String|Array} `glob` Filepaths or glob patterns.
- * @param  {Function} `fn` Task(s) to watch.
+ * @param  {String|Array} `glob` Filename, Directory name, or glob pattern to watch
+ * @param {String|Array|Function} `tasks` Tasks that are passed to `.run` when files in the glob are changed.
+ * @return {Object} Returns `this` for chaining
  * @api public
  */
 
-Composer.prototype.watch = function(glob, opts, fn) {
-  if (Array.isArray(opts) || typeof opts === 'function') {
-    fn = opts; opts = null;
+Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
+  var self = this;
+  var len = arguments.length - 1, i = 0;
+  var args = new Array(len + 1);
+  while (len--) args[i] = arguments[++i];
+  args[i] = done;
+
+  var running = true;
+  function done (err) {
+    running = false;
+    if (err) console.error(err);
   }
-  if (!Array.isArray(fn)) {
-    return vfs.watch(glob, opts, fn);
-  }
-  return vfs.watch(glob, opts, function () {
-    this.start.apply(this, fn);
-  }.bind(this));
+
+  lazy.chokidar.watch(glob)
+    .on('ready', function () {
+      running = false;
+    })
+    .on('all', function () {
+      if (running) return;
+      running = true;
+      self.run.apply(self, args);
+    });
+
+  return this;
 };
 
 /**
- * Expose the `Composer` class on `app.Composer`
- */
-
-Composer.prototype.Composer = Composer;
-
-/**
- * Expose our instance of `app`
+ * Export instance of Composer
+ * @type {Composer}
  */
 
 module.exports = new Composer();
+
+/**
+ * Export Composer constructor
+ * @type {Function}
+ */
+
+module.exports.Composer = Composer;
