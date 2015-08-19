@@ -9,7 +9,7 @@ var through = require('through2');
 var path = require('path');
 
 var composer = require('../');
-require('./lib/runtimes')(composer);
+require('composer-runtimes')(composer);
 
 var template = new Template();
 

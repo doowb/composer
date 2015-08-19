@@ -6,7 +6,7 @@ lazy('bluebird');
 lazy('through2');
 
 var composer = require('../');
-require('./lib/runtimes')(composer);
+require('composer-runtimes')(composer);
 
 composer.task('foo-sync', function (done) {
   console.log('foo-sync');
