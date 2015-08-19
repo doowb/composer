@@ -1,7 +1,7 @@
 {
   "name": "composer",
   "description": "The build system used to create verb, assemble and generate.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "https://github.com/jonschlinkert/composer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": {
