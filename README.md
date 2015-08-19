@@ -1,4 +1,4 @@
-# composer [![NPM version](https://badge.fury.io/js/composer.svg)](http://badge.fury.io/js/composer)
+# composer [![NPM version](https://badge.fury.io/js/composer.svg)](http://badge.fury.io/js/composer)  [![Build Status](https://travis-ci.org/jonschlinkert/composer.svg)](https://travis-ci.org/jonschlinkert/composer)
 
 > The build system used to create verb, assemble and generate.
 
