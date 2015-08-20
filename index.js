@@ -75,56 +75,15 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
     options: options,
     fn: fn
   });
-  task.on('starting', this.handleTask.bind(this, 'starting'));
-  task.on('finished', this.handleTask.bind(this, 'finished'));
-  task.on('error', this.handleError.bind(this, 'error'));
+
+  // bubble up events from tasks
+  task.on('starting', this.emit.bind(this, 'starting'));
+  task.on('finished', this.emit.bind(this, 'finished'));
+  task.on('error', this.emit.bind(this, 'error'));
 
   this.tasks[name] = task;
   return this;
 };
-
-/**
- * Event listener for task events.
- *
- * ```js
- * var task = this.tasks['default'];
- * task.on('starting', this.handleTask.bind(this, 'starting'));
- * ```
- *
- * @param  {String} `event` Name of the event being handled.
- * @param  {Object} `task` Task object being handled.
- * @param  {Object} `run` Current run object for the Task being handled.
- */
-
-Composer.prototype.handleTask = function(event, task, run) {
-  var info = {
-    task: task,
-    run: run
-  };
-  this.emit(['task', event].join('.'), info);
-};
-
-/**
- * Event listener for task error events.
- *
- * ```js
- * var task = this.tasks['default'];
- * task.on('error', this.handleError.bind(this, 'error'));
- * ```
- *
- * @param  {String} `event` Name of the event being handled.
- * @param  {Object} `err` Error from the Task being handled.
- * @param  {Object} `task` Task object being handled.
- * @param  {Object} `run` Current run object for the Task being handled.
- */
-
-Composer.prototype.handleError = function (event, err, task, run) {
-  var info = {
-    task: task,
-    run: run
-  };
-  this.emit(['task', event].join('.'), err, info);
-}
 
 /**
  * Run a task or list of tasks.

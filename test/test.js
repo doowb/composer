@@ -77,6 +77,64 @@ describe('composer', function () {
     }
   });
 
+  it('should emit task events', function (done) {
+    var events = [];
+    composer.on('starting', function (task, run) {
+      events.push('starting.' + task.name);
+    });
+    composer.on('finished', function (task, run) {
+      events.push('finished.' + task.name);
+    });
+    composer.on('error', function (err, task, run) {
+      events.push('error.' + task.name);
+    });
+
+    composer.task('foo', function (cb) {
+      cb();
+    });
+    composer.task('bar', ['foo'], function (cb) {
+      cb();
+    });
+    composer.task('default', ['bar']);
+    composer.run('default', function (err) {
+      if (err) return done(err);
+      assert.deepEqual(events, ['starting.foo','finished.foo','starting.bar','finished.bar','starting.default','finished.default']);
+      done();
+    });
+  });
+
+  it('should emit an error event when an error is passed back in a task', function (done) {
+    composer.on('error', function (err, task, run) {
+      assert(err);
+      assert.equal(err.message, 'This is an error');
+    });
+    composer.task('default', function (cb) {
+      return cb(new Error('This is an error'));
+    });
+    composer.run('default', function (err) {
+      if (err) return done();
+      done(new Error('Expected an error'));
+    });
+  });
+
+  it('should emit an error event when an error is thrown in a task', function (done) {
+    var errors = 0;
+    composer.on('error', function (err, task, run) {
+      errors++;
+      assert(err);
+      assert.equal(err.message, 'This is an error');
+    });
+    composer.task('default', function (cb) {
+      throw new Error('This is an error');
+      cb();
+    });
+    composer.run('default', function (err) {
+      assert.equal(errors, 1);
+      if (err) return done();
+      done(new Error('Expected an error'));
+    });
+  });
+
   it('should run dependencies before running the dependent task.', function (done) {
     var seq = [];
     composer.task('foo', function (cb) {
