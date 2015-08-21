@@ -129,7 +129,8 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
 
 /**
  * Watch a file, directory, or glob pattern for changes and run a task or list of tasks
- * when changes are made.
+ * when changes are made. Watch is powered by `[chokidar][]` so the glob pattern may be
+ * anything that `[chokidar.watch](https://github.com/paulmillr/chokidar#api)` accepts.
  *
  * ```js
  * composer.watch('templates/pages/*.hbs', ['site']);
