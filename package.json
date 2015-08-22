@@ -1,13 +1,10 @@
 {
   "name": "composer",
-  "description": "The build system used to create verb, assemble and generate.",
+  "description": "API-first task runner with three methods: task, run and watch.",
   "version": "0.3.0",
   "homepage": "https://github.com/jonschlinkert/composer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jonschlinkert/composer.git"
-  },
+  "repository": "jonschlinkert/composer",
   "bugs": {
     "url": "https://github.com/jonschlinkert/composer/issues"
   },
@@ -23,11 +20,14 @@
   "scripts": {
     "test": "mocha"
   },
+  "dependencies": {
+    "bach": "^0.4.1",
+    "chokidar": "^1.0.5",
+    "component-emitter": "^1.2.0",
+    "isobject": "^2.0.0",
+    "lazy-cache": "^0.2.0"
+  },
   "devDependencies": {
-    "ansi-cyan": "^0.1.1",
-    "ansi-green": "^0.1.1",
-    "ansi-red": "^0.1.1",
-    "ansi-yellow": "^0.1.1",
     "bluebird": "^2.9.34",
     "composer-runtimes": "^0.1.0",
     "engine-handlebars": "^0.6.1",
@@ -36,6 +36,16 @@
     "template": "0.17.0",
     "through2": "^2.0.0"
   },
+  "keywords": [
+    "build",
+    "build-system",
+    "compose",
+    "flow",
+    "run",
+    "system",
+    "task",
+    "workflow"
+  ],
   "verb": {
     "related": {
       "list": [
@@ -43,17 +53,8 @@
         "template",
         "assemble",
         "generate",
-        "update",
-        "scaffold"
+        "update"
       ]
     }
-  },
-  "keywords": [],
-  "dependencies": {
-    "bach": "^0.4.1",
-    "chokidar": "^1.0.5",
-    "component-emitter": "^1.2.0",
-    "isobject": "^2.0.0",
-    "lazy-cache": "^0.2.0"
   }
 }
