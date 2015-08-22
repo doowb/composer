@@ -5,19 +5,19 @@ var lazy = require('lazy-cache')(require);
 lazy('bluebird');
 lazy('through2');
 
-var composer = require('../');
-require('composer-runtimes')(composer);
+var app = require('../');
+require('composer-runtimes')(app);
 
-composer.task('foo-sync', function (done) {
+app.task('foo-sync', function (done) {
   console.log('foo-sync');
   done(null, 'foo-sync');
 });
 
-composer.task('foo-async', function (done) {
+app.task('foo-async', function (done) {
   logAfter('foo-async', 3500, done.bind(null, null));
 });
 
-composer.task('foo-promise', function () {
+app.task('foo-promise', function () {
   var Promise = lazy.bluebird;
   var promise = new Promise(function (resolve, reject) {
     logAfter('foo-promise', 1000, resolve);
@@ -25,7 +25,7 @@ composer.task('foo-promise', function () {
   return promise;
 });
 
-composer.task('foo-stream', function () {
+app.task('foo-stream', function () {
   var stream = lazy.through.obj();
   logAfter('foo-stream', 500, function (msg) {
     stream.write(msg);
@@ -34,7 +34,7 @@ composer.task('foo-stream', function () {
   return stream;
 });
 
-composer.task('beep', [
+app.task('beep', [
     function (done) { console.log(this.name); done(null, this.name); },
     'foo-async',
     function inline (done) { console.log(this.name); done(null, this.name); }
@@ -42,14 +42,14 @@ composer.task('beep', [
     logAfter('beep', 2000, done.bind(null, null));
   });
 
-composer.task('baz-with-deps', {flow: 'series'}, ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
+app.task('baz-with-deps', {flow: 'series'}, ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function (done) {
   console.log('baz-with-deps\' dependencies finished');
   logAfter('baz-with-deps', 3000, done.bind(null, null));
 });
 
-composer.task('default', 'beep', 'baz-with-deps');
+app.task('default', 'beep', 'baz-with-deps');
 
-composer.run('default', function (err, results) {
+app.run('default', function (err, results) {
   console.log('done');
   console.log(JSON.stringify(results, null, 2));
 });
