@@ -1,5 +1,6 @@
 'use strict';
 
+var util = require('util');
 var Emitter = require('component-emitter');
 var lazy = require('lazy-cache')(require);
 
@@ -11,8 +12,6 @@ var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
 var resolve = require('./lib/resolve');
-
-
 
 /**
  * Composer constructor. Create a new Composer
@@ -29,7 +28,7 @@ function Composer () {
   this.tasks = {};
 }
 
-require('util').inherits(Composer, Emitter);
+util.inherits(Composer, Emitter);
 
 /**
  * Register a new task with it's options and dependencies.
@@ -129,8 +128,8 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
 
 /**
  * Watch a file, directory, or glob pattern for changes and run a task or list of tasks
- * when changes are made. Watch is powered by `[chokidar][]` so the glob pattern may be
- * anything that `[chokidar.watch](https://github.com/paulmillr/chokidar#api)` accepts.
+ * when changes are made. Watch is powered by [chokidar][] so the glob pattern may be
+ * anything that [chokidar.watch](https://github.com/paulmillr/chokidar#api) accepts.
  *
  * ```js
  * composer.watch('templates/pages/*.hbs', ['site']);
@@ -142,7 +141,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
  * @api public
  */
 
-Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
+Composer.prototype.watch = function(glob/*, fns/tasks */) {
   var self = this;
   var len = arguments.length - 1, i = 0;
   var args = new Array(len + 1);
@@ -170,7 +169,7 @@ Composer.prototype.watch = function(glob/*, list of tasks/functions to run */) {
 
 /**
  * Export instance of Composer
- * @type {Composer}
+ * @type {Object}
  */
 
 module.exports = new Composer();
