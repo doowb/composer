@@ -12,6 +12,7 @@ var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
 var resolve = require('./lib/resolve');
+var session = require('./lib/session');
 
 /**
  * Composer constructor. Create a new Composer
@@ -25,6 +26,7 @@ var resolve = require('./lib/resolve');
 
 function Composer () {
   Emitter.call(this);
+  this.session = session(this.runner || 'composer');
   this.tasks = {};
 }
 
@@ -72,7 +74,8 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
   var task = new Task({
     name: name,
     options: options,
-    fn: fn
+    fn: fn,
+    session: this.session
   });
 
   // bubble up events from tasks

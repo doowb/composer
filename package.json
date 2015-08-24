@@ -25,9 +25,11 @@
     "chokidar": "^1.0.5",
     "component-emitter": "^1.2.0",
     "isobject": "^2.0.0",
-    "lazy-cache": "^0.2.0"
+    "lazy-cache": "^0.2.0",
+    "session-cache": "^0.1.3"
   },
   "devDependencies": {
+    "async": "^1.4.2",
     "bluebird": "^2.9.34",
     "composer-runtimes": "^0.1.0",
     "engine-handlebars": "^0.6.1",

@@ -1,5 +1,6 @@
 'use strict';
 
+var async = require('async');
 var assert = require('assert');
 var Task = require('../lib/task');
 
@@ -107,4 +108,23 @@ describe('task', function () {
     });
   });
 
+  it('should have a session with the current task value set', function (done) {
+    var results = [];
+    var fn = function (cb) {
+      results.push(this.session.get('task').name);
+      cb();
+    };
+    var tasks = [];
+    for (var i = 0; i < 10; i++) {
+      tasks.push(new Task({name: 'task-' + i, fn: fn}));
+    }
+    async.eachSeries(tasks, function (task, next) {
+      task.run(next);
+    }, function (err) {
+      if (err) return done(err);
+      assert.equal(results.length, 10);
+      assert.deepEqual(results,['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
+      done();
+    });
+  });
 });
