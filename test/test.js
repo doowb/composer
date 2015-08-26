@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var Composer = require('../').Composer;
+var Composer = require('../');
 var noop = require('../lib/noop');
 var composer;
 
@@ -155,6 +155,58 @@ describe('composer', function () {
       assert.deepEqual(seq, ['foo', 'bar', 'default']);
       done();
     });
+  });
+
+  it('should have a session with the current task value set', function (done) {
+    var results = [];
+    var fn = function (cb) {
+      results.push(this.session.get('task').name);
+      cb();
+    };
+    var tasks = [];
+    for (var i = 0; i < 10; i++) {
+      tasks.push('task-' + i);
+      composer.task('task-' + i, fn);
+    }
+
+    composer.run(tasks, function (err) {
+      if (err) return done(err);
+      assert.equal(results.length, 10);
+      assert.deepEqual(results,['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
+      done();
+    });
+  });
+
+  it('should create a session with a custom name', function (done) {
+    var composer = new Composer('custom-name');
+    var session = require('../lib/session')('custom-name');
+
+    var results = [];
+
+    var dep = function (cb) {
+      var name = this.session.get('task').name;
+      session.set('secret', 'Shhhh... ' + name);
+      cb();
+    }
+
+    var task = function (cb) {
+      results.push(this.session.get('secret'));
+      cb();
+    }
+
+    var tasks = [];
+    for (var i = 0; i < 10; i++) {
+      tasks.push('task-' + i);
+      composer.task('dep-' + i, dep);
+      composer.task('task-' + i, ['dep-' + i], task);
+    }
+
+    composer.run(tasks, function (err) {
+      if (err) return done(err);
+      assert.equal(results.length, 10);
+      assert.deepEqual(results,['Shhhh... dep-0', 'Shhhh... dep-1', 'Shhhh... dep-2', 'Shhhh... dep-3', 'Shhhh... dep-4', 'Shhhh... dep-5', 'Shhhh... dep-6', 'Shhhh... dep-7', 'Shhhh... dep-8', 'Shhhh... dep-9']);
+      done();
+    })
   });
 
 });

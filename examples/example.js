@@ -5,7 +5,7 @@ var lazy = require('lazy-cache')(require);
 lazy('bluebird');
 lazy('through2');
 
-var app = require('../');
+var app = require('./app');
 require('composer-runtimes')(app);
 
 app.task('foo-sync', function (done) {
