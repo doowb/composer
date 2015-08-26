@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var Composer = require('../').Composer;
+var Composer = require('../');
 var noop = require('../lib/noop');
 var composer;
 

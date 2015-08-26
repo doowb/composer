@@ -171,15 +171,7 @@ Composer.prototype.watch = function(glob/*, fns/tasks */) {
 };
 
 /**
- * Export instance of Composer
- * @type {Object}
+ * Expose Composer
  */
 
-module.exports = new Composer();
-
-/**
- * Export Composer constructor
- * @type {Function}
- */
-
-module.exports.Composer = Composer;
+module.exports = Composer;

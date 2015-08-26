@@ -8,8 +8,8 @@ var Template = require('template');
 var through = require('through2');
 var path = require('path');
 
-var composer = require('../');
-require('composer-runtimes')(composer);
+var app = require('./app');
+require('composer-runtimes')(app);
 
 var template = new Template();
 
@@ -32,38 +32,38 @@ template.create('pages');
 template.create('layouts', {viewType: 'layout'});
 template.create('includes', {viewType: 'partial'});
 
-composer.task('layouts', function (done) {
+app.task('layouts', function (done) {
   template.layouts(paths.layouts);
   done();
 });
 
-composer.task('includes', function (done) {
+app.task('includes', function (done) {
   template.includes(paths.includes);
   done();
 });
 
-composer.task('pages', function (done) {
+app.task('pages', function (done) {
   template.pages(paths.pages);
   done();
 });
 
-composer.task('site', function () {
+app.task('site', function () {
   return loadCollection('pages')
     .pipe(render())
     .pipe(extname())
     .pipe(dest('dist'));
 });
 
-composer.task('watch', function () {
-  composer.watch(paths.layouts, ['layouts', 'pages', 'site']);
-  composer.watch(paths.includes, ['includes', 'pages', 'site']);
-  composer.watch(paths.pages, ['pages', 'site']);
+app.task('watch', function () {
+  app.watch(paths.layouts, ['layouts', 'pages', 'site']);
+  app.watch(paths.includes, ['includes', 'pages', 'site']);
+  app.watch(paths.pages, ['pages', 'site']);
 });
 
-composer.task('default', ['layouts', 'includes', 'pages', 'site']);
-composer.task('dev', ['default', 'watch']);
+app.task('default', ['layouts', 'includes', 'pages', 'site']);
+app.task('dev', ['default', 'watch']);
 
-composer.run('default', function (err, results) {
+app.run('default', function (err, results) {
   if (err) return console.error(err);
   console.log('Finshed');
 });
