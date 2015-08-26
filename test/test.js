@@ -177,4 +177,36 @@ describe('composer', function () {
     });
   });
 
+  it('should create a session with a custom name', function (done) {
+    var composer = new Composer('custom-name');
+    var session = require('../lib/session')('custom-name');
+
+    var results = [];
+
+    var dep = function (cb) {
+      var name = this.session.get('task').name;
+      session.set('secret', 'Shhhh... ' + name);
+      cb();
+    }
+
+    var task = function (cb) {
+      results.push(this.session.get('secret'));
+      cb();
+    }
+
+    var tasks = [];
+    for (var i = 0; i < 10; i++) {
+      tasks.push('task-' + i);
+      composer.task('dep-' + i, dep);
+      composer.task('task-' + i, ['dep-' + i], task);
+    }
+
+    composer.run(tasks, function (err) {
+      if (err) return done(err);
+      assert.equal(results.length, 10);
+      assert.deepEqual(results,['Shhhh... dep-0', 'Shhhh... dep-1', 'Shhhh... dep-2', 'Shhhh... dep-3', 'Shhhh... dep-4', 'Shhhh... dep-5', 'Shhhh... dep-6', 'Shhhh... dep-7', 'Shhhh... dep-8', 'Shhhh... dep-9']);
+      done();
+    })
+  });
+
 });

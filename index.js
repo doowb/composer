@@ -24,9 +24,9 @@ var session = require('./lib/session');
  * @api public
  */
 
-function Composer () {
+function Composer (name) {
   Emitter.call(this);
-  this.session = session(this.runner || 'composer');
+  this.session = session(name || 'composer');
   this.tasks = {};
 }
 
