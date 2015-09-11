@@ -177,6 +177,25 @@ describe('composer', function () {
     });
   });
 
+  it('should get the current task from the app session', function (done) {
+    var results = [];
+    var fn = function (cb) {
+      results.push(composer.task().name);
+      cb();
+    };
+    var tasks = [];
+    for (var i = 0; i < 10; i++) {
+      tasks.push('task-' + i);
+      composer.task('task-' + i, fn);
+    }
+    composer.run(tasks, function (err) {
+      if (err) return done(err);
+      assert.equal(results.length, 10);
+      assert.deepEqual(results,['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
+      done();
+    });
+  });
+
   it('should create a session with a custom name', function (done) {
     var composer = new Composer('custom-name');
     var session = require('../lib/session')('custom-name');

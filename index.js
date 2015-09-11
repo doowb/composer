@@ -56,6 +56,12 @@ util.inherits(Composer, Emitter);
  */
 
 Composer.prototype.task = function(name/*, options, dependencies and task */) {
+  // return the currently running task
+  // when no name is given
+  if (arguments.length === 0) {
+    return this.session.get('task');
+  }
+
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
   var options = {};
   var fn = noop;
