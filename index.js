@@ -4,6 +4,7 @@ var util = require('util');
 var Emitter = require('component-emitter');
 var lazy = require('lazy-cache')(require);
 
+lazy('extend-shallow', 'extend');
 lazy('isobject');
 lazy('chokidar');
 lazy('bach');
@@ -141,21 +142,28 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
  * anything that [chokidar.watch](https://github.com/paulmillr/chokidar#api) accepts.
  *
  * ```js
- * composer.watch('templates/pages/*.hbs', ['site']);
+ * var watcher = composer.watch('templates/pages/*.hbs', ['site']);
  * ```
  *
  * @param  {String|Array} `glob` Filename, Directory name, or glob pattern to watch
- * @param {String|Array|Function} `tasks` Tasks that are passed to `.run` when files in the glob are changed.
- * @return {Object} Returns `this` for chaining
+ * @param  {Object} `options` Additional options to be passed to [chokidar][]
+ * @param  {String|Array|Function} `tasks` Tasks that are passed to `.run` when files in the glob are changed.
+ * @return {Object} Returns an instance of `FSWatcher` from [chokidar][]
  * @api public
  */
 
-Composer.prototype.watch = function(glob/*, fns/tasks */) {
+Composer.prototype.watch = function(glob, options/*, fns/tasks */) {
   var self = this;
   var len = arguments.length - 1, i = 0;
   var args = new Array(len + 1);
   while (len--) args[i] = arguments[++i];
   args[i] = done;
+
+  var opts = {};
+  if (typeof options === 'object' && !Array.isArray(options)) {
+    args.shift();
+    opts = lazy.extend(opts, options);
+  }
 
   var running = true;
   function done (err) {
@@ -163,7 +171,14 @@ Composer.prototype.watch = function(glob/*, fns/tasks */) {
     if (err) console.error(err);
   }
 
-  lazy.chokidar.watch(glob)
+  var watch = lazy.chokidar.watch(glob, opts);
+
+  // only contains our `done` function
+  if (args.length === 1) {
+    return watch;
+  }
+
+  watch
     .on('ready', function () {
       running = false;
     })
@@ -173,7 +188,7 @@ Composer.prototype.watch = function(glob/*, fns/tasks */) {
       self.run.apply(self, args);
     });
 
-  return this;
+  return watch;
 };
 
 /**
