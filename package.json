@@ -1,7 +1,7 @@
 {
   "name": "composer",
   "description": "API-first task runner with three methods: task, run and watch.",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "homepage": "https://github.com/jonschlinkert/composer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/composer",
