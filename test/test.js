@@ -50,30 +50,30 @@ describe('composer', function () {
       cb();
     });
 
-    composer.run('default', function (err) {
+    composer.build('default', function (err) {
       if (err) return done(err);
       assert.equal(count, 1);
       done();
     });
   });
 
-  it('should throw an error when a task with unregistered dependencies is run', function (done) {
+  it('should throw an error when a task with unregistered dependencies is built', function (done) {
     var count = 0;
     composer.task('default', ['foo', 'bar'], function (cb) {
       count++;
       cb();
     });
 
-    composer.run('default', function (err) {
+    composer.build('default', function (err) {
       if (!err) return done(new Error('Expected an error to be thrown.'));
       assert.equal(count, 0);
       done();
     });
   });
 
-  it('should throw an error when `.run` is called without a callback function.', function () {
+  it('should throw an error when `.build` is called without a callback function.', function () {
     try {
-      composer.run('default');
+      composer.build('default');
       throw new Error('Expected an error to be thrown.');
     } catch (err) {
     }
@@ -98,7 +98,7 @@ describe('composer', function () {
       cb();
     });
     composer.task('default', ['bar']);
-    composer.run('default', function (err) {
+    composer.build('default', function (err) {
       if (err) return done(err);
       assert.deepEqual(events, ['starting.foo','finished.foo','starting.bar','finished.bar','starting.default','finished.default']);
       done();
@@ -113,7 +113,7 @@ describe('composer', function () {
     composer.task('default', function (cb) {
       return cb(new Error('This is an error'));
     });
-    composer.run('default', function (err) {
+    composer.build('default', function (err) {
       if (err) return done();
       done(new Error('Expected an error'));
     });
@@ -130,7 +130,7 @@ describe('composer', function () {
       throw new Error('This is an error');
       cb();
     });
-    composer.run('default', function (err) {
+    composer.build('default', function (err) {
       assert.equal(errors, 1);
       if (err) return done();
       done(new Error('Expected an error'));
@@ -152,7 +152,7 @@ describe('composer', function () {
       cb();
     });
 
-    composer.run('default', function (err) {
+    composer.build('default', function (err) {
       if (err) return done(err);
       assert.deepEqual(seq, ['foo', 'bar', 'default']);
       done();
@@ -171,7 +171,7 @@ describe('composer', function () {
       composer.task('task-' + i, fn);
     }
 
-    composer.run(tasks, function (err) {
+    composer.build(tasks, function (err) {
       if (err) return done(err);
       assert.equal(results.length, 10);
       assert.deepEqual(results,['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
@@ -190,7 +190,7 @@ describe('composer', function () {
       tasks.push('task-' + i);
       composer.task('task-' + i, fn);
     }
-    composer.run(tasks, function (err) {
+    composer.build(tasks, function (err) {
       if (err) return done(err);
       assert.equal(results.length, 10);
       assert.deepEqual(results,['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
@@ -222,7 +222,7 @@ describe('composer', function () {
       composer.task('task-' + i, ['dep-' + i], task);
     }
 
-    composer.run(tasks, function (err) {
+    composer.build(tasks, function (err) {
       if (err) return done(err);
       assert.equal(results.length, 10);
       assert.deepEqual(results,['Shhhh... dep-0', 'Shhhh... dep-1', 'Shhhh... dep-2', 'Shhhh... dep-3', 'Shhhh... dep-4', 'Shhhh... dep-5', 'Shhhh... dep-6', 'Shhhh... dep-7', 'Shhhh... dep-8', 'Shhhh... dep-9']);
@@ -249,7 +249,7 @@ describe('composer', function () {
       composer.on('close', cb);
     });
 
-    composer.run(['watch'], function (err) {
+    composer.build(['watch'], function (err) {
       if (err) return done(err);
       assert.equal(count, 1);
       done();
@@ -275,7 +275,7 @@ describe('composer', function () {
       composer.on('close', cb);
     });
 
-    composer.run(['watch'], function (err) {
+    composer.build(['watch'], function (err) {
       if (err) return done(err);
       assert.equal(count, 1);
       done();
@@ -297,12 +297,12 @@ describe('composer', function () {
     composer.task('watch', function (cb) {
       watch = composer.watch('test/fixtures/foo.txt');
       watch.on('change', function () {
-        composer.run(['default', 'close'], cb);
+        composer.build(['default', 'close'], cb);
       });
       fs.writeFileSync('test/fixtures/foo.txt', 'bar');
     });
 
-    composer.run(['watch'], function (err) {
+    composer.build(['watch'], function (err) {
       if (err) return done(err);
       assert.equal(count, 1);
       done();
@@ -324,12 +324,12 @@ describe('composer', function () {
     composer.task('watch', function (cb) {
       watch = composer.watch('foo.txt', {cwd: 'test/fixtures', ignoreInitial: true});
       watch.on('all', function () {
-        composer.run(['default', 'close'], cb);
+        composer.build(['default', 'close'], cb);
       });
       fs.writeFileSync('test/fixtures/foo.txt', 'bar');
     });
 
-    composer.run(['watch'], function (err) {
+    composer.build(['watch'], function (err) {
       if (err) return done(err);
       assert.equal(count, 1);
       done();

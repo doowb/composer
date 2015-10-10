@@ -2,13 +2,8 @@
 
 var util = require('util');
 var Emitter = require('component-emitter');
-var lazy = require('lazy-cache')(require);
 
-lazy('extend-shallow', 'extend');
-lazy('isobject');
-lazy('chokidar');
-lazy('bach');
-
+var utils = require('./lib/utils');
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
@@ -70,7 +65,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
     fn = deps.pop();
   }
 
-  if (deps.length && lazy.isobject(deps[0])) {
+  if (deps.length && utils.isobject(deps[0])) {
     options = deps.shift();
   }
 
@@ -95,25 +90,25 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
 };
 
 /**
- * Run a task or list of tasks.
+ * Build a task or list of tasks.
  *
  * ```js
- * composer.run('default', function (err, results) {
+ * composer.build('default', function (err, results) {
  *   if (err) return console.error(err);
  *   console.log(results);
  * });
  * ```
  *
  * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
- * @param {Function} `cb` Callback function to be called when all tasks are finished running.
+ * @param {Function} `cb` Callback function to be called when all tasks are finished building.
  * @api public
  */
 
-Composer.prototype.run = function(/* list of tasks/functions to run */) {
+Composer.prototype.build = function(/* list of tasks/functions to build */) {
   var args = [].concat.apply([], [].slice.call(arguments));
   var done = args.pop();
   if (typeof done !== 'function') {
-    throw new Error('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
+    throw new TypeError('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
   }
 
   var fns;
@@ -129,7 +124,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
 
   var batch;
   try {
-    batch =  lazy.bach.series.apply(lazy.bach, fns);
+    batch =  utils.bach.series.apply(utils.bach, fns);
   } catch (err) {
     return done(err);
   }
@@ -137,7 +132,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
 };
 
 /**
- * Watch a file, directory, or glob pattern for changes and run a task or list of tasks
+ * Watch a file, directory, or glob pattern for changes and build a task or list of tasks
  * when changes are made. Watch is powered by [chokidar][] so the glob pattern may be
  * anything that [chokidar.watch](https://github.com/paulmillr/chokidar#api) accepts.
  *
@@ -147,7 +142,7 @@ Composer.prototype.run = function(/* list of tasks/functions to run */) {
  *
  * @param  {String|Array} `glob` Filename, Directory name, or glob pattern to watch
  * @param  {Object} `options` Additional options to be passed to [chokidar][]
- * @param  {String|Array|Function} `tasks` Tasks that are passed to `.run` when files in the glob are changed.
+ * @param  {String|Array|Function} `tasks` Tasks that are passed to `.build` when files in the glob are changed.
  * @return {Object} Returns an instance of `FSWatcher` from [chokidar][]
  * @api public
  */
@@ -162,16 +157,16 @@ Composer.prototype.watch = function(glob, options/*, fns/tasks */) {
   var opts = {};
   if (typeof options === 'object' && !Array.isArray(options)) {
     args.shift();
-    opts = lazy.extend(opts, options);
+    opts = utils.extend(opts, options);
   }
 
-  var running = true;
+  var building = true;
   function done (err) {
-    running = false;
+    building = false;
     if (err) console.error(err);
   }
 
-  var watch = lazy.chokidar.watch(glob, opts);
+  var watch = utils.chokidar.watch(glob, opts);
 
   // only contains our `done` function
   if (args.length === 1) {
@@ -180,12 +175,12 @@ Composer.prototype.watch = function(glob, options/*, fns/tasks */) {
 
   watch
     .on('ready', function () {
-      running = false;
+      building = false;
     })
     .on('all', function () {
-      if (running) return;
-      running = true;
-      self.run.apply(self, args);
+      if (building) return;
+      building = true;
+      self.build.apply(self, args);
     });
 
   return watch;
