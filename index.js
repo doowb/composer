@@ -7,7 +7,6 @@ var utils = require('./lib/utils');
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
-var resolve = require('./lib/resolve');
 var session = require('./lib/session');
 var flowFactory = require('./lib/flow');
 
