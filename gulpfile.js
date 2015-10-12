@@ -15,7 +15,7 @@ gulp.task('coverage', function () {
 });
 
 gulp.task('test', ['coverage'], function () {
-  return gulp.src('test.js')
+  return gulp.src('test/*.js')
     .pipe(mocha({reporter: 'spec'}))
     .pipe(istanbul.writeReports())
     .pipe(istanbul.writeReports({
@@ -25,7 +25,7 @@ gulp.task('test', ['coverage'], function () {
 });
 
 gulp.task('lint', function () {
-  return gulp.src(lint.concat('test.js'))
+  return gulp.src(lint.concat('test/*.js'))
     .pipe(jshint())
     .pipe(jshint.reporter(stylish));
 });
