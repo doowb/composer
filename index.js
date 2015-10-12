@@ -9,6 +9,7 @@ var noop = require('./lib/noop');
 var map = require('./lib/map-deps');
 var resolve = require('./lib/resolve');
 var session = require('./lib/session');
+var flowFactory = require('./lib/flow');
 
 /**
  * Composer constructor. Create a new Composer
@@ -115,34 +116,9 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
   return fn(done);
 };
 
-Composer.prototype.series = flowMaker('series');
-Composer.prototype.parallel = flowMaker('parallel');
+Composer.prototype.series = flowFactory('series');
+Composer.prototype.parallel = flowFactory('parallel');
 
-function flowMaker(flow) {
-  return function(/* list of tasks/functions to compose */) {
-    var args = [].concat.apply([], [].slice.call(arguments));
-    var self = this;
-    return function (done) {
-      var fns;
-      try {
-        fns = resolve.call(self, args);
-      } catch (err) {
-        return done(err);
-      }
-      if (fns.length === 1) {
-        return fns[0](done);
-      }
-
-      var batch;
-      try {
-        batch = utils.bach[flow].apply(utils.bach, fns);
-      } catch (err) {
-        return done(err);
-      }
-      return batch(done);
-    };
-  };
-};
 
 /**
  * Watch a file, directory, or glob pattern for changes and build a task or list of tasks
