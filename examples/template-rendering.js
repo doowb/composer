@@ -4,21 +4,29 @@
 
 var matter = require('parser-front-matter');
 var extname = require('gulp-extname');
-var Template = require('template');
+var Templates = require('templates');
 var through = require('through2');
 var path = require('path');
 
+// plugins
+var loader = require('assemble-loader');
+var streams = require('assemble-streams');
+var renderFile = require('assemble-render-file');
+
 var app = require('./app');
-require('composer-runtimes')(app);
+require('composer-runtimes')()(app);
 
-var template = new Template();
+var templates = new Templates();
+templates.use(loader());
+templates.use(streams);
+templates.use(renderFile());
 
-template.engine('hbs', require('engine-handlebars'));
-template.option('renameKey', function (fp) {
+templates.engine('hbs', require('engine-handlebars'));
+templates.option('renameKey', function (fp) {
   return path.basename(fp, path.extname(fp));
 });
 
-template.onLoad(/\.hbs$/, function (file, next) {
+templates.onLoad(/\.hbs$/, function (file, next) {
   matter.parse(file, next);
 });
 
@@ -28,29 +36,29 @@ var paths = {
   includes: ['./templates/includes/*.hbs']
 };
 
-template.create('pages');
-template.create('layouts', {viewType: 'layout'});
-template.create('includes', {viewType: 'partial'});
+templates.create('pages');
+templates.create('layouts', {viewType: 'layout'});
+templates.create('includes', {viewType: 'partial'});
 
 app.task('layouts', function (done) {
-  template.layouts(paths.layouts);
+  templates.layouts.load(paths.layouts);
   done();
 });
 
 app.task('includes', function (done) {
-  template.includes(paths.includes);
+  templates.includes.load(paths.includes);
   done();
 });
 
 app.task('pages', function (done) {
-  template.pages(paths.pages);
+  templates.pages.load(paths.pages);
   done();
 });
 
 app.task('site', function () {
-  return loadCollection('pages')
-    .pipe(render())
-    .pipe(extname())
+  return templates.pages.toStream()
+    .pipe(templates.renderFile())
+    .pipe(extname)
     .pipe(dest('dist'));
 });
 
@@ -63,30 +71,10 @@ app.task('watch', function () {
 app.task('default', ['layouts', 'includes', 'pages', 'site']);
 app.task('dev', ['default', 'watch']);
 
-app.run('default', function (err, results) {
+app.build('default', function (err, results) {
   if (err) return console.error(err);
   console.log('Finshed');
 });
-
-
-function loadCollection (collection) {
-  var stream = through.obj();
-  function write () {
-    template[collection].forOwn(function (view) {
-      stream.write(view);
-    });
-    stream.end();
-  }
-  process.nextTick(write);
-  return stream;
-}
-
-function render (locals) {
-  locals = locals || {};
-  return through.obj(function (file, enc, next) {
-    file.render(locals, next);
-  });
-}
 
 function dest (dir) {
   return through.obj(function (file, enc, next) {
