@@ -77,7 +77,8 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
     name: name,
     options: options,
     fn: fn,
-    session: this.session
+    session: this.session,
+    app: this
   });
 
   // bubble up events from tasks
