@@ -21,12 +21,29 @@ describe('composer', function () {
     assert.equal(composer.tasks.default.fn, fn);
   });
 
-  it('should register a task with an array of dependencies', function () {
+  it('should register a task with an array of named dependencies', function () {
     composer.task('default', ['foo', 'bar'], function (done) {
       done();
     });
     assert.equal(typeof composer.tasks.default, 'object');
     assert.deepEqual(composer.tasks.default.deps, ['foo', 'bar']);
+  });
+
+  it('should register a task with an array of function dependencies', function () {
+    function baz(cb) { cb(); };
+    baz.taskName = 'Baz';
+
+    var deps = [
+      'foo',
+      function bar(cb) { cb(); },
+      baz,
+      function (cb) { cb(); }
+    ];
+    composer.task('default', deps, function (done) {
+      done();
+    });
+    assert.equal(typeof composer.tasks.default, 'object');
+    assert.deepEqual(composer.tasks.default.deps, ['foo', 'bar', 'Baz', '[anonymous (1)]']);
   });
 
   it('should register a task with a list of strings as dependencies', function () {
