@@ -110,25 +110,37 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
   if (typeof done !== 'function') {
     throw new TypeError('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
   }
+  var fn = this.series.apply(this, args);
+  return fn(done);
+};
 
-  var fns;
-  try {
-    fns = resolve.call(this, args);
-  } catch (err) {
-    return done(err);
-  }
+Composer.prototype.series = flowMaker('series');
+Composer.prototype.parallel = flowMaker('parallel');
 
-  if (fns.length === 1) {
-    return fns[0](done);
-  }
+function flowMaker(flow) {
+  return function(/* list of tasks/functions to compose */) {
+    var args = [].concat.apply([], [].slice.call(arguments));
+    var self = this;
+    return function (done) {
+      var fns;
+      try {
+        fns = resolve.call(self, args);
+      } catch (err) {
+        return done(err);
+      }
+      if (fns.length === 1) {
+        return fns[0](done);
+      }
 
-  var batch;
-  try {
-    batch =  utils.bach.series.apply(utils.bach, fns);
-  } catch (err) {
-    return done(err);
-  }
-  return batch(done);
+      var batch;
+      try {
+        batch = utils.bach[flow].apply(utils.bach, fns);
+      } catch (err) {
+        return done(err);
+      }
+      return batch(done);
+    };
+  };
 };
 
 /**
