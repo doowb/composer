@@ -49,7 +49,7 @@ app.task('baz-with-deps', {flow: 'series'}, ['foo-sync', 'foo-async', 'foo-promi
 
 app.task('default', 'beep', 'baz-with-deps');
 
-app.run('default', function (err, results) {
+app.build('default', function (err, results) {
   console.log('done');
   console.log(JSON.stringify(results, null, 2));
 });

@@ -63,7 +63,7 @@ app.task('watch', function () {
 app.task('default', ['layouts', 'includes', 'pages', 'site']);
 app.task('dev', ['default', 'watch']);
 
-app.run('default', function (err, results) {
+app.build('default', function (err, results) {
   if (err) return console.error(err);
   console.log('Finshed');
 });
