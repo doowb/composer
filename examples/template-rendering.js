@@ -32,7 +32,7 @@ templates.onLoad(/\.hbs$/, function (file, next) {
 });
 
 var paths = {
-  pages: './examples/templates/pages/**/*.hbs',
+  pages: ['./examples/templates/pages/**/*.hbs'],
   layouts: ['./examples/templates/layouts/*.hbs'],
   includes: ['./examples/templates/includes/*.hbs']
 };

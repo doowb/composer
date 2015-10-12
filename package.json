@@ -45,7 +45,7 @@
     "jshint-stylish": "^2.0.1",
     "mocha": "^2.3.3",
     "parser-front-matter": "^1.2.5",
-    "templates": "^0.3.2",
+    "templates": "^0.3.3",
     "through2": "^2.0.0",
     "write": "^0.2.1"
   },
@@ -63,7 +63,7 @@
     "related": {
       "list": [
         "verb",
-        "template",
+        "templates",
         "assemble",
         "generate",
         "update"
