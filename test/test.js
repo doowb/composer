@@ -117,7 +117,7 @@ describe('composer', function () {
     composer.task('default', ['bar']);
     composer.build('default', function (err) {
       if (err) return done(err);
-      assert.deepEqual(events, ['starting.foo','finished.foo','starting.bar','finished.bar','starting.default','finished.default']);
+      assert.deepEqual(events, ['starting.default','starting.bar','starting.foo','finished.foo','finished.bar','finished.default']);
       done();
     });
   });
