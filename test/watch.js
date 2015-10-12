@@ -2,6 +2,7 @@
 
 /* deps: mocha */
 var assert = require('assert');
+var path = require('path');
 var fs = require('fs');
 
 var Composer = require('../');
@@ -33,8 +34,8 @@ describe('composer', function () {
 
     composer.task('watch', function (cb) {
       composer.on('close', cb);
-      watch = composer.watch('test/fixtures/foo.txt', ['default', 'close']);
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
+      watch = composer.watch(path.join(__dirname, 'fixtures/foo.txt'), ['default', 'close']);
+      fs.writeFileSync(path.join(__dirname, 'fixtures/foo.txt'), 'bar');
     });
 
     composer.build(['watch'], function (err) {
@@ -58,8 +59,8 @@ describe('composer', function () {
 
     composer.task('watch', function (cb) {
       composer.on('close', cb);
-      watch = composer.watch('foo.txt', {cwd: 'test/fixtures'}, ['default', 'close']);
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
+      watch = composer.watch('foo.txt', {cwd: path.join(__dirname, 'fixtures')}, ['default', 'close']);
+      fs.writeFileSync(path.join(__dirname, 'fixtures/foo.txt'), 'bar');
     });
 
     composer.build(['watch'], function (err) {
@@ -77,11 +78,11 @@ describe('composer', function () {
     });
 
     composer.task('watch', function (cb) {
-      watch = composer.watch('test/fixtures/foo.txt');
+      watch = composer.watch(path.join(__dirname, 'fixtures/foo.txt'));
       watch.on('change', function () {
         composer.build(['default'], cb);
       });
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
+      fs.writeFileSync(path.join(__dirname, 'fixtures/foo.txt'), 'bar');
     });
 
     composer.build(['watch'], function (err) {
@@ -99,11 +100,11 @@ describe('composer', function () {
     });
 
     composer.task('watch', function (cb) {
-      watch = composer.watch('foo.txt', {cwd: 'test/fixtures', ignoreInitial: true});
+      watch = composer.watch('foo.txt', {cwd: path.join(__dirname, 'fixtures'), ignoreInitial: true});
       watch.on('all', function () {
         composer.build(['default'], cb);
       });
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
+      fs.writeFileSync(path.join(__dirname, 'fixtures/foo.txt'), 'bar');
     });
 
     composer.build(['watch'], function (err) {
