@@ -6,6 +6,7 @@ var matter = require('parser-front-matter');
 var extname = require('gulp-extname');
 var Templates = require('templates');
 var through = require('through2');
+var writeFile = require('write');
 var path = require('path');
 
 // plugins
@@ -31,9 +32,9 @@ templates.onLoad(/\.hbs$/, function (file, next) {
 });
 
 var paths = {
-  pages: ['./templates/pages/**/*.hbs'],
-  layouts: ['./templates/layouts/*.hbs'],
-  includes: ['./templates/includes/*.hbs']
+  pages: './examples/templates/pages/**/*.hbs',
+  layouts: ['./examples/templates/layouts/*.hbs'],
+  includes: ['./examples/templates/includes/*.hbs']
 };
 
 templates.create('pages');
@@ -41,25 +42,25 @@ templates.create('layouts', {viewType: 'layout'});
 templates.create('includes', {viewType: 'partial'});
 
 app.task('layouts', function (done) {
-  templates.layouts.load(paths.layouts);
+  templates.layouts(paths.layouts);
   done();
 });
 
 app.task('includes', function (done) {
-  templates.includes.load(paths.includes);
+  templates.includes(paths.includes);
   done();
 });
 
 app.task('pages', function (done) {
-  templates.pages.load(paths.pages);
+  templates.pages(paths.pages);
   done();
 });
 
 app.task('site', function () {
-  return templates.pages.toStream()
+  return templates.toStream('pages')
     .pipe(templates.renderFile())
-    .pipe(extname)
-    .pipe(dest('dist'));
+    .pipe(extname())
+    .pipe(dest('dist'))
 });
 
 app.task('watch', function () {
@@ -71,13 +72,13 @@ app.task('watch', function () {
 app.task('default', ['layouts', 'includes', 'pages', 'site']);
 app.task('dev', ['default', 'watch']);
 
-app.build('default', function (err, results) {
+app.build('default', function (err) {
   if (err) return console.error(err);
   console.log('Finshed');
 });
 
 function dest (dir) {
   return through.obj(function (file, enc, next) {
-    file.write(path.join(dir, path.basename(file.path)), next);
+    writeFile(path.join(dir, path.basename(file.path)), file.content, next);
   });
 }

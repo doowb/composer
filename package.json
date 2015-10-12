@@ -45,7 +45,8 @@
     "jshint-stylish": "^2.0.1",
     "parser-front-matter": "^1.2.5",
     "templates": "^0.3.2",
-    "through2": "^2.0.0"
+    "through2": "^2.0.0",
+    "write": "^0.2.1"
   },
   "keywords": [
     "build",
