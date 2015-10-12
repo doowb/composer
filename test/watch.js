@@ -10,6 +10,7 @@ var composer, watch;
 describe('composer', function () {
   beforeEach(function () {
     composer = new Composer();
+    composer.on('error', console.log);
   });
 
   afterEach(function () {
