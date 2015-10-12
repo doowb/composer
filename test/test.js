@@ -2,14 +2,12 @@
 
 /* deps: mocha */
 var assert = require('assert');
-var fs = require('fs');
 
 var Composer = require('../');
 var noop = require('../lib/noop');
 var composer;
 
 describe('composer', function () {
-  this.timeout(0);
   beforeEach(function () {
     composer = new Composer();
   });
@@ -248,111 +246,4 @@ describe('composer', function () {
       done();
     })
   });
-
-  it('should watch files and run a task when files change', function (done) {
-    var count = 0, watch;
-    composer.task('default', function (cb) {
-      count++;
-      cb();
-    });
-
-    composer.task('close', function (cb) {
-      watch.close();
-      cb();
-      composer.emit('close');
-    });
-
-    composer.task('watch', function (cb) {
-      watch = composer.watch('test/fixtures/foo.txt', ['default', 'close']);
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
-      composer.on('close', cb);
-    });
-
-    composer.build(['watch'], function (err) {
-      if (err) return done(err);
-      assert.equal(count, 1);
-      done();
-    });
-  });
-
-  it('should watch files with given options and run a task when files change', function (done) {
-    var count = 0, watch;
-    composer.task('default', function (cb) {
-      count++;
-      cb();
-    });
-
-    composer.task('close', function (cb) {
-      watch.close();
-      cb();
-      composer.emit('close');
-    });
-
-    composer.task('watch', function (cb) {
-      watch = composer.watch('foo.txt', {cwd: 'test/fixtures'}, ['default', 'close']);
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
-      composer.on('close', cb);
-    });
-
-    composer.build(['watch'], function (err) {
-      if (err) return done(err);
-      assert.equal(count, 1);
-      done();
-    });
-  });
-
-  it('should watch files without given tasks', function (done) {
-    var count = 0, watch;
-    composer.task('default', function (cb) {
-      count++;
-      cb();
-    });
-
-    composer.task('close', function (cb) {
-      watch.close();
-      cb();
-    });
-
-    composer.task('watch', function (cb) {
-      watch = composer.watch('test/fixtures/foo.txt');
-      watch.on('change', function () {
-        composer.build(['default', 'close'], cb);
-      });
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
-    });
-
-    composer.build(['watch'], function (err) {
-      if (err) return done(err);
-      assert.equal(count, 1);
-      done();
-    });
-  });
-
-  it('should watch files without given tasks and with given options', function (done) {
-    var count = 0, watch;
-    composer.task('default', function (cb) {
-      count++;
-      cb();
-    });
-
-    composer.task('close', function (cb) {
-      watch.close();
-      cb();
-    });
-
-    composer.task('watch', function (cb) {
-      watch = composer.watch('foo.txt', {cwd: 'test/fixtures', ignoreInitial: true});
-      watch.on('all', function () {
-        composer.build(['default', 'close'], cb);
-      });
-      fs.writeFileSync('test/fixtures/foo.txt', 'bar');
-    });
-
-    composer.build(['watch'], function (err) {
-      if (err) return done(err);
-      assert.equal(count, 1);
-      done();
-    });
-  });
-
 });
