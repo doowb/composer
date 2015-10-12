@@ -115,7 +115,66 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
   return fn(done);
 };
 
+/**
+ * Compose task or list of tasks into a single function that runs the tasks in series.
+ *
+ * ```js
+ * composer.task('foo', function (done) {
+ *   console.log('this is foo');
+ *   done();
+ * });
+ *
+ * var fn = composer.series('foo', function bar(done) {
+ *   console.log('this is bar');
+ *   done();
+ * });
+ *
+ * fn(function (err) {
+ *   if (err) return console.error(err);
+ *   console.log('done');
+ * });
+ * //=> this is foo
+ * //=> this is bar
+ * //=> done
+ * ```
+ *
+ * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
+ * @return {Function} Composed function that may take a callback function.
+ * @api public
+ */
+
 Composer.prototype.series = flowFactory('series');
+
+/**
+ * Compose task or list of tasks into a single function that runs the tasks in parallel.
+ *
+ * ```js
+ * composer.task('foo', function (done) {
+ *   setTimeout(function () {
+ *     console.log('this is foo');
+ *     done();
+ *   }, 500);
+ * });
+ *
+ * var fn = composer.parallel('foo', function bar(done) {
+ *   console.log('this is bar');
+ *   done();
+ * });
+ *
+ * fn(function (err) {
+ *   if (err) return console.error(err);
+ *   console.log('done');
+ * });
+ * //=> this is bar
+ * //=> this is foo
+ * //=> done
+ * ```
+ *
+ * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
+ * @return {Function} Composed function that may take a callback function.
+ * @api public
+ */
+
 Composer.prototype.parallel = flowFactory('parallel');
 
 
