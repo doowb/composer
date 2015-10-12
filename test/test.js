@@ -9,7 +9,7 @@ var noop = require('../lib/noop');
 var composer;
 
 describe('composer', function () {
-  this.timeout(5000);
+  this.timeout(0);
   beforeEach(function () {
     composer = new Composer();
   });
