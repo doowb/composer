@@ -20,13 +20,17 @@ var flowFactory = require('./lib/flow');
  * @api public
  */
 
-function Composer (name) {
-  Emitter.call(this, this);
+function Composer(name) {
+  Emitter.call(this);
   this.session = session(name || 'composer');
   this.tasks = {};
 }
 
-// util.inherits(Composer, Emitter);
+/**
+ * Mix in `Emitter` methods
+ */
+
+Emitter(Composer.prototype);
 
 /**
  * Register a new task with it's options and dependencies.
