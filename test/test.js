@@ -104,8 +104,8 @@ describe('composer', function () {
     composer.on('finished', function (task, run) {
       events.push('finished.' + task.name);
     });
-    composer.on('error', function (err, task, run) {
-      events.push('error.' + task.name);
+    composer.on('error', function (err) {
+      events.push('error.' + err.task.name);
     });
 
     composer.task('foo', function (cb) {
@@ -123,7 +123,7 @@ describe('composer', function () {
   });
 
   it('should emit an error event when an error is passed back in a task', function (done) {
-    composer.on('error', function (err, task, run) {
+    composer.on('error', function (err) {
       assert(err);
       assert.equal(err.message, 'This is an error');
     });
@@ -138,7 +138,7 @@ describe('composer', function () {
 
   it('should emit an error event when an error is thrown in a task', function (done) {
     var errors = 0;
-    composer.on('error', function (err, task, run) {
+    composer.on('error', function (err) {
       errors++;
       assert(err);
       assert.equal(err.message, 'This is an error');

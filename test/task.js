@@ -98,7 +98,7 @@ describe('task', function () {
       cb(new Error('Expected error'));
     };
     var task = new Task({name: 'default', fn: fn});
-    task.on('error', function (err, t, run) {
+    task.on('error', function (err) {
       count++;
     });
     task.run(function (err) {
