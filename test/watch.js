@@ -21,6 +21,7 @@ describe('composer', function () {
   });
 
   it('should watch files and run a task when files change', function (done) {
+    if (process.env.CI) return done();
     var count = 0;
     composer.task('default', function (cb) {
       count++;
@@ -46,6 +47,7 @@ describe('composer', function () {
   });
 
   it('should watch files with given options and run a task when files change', function (done) {
+    if (process.env.CI) return done();
     var count = 0;
     composer.task('default', function (cb) {
       count++;
@@ -71,6 +73,7 @@ describe('composer', function () {
   });
 
   it('should watch files without given tasks', function (done) {
+    if (process.env.CI) return done();
     var count = 0;
     composer.task('default', function (cb) {
       count++;
@@ -93,6 +96,7 @@ describe('composer', function () {
   });
 
   it('should watch files without given tasks and with given options', function (done) {
+    if (process.env.CI) return done();
     var count = 0;
     composer.task('default', function (cb) {
       count++;
