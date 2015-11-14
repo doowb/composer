@@ -1,6 +1,5 @@
 'use strict';
 
-var util = require('util');
 var Emitter = require('component-emitter');
 
 var utils = require('./lib/utils');
@@ -46,7 +45,7 @@ Emitter(Composer.prototype);
  *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
  *
  * ```js
- * composer.task('site', ['styles'], function () {
+ * composer.task('site', ['styles'], function() {
  *   return app.src('templates/pages/*.hbs')
  *     .pipe(app.dest('_gh_pages'));
  * });
@@ -68,7 +67,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
   var options = {};
   var fn = noop;
-  if (typeof deps[deps.length-1] === 'function') {
+  if (typeof deps[deps.length - 1] === 'function') {
     fn = deps.pop();
   }
 
@@ -101,7 +100,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
  * Build a task or list of tasks.
  *
  * ```js
- * composer.build('default', function (err, results) {
+ * composer.build('default', function(err, results) {
  *   if (err) return console.error(err);
  *   console.log(results);
  * });
@@ -126,7 +125,7 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
  * Compose task or list of tasks into a single function that runs the tasks in series.
  *
  * ```js
- * composer.task('foo', function (done) {
+ * composer.task('foo', function(done) {
  *   console.log('this is foo');
  *   done();
  * });
@@ -136,7 +135,7 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
  *   done();
  * });
  *
- * fn(function (err) {
+ * fn(function(err) {
  *   if (err) return console.error(err);
  *   console.log('done');
  * });
@@ -156,8 +155,8 @@ Composer.prototype.series = flowFactory('series');
  * Compose task or list of tasks into a single function that runs the tasks in parallel.
  *
  * ```js
- * composer.task('foo', function (done) {
- *   setTimeout(function () {
+ * composer.task('foo', function(done) {
+ *   setTimeout(function() {
  *     console.log('this is foo');
  *     done();
  *   }, 500);
@@ -168,7 +167,7 @@ Composer.prototype.series = flowFactory('series');
  *   done();
  * });
  *
- * fn(function (err) {
+ * fn(function(err) {
  *   if (err) return console.error(err);
  *   console.log('done');
  * });
@@ -183,7 +182,6 @@ Composer.prototype.series = flowFactory('series');
  */
 
 Composer.prototype.parallel = flowFactory('parallel');
-
 
 /**
  * Watch a file, directory, or glob pattern for changes and build a task or list of tasks
@@ -215,7 +213,7 @@ Composer.prototype.watch = function(glob, options/*, fns/tasks */) {
   }
 
   var building = true;
-  function done (err) {
+  function done(err) {
     building = false;
     if (err) console.error(err);
   }
@@ -228,10 +226,10 @@ Composer.prototype.watch = function(glob, options/*, fns/tasks */) {
   }
 
   watch
-    .on('ready', function () {
+    .on('ready', function() {
       building = false;
     })
-    .on('all', function () {
+    .on('all', function() {
       if (building) return;
       building = true;
       self.build.apply(self, args);

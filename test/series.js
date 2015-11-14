@@ -5,14 +5,14 @@ var assert = require('assert');
 var Composer = require('../');
 var composer;
 
-describe('series', function () {
-  beforeEach(function () {
+describe('series', function() {
+  beforeEach(function() {
     composer = new Composer();
   });
 
-  it('should compose tasks into a function that runs in series', function (done) {
+  it('should compose tasks into a function that runs in series', function(done) {
     var output = [];
-    composer.task('foo', function (cb) {
+    composer.task('foo', function(cb) {
       output.push('this is foo');
       cb();
     });
@@ -21,16 +21,16 @@ describe('series', function () {
       cb();
     });
 
-    fn(function (err) {
+    fn(function(err) {
       if (err) return done(err);
       assert.deepEqual(output, ['this is foo', 'this is bar']);
       done();
     });
   });
 
-  it('should not throw an error when `fn` is called without a callback function.', function (done) {
+  it('should not throw an error when `fn` is called without a callback function.', function(done) {
     var output = [];
-    composer.task('foo', function (cb) {
+    composer.task('foo', function(cb) {
       output.push('this is foo');
       cb();
     });
@@ -41,23 +41,23 @@ describe('series', function () {
 
     fn();
 
-    setTimeout(function () {
+    setTimeout(function() {
       assert.deepEqual(output, ['this is foo', 'this is bar']);
       done();
     }, 10);
   });
 
-  it('should emit an error when a task returns an error and when `fn` is called without a callback function.', function (done) {
+  it('should emit an error when a task returns an error and when `fn` is called without a callback function.', function(done) {
     var output = [];
     var finished = false;
-    composer.on('error', function (err) {
+    composer.on('error', function(err) {
       finished = true;
       assert.deepEqual(output, ['this is foo']);
       assert.equal(err.message, 'bar error');
       done();
     });
 
-    composer.task('foo', function (cb) {
+    composer.task('foo', function(cb) {
       output.push('this is foo');
       cb();
     });
@@ -65,10 +65,9 @@ describe('series', function () {
       cb(new Error('bar error'));
     });
 
-
     fn();
 
-    setTimeout(function () {
+    setTimeout(function() {
       if (!finished) {
         done(new Error('Expected an error'));
       }
