@@ -22,7 +22,12 @@ var flowFactory = require('./lib/flow');
 
 function Composer(name) {
   Emitter.call(this);
-  this.name = name || 'composer';
+  utils.define(this, '_appname', name || 'composer');
+  utils.define(this, 'currentTask', {
+    get: function() {
+      return session(this._appname).get('task');
+    }
+  });
   this.tasks = {};
 }
 
@@ -56,10 +61,8 @@ Emitter(Composer.prototype);
  */
 
 Composer.prototype.task = function(name/*, options, dependencies and task */) {
-  // return the currently running task
-  // when no name is given
-  if (arguments.length === 0) {
-    return session(this.name).get('task');
+  if (typeof name !== 'string') {
+    throw new TypeError('expected `name` to be a string');
   }
 
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
@@ -81,7 +84,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
     name: name,
     options: options,
     fn: fn,
-    session: session(this.name),
+    session: session(this._appname),
     app: this
   });
 
