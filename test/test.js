@@ -12,6 +12,15 @@ describe('composer', function () {
     composer = new Composer();
   });
 
+  it('should throw an error when a name is not given for a task', function(done) {
+    try {
+      composer.task();
+      done(new Error('Expected an error to be thrown'));
+    } catch (err) {
+      done();
+    }
+  });
+
   it('should register a task', function () {
     var fn = function (done) {
       done();
@@ -56,6 +65,12 @@ describe('composer', function () {
 
   it('should register a task as a noop function when only dependencies are given', function () {
     composer.task('default', ['foo', 'bar']);
+    assert.equal(typeof composer.tasks.default, 'object');
+    assert.equal(composer.tasks.default.fn, noop);
+  });
+
+  it('should register a task with options as the second argument', function () {
+    composer.task('default', {flow: 'parallel'}, ['foo', 'bar']);
     assert.equal(typeof composer.tasks.default, 'object');
     assert.equal(composer.tasks.default.fn, noop);
   });
@@ -199,7 +214,7 @@ describe('composer', function () {
   it('should get the current task from the app session', function (done) {
     var results = [];
     var fn = function (cb) {
-      results.push(composer.task().name);
+      results.push(composer.currentTask.name);
       cb();
     };
     var tasks = [];
