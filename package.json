@@ -24,6 +24,7 @@
     "bach": "^0.4.1",
     "chokidar": "^1.2.0",
     "component-emitter": "^1.2.0",
+    "define-property": "^0.2.5",
     "extend-shallow": "^2.0.1",
     "isobject": "^2.0.0",
     "lazy-cache": "^0.2.3",
