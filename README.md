@@ -155,12 +155,12 @@ var watcher = composer.watch('templates/pages/*.hbs', ['site']);
 
 ## Events
 
-[composer][] is an event emitter that may emit the following events:
+[composer](https://github.com/jonschlinkert/composer) is an event emitter that may emit the following events:
 
 ### starting
 
 This event is emitted when a `build` is starting.
-The event emits 2 arguments, the current instance of [composer][] as the `app` and an object containing the build runtime information.
+The event emits 2 arguments, the current instance of [composer](https://github.com/jonschlinkert/composer) as the `app` and an object containing the build runtime information.
 
 ```js
 composer.on('starting', function(app, build) {});
@@ -172,7 +172,7 @@ composer.on('starting', function(app, build) {});
 ### finished
 
 This event is emitted when a `build` has finished.
-The event emits 2 arguments, the current instance of [composer][] as the `app` and an object containing the build runtime information.
+The event emits 2 arguments, the current instance of [composer](https://github.com/jonschlinkert/composer) as the `app` and an object containing the build runtime information.
 
 ```js
 composer.on('finished', function(app, build) {});
