@@ -2,12 +2,14 @@
 
 var Emitter = require('component-emitter');
 
-var utils = require('./lib/utils');
+var Run = require('./lib/run');
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
+var utils = require('./lib/utils');
 var map = require('./lib/map-deps');
 var session = require('./lib/session');
 var flowFactory = require('./lib/flow');
+var builds = [];
 
 /**
  * Composer constructor. Create a new Composer
@@ -21,13 +23,18 @@ var flowFactory = require('./lib/flow');
 
 function Composer(name) {
   Emitter.call(this);
+  this.tasks = {};
   utils.define(this, '_appname', name || 'composer');
   utils.define(this, 'currentTask', {
     get: function() {
       return session(this._appname).get('task');
     }
   });
-  this.tasks = {};
+  utils.define(this, 'buildHistory', {
+    get: function() {
+      return builds;
+    }
+  });
 }
 
 /**
@@ -88,9 +95,9 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
   });
 
   // bubble up events from tasks
-  task.on('starting', this.emit.bind(this, 'starting'));
-  task.on('finished', this.emit.bind(this, 'finished'));
-  task.on('error', this.emit.bind(this, 'error'));
+  task.on('starting', this.emit.bind(this, 'task:starting'));
+  task.on('finished', this.emit.bind(this, 'task:finished'));
+  task.on('error', this.emit.bind(this, 'task:error'));
 
   this.tasks[name] = task;
   return this;
@@ -117,8 +124,27 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
   if (typeof done !== 'function') {
     throw new TypeError('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
   }
+
+  // gather total build time information
+  var self = this;
+  var build = new Run(builds.length);
+  builds.push(build);
+  build.start();
+  this.emit('starting', this, build);
+  function finishBuild(err) {
+    build.end();
+    if (err) {
+      err.app = self;
+      err.build = build;
+      self.emit('error', err);
+    } else {
+      self.emit('finished', self, build);
+    }
+    return done.apply(null, arguments);
+  };
+
   var fn = this.series.apply(this, args);
-  return fn(done);
+  return fn(finishBuild);
 };
 
 /**
