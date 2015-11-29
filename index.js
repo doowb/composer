@@ -100,6 +100,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
   task.on('error', this.emit.bind(this, 'task:error'));
 
   this.tasks[name] = task;
+  this.emit('task', this.name, task);
   return this;
 };
 
