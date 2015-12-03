@@ -51,14 +51,20 @@ Emitter(Composer.prototype);
  *  - `deps`: array of dependencies
  *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
  *
+ * To return the task object of an already registered task, pass the name of the task without any additional parameters.
+ *
  * ```js
+ * // register task "site" with composer
  * composer.task('site', ['styles'], function() {
  *   return app.src('templates/pages/*.hbs')
  *     .pipe(app.dest('_gh_pages'));
  * });
+ *
+ * // get the "site" task object
+ * var task = composer.task('site');
  * ```
  *
- * @param  {String} `name` Name of the task to register
+ * @param {String} `name` Name of the task to register
  * @param {Object} `options` Options to set dependencies or control flow.
  * @param {String|Array|Function} `deps` Additional dependencies for this task.
  * @param {Function} `fn` Final function is the task to register.
@@ -72,6 +78,10 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
   }
 
   var deps = [].concat.apply([], [].slice.call(arguments, 1));
+  if (!deps.length) {
+    return this.tasks[name];
+  }
+
   var options = {};
   var fn = noop;
   if (typeof deps[deps.length - 1] === 'function') {

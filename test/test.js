@@ -30,6 +30,16 @@ describe('composer', function() {
     assert.equal(composer.tasks.default.fn, fn);
   });
 
+  it('should return a task by name', function() {
+    var fn = function(done) {
+      done();
+    };
+    composer.task('default', fn);
+    var task = composer.task('default');
+    assert.equal(typeof task, 'object');
+    assert.equal(task.fn, fn);
+  });
+
   it('should register a task with an array of named dependencies', function() {
     composer.task('default', ['foo', 'bar'], function(done) {
       done();
