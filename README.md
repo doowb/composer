@@ -1,10 +1,10 @@
-# composer [![NPM version](https://badge.fury.io/js/composer.svg)](http://badge.fury.io/js/composer)  [![Build Status](https://travis-ci.org/jonschlinkert/composer.svg)](https://travis-ci.org/jonschlinkert/composer)
+# composer [![NPM version](https://img.shields.io/npm/v/composer.svg)](https://www.npmjs.com/package/composer) [![Build Status](https://img.shields.io/travis/jonschlinkert/composer.svg)](https://travis-ci.org/jonschlinkert/composer)
 
 > API-first task runner with three methods: task, run and watch.
 
 ## Install
 
-Install with [npm](https://www.npmjs.com/)
+Install with [npm](https://www.npmjs.com/):
 
 ```sh
 $ npm i composer --save
@@ -18,50 +18,36 @@ var Composer = require('composer');
 
 ## API
 
-### [Composer](index.js#L24)
+### [.task](index.js#L68)
 
-Composer constructor. Create a new Composer
-
-**Example**
-
-```js
-var composer = new Composer();
-```
-
-### [.task](index.js#L75)
-
-Register a new task with it's options and dependencies.
-
-Options:
-
-* `deps`: array of dependencies
-* `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
-To return the task object of an already registered task, pass the name of the task without any additional parameters.
+Register a new task with it's options and dependencies. To return the task object of an already registered task, pass the name of the task without any additional parameters.
 
 **Params**
 
 * `name` **{String}**: Name of the task to register
 * `options` **{Object}**: Options to set dependencies or control flow.
+* `options.deps` **{Object}**: array of dependencies
+* `options.flow` **{Object}**: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
 * `deps` **{String|Array|Function}**: Additional dependencies for this task.
 * `fn` **{Function}**: Final function is the task to register.
-* `returns` **{Object}**: Return `this` for chaining
+* `returns` **{Object}**: Return the instance for chaining
 
 **Example**
 
 ```js
 // register task "site" with composer
-composer.task('site', ['styles'], function() {
+app.task('site', ['styles'], function() {
   return app.src('templates/pages/*.hbs')
     .pipe(app.dest('_gh_pages'));
 });
 
 // get the "site" task object
-var task = composer.task('site');
+var task = app.task('site');
 ```
 
-### [.build](index.js#L132)
+### [.build](index.js#L125)
 
-Build a task or list of tasks.
+Build a task or array of tasks.
 
 **Params**
 
@@ -71,13 +57,13 @@ Build a task or list of tasks.
 **Example**
 
 ```js
-composer.build('default', function(err, results) {
+app.build('default', function(err, results) {
   if (err) return console.error(err);
   console.log(results);
 });
 ```
 
-### [.series](index.js#L189)
+### [.series](index.js#L181)
 
 Compose task or list of tasks into a single function that runs the tasks in series.
 
@@ -89,12 +75,12 @@ Compose task or list of tasks into a single function that runs the tasks in seri
 **Example**
 
 ```js
-composer.task('foo', function(done) {
+app.task('foo', function(done) {
   console.log('this is foo');
   done();
 });
 
-var fn = composer.series('foo', function bar(done) {
+var fn = app.series('foo', function bar(done) {
   console.log('this is bar');
   done();
 });
@@ -108,7 +94,7 @@ fn(function(err) {
 //=> done
 ```
 
-### [.parallel](index.js#L221)
+### [.parallel](index.js#L213)
 
 Compose task or list of tasks into a single function that runs the tasks in parallel.
 
@@ -120,14 +106,14 @@ Compose task or list of tasks into a single function that runs the tasks in para
 **Example**
 
 ```js
-composer.task('foo', function(done) {
+app.task('foo', function(done) {
   setTimeout(function() {
     console.log('this is foo');
     done();
   }, 500);
 });
 
-var fn = composer.parallel('foo', function bar(done) {
+var fn = app.parallel('foo', function bar(done) {
   console.log('this is bar');
   done();
 });
@@ -141,9 +127,9 @@ fn(function(err) {
 //=> done
 ```
 
-### [.watch](index.js#L239)
+### [.watch](index.js#L230)
 
-Watch a file, directory, or glob pattern for changes and build a task or list of tasks when changes are made. Watch is powered by [chokidar](https://github.com/paulmillr/chokidar) so the glob pattern may be anything that [chokidar.watch](https://github.com/paulmillr/chokidar#api) accepts.
+Watch a file, directory, or glob pattern for changes and build a task or list of tasks when changes are made. Watch is powered by [chokidar](https://github.com/paulmillr/chokidar) so arguments can be anything supported by [chokidar.watch](https://github.com/paulmillr/chokidar#api).
 
 **Params**
 
@@ -155,7 +141,7 @@ Watch a file, directory, or glob pattern for changes and build a task or list of
 **Example**
 
 ```js
-var watcher = composer.watch('templates/pages/*.hbs', ['site']);
+var watcher = app.watch('templates/pages/*.hbs', ['site']);
 ```
 
 ## Events
@@ -165,26 +151,28 @@ var watcher = composer.watch('templates/pages/*.hbs', ['site']);
 ### starting
 
 This event is emitted when a `build` is starting.
+
 The event emits 2 arguments, the current instance of [composer](https://github.com/jonschlinkert/composer) as the `app` and an object containing the build runtime information.
 
 ```js
-composer.on('starting', function(app, build) {});
+app.on('starting', function(app, build) {});
 ```
 
-`build` will have a `.date` object that has a `.start` property containing the start time as a `Date` object.
-`build` will have a `.hr` object that has a `.start` property containing the start time as an `hrtime` array.
+* `build` exposes a `.date` object that has a `.start` property containing the start time as a `Date` object.
+* `build` exposes a `.hr` object that has a `.start` property containing the start time as an `hrtime` array.
 
 ### finished
 
 This event is emitted when a `build` has finished.
+
 The event emits 2 arguments, the current instance of [composer](https://github.com/jonschlinkert/composer) as the `app` and an object containing the build runtime information.
 
 ```js
-composer.on('finished', function(app, build) {});
+app.on('finished', function(app, build) {});
 ```
 
-`build` will have a `.date` object that has `.start` and `.end` properties containing start and end times of the build as `Date` objects.
-`build` will have a `.hr` object that has `.start`, `.end`, `.duration`, and `.diff` properties containing timing information calculated using `process.hrtime`
+* `build` exposes a `.date` object that has `.start` and `.end` properties containing start and end times of the build as `Date` objects.
+* `build` exposes a `.hr` object that has `.start`, `.end`, `.duration`, and `.diff` properties containing timing information calculated using `process.hrtime`
 
 ### error
 
@@ -192,7 +180,7 @@ This event is emitted when an error occurrs during a `build`.
 The event emits 1 argument as an `Error` object containing additional information about the build and the task running when the error occurred.
 
 ```js
-composer.on('error', function(err) {});
+app.on('error', function(err) {});
 ```
 
 Additional properties:
@@ -208,23 +196,28 @@ This event is emitted when a task is starting.
 The event emits 2 arguments, the current instance of the task object and an object containing the task runtime information.
 
 ```js
-composer.on('task:starting', function(task, run) {});
+app.on('task:starting', function(task, run) {});
 ```
 
-`run` will have a `.date` object that has a `.start` property containing the start time as a `Date` object.
-`run` will have a `.hr` object that has a `.start` property containing the start time as an `hrtime` array.
+The `run` parameter exposes:
+
+* `.date` **{Object}**: has a `.start` property containing the start time as a `Date` object.
+* `.hr` **{Object}**: has a `.start` property containing the start time as an `hrtime` array.
 
 ### task:finished
 
 This event is emitted when a task has finished.
-The event emits 2 arguments, the current instance of the task object and an object containging the task runtime information.
+
+The event emits 2 arguments, the current instance of the task object and an object containing the task runtime information.
 
 ```js
-composer.on('task:finished', function(task, run) {});
+app.on('task:finished', function(task, run) {});
 ```
 
-`run` will have a `.date` object that has `.start` and `.end` properties containing start and end times of the task as `Date` objects.
-`run` will have a `.hr` object that has `.start`, `.end`, `.duration`, and `.diff` properties containing timing information calculated using `process.hrtime`
+The `run` parameter exposes:
+
+* `.date` **{Object}**: has a `.date` object that has `.start` and `.end` properties containing start and end times of the task as `Date` objects.
+* `run` **{Object}**: has an `.hr` object that has `.start`, `.end`, `.duration`, and `.diff` properties containing timing information calculated using `process.hrtime`
 
 ### task:error
 
@@ -232,20 +225,20 @@ This event is emitted when an error occurrs while running a task.
 The event emits 1 argument as an `Error` object containing additional information about the task running when the error occurred.
 
 ```js
-composer.on('task:error', function(err) {});
+app.on('task:error', function(err) {});
 ```
 
-Additional properties:
+**Additional properties**
 
 * `task`: current task instance running when the error occurred
 * `run`: current task runtime information
 
 ## Related projects
 
-* [assemble](https://www.npmjs.com/package/assemble): Static site generator for Grunt.js, Yeoman and Node.js. Used by Zurb Foundation, Zurb Ink, H5BP/Effeckt,… [more](https://www.npmjs.com/package/assemble) | [homepage](http://assemble.io)
-* [generate](https://www.npmjs.com/package/generate): Project generator, for node.js. | [homepage](https://github.com/generate/generate)
+* [assemble](https://www.npmjs.com/package/assemble): Assemble is a powerful, extendable and easy to use static site generator for node.js. Used… [more](https://www.npmjs.com/package/assemble) | [homepage](https://github.com/assemble/assemble)
+* [generate](https://www.npmjs.com/package/generate): Fast, composable, highly extendable project generator for node.js | [homepage](https://github.com/jonschlinkert/generate)
 * [templates](https://www.npmjs.com/package/templates): System for creating and managing template collections, and rendering templates with any node.js template engine.… [more](https://www.npmjs.com/package/templates) | [homepage](https://github.com/jonschlinkert/templates)
-* [update](https://www.npmjs.com/package/update): Update the year in all files in a project using glob patterns. | [homepage](https://github.com/jonschlinkert/update)
+* [update](https://www.npmjs.com/package/update): Update | [homepage](https://github.com/jonschlinkert/update)
 * [verb](https://www.npmjs.com/package/verb): Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used… [more](https://www.npmjs.com/package/verb) | [homepage](https://github.com/verbose/verb)
 
 ## Running tests
@@ -264,14 +257,14 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 
 **Jon Schlinkert**
 
-+ [github/jonschlinkert](https://github.com/jonschlinkert)
-+ [twitter/jonschlinkert](http://twitter.com/jonschlinkert)
+* [github/jonschlinkert](https://github.com/jonschlinkert)
+* [twitter/jonschlinkert](http://twitter.com/jonschlinkert)
 
 ## License
 
-Copyright © 2015 Jon Schlinkert
+Copyright © 2016 [Jon Schlinkert](https://github.com/jonschlinkert)
 Released under the MIT license.
 
 ***
 
-_This file was generated by [verb-cli](https://github.com/assemble/verb-cli) on December 03, 2015._
+_This file was generated by [verb](https://github.com/verbose/verb) on January 06, 2016._

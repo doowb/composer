@@ -1,7 +1,5 @@
 'use strict';
 
-var Emitter = require('component-emitter');
-
 var Run = require('./lib/run');
 var Task = require('./lib/task');
 var noop = require('./lib/noop');
@@ -9,16 +7,15 @@ var utils = require('./lib/utils');
 var map = require('./lib/map-deps');
 var session = require('./lib/session');
 var flowFactory = require('./lib/flow');
+var Emitter = require('component-emitter');
 var builds = [];
 
 /**
- * Composer constructor. Create a new Composer
+ * Composer constructor. Create an instance of `Composer`
  *
  * ```js
  * var composer = new Composer();
  * ```
- *
- * @api public
  */
 
 function Composer(name) {
@@ -44,35 +41,31 @@ function Composer(name) {
 Emitter(Composer.prototype);
 
 /**
- * Register a new task with it's options and dependencies.
- *
- * Options:
- *
- *  - `deps`: array of dependencies
- *  - `flow`: How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
- *
- * To return the task object of an already registered task, pass the name of the task without any additional parameters.
+ * Register a new task with it's options and dependencies. To
+ * return the task object of an already registered task, pass
+ * the name of the task without any additional parameters.
  *
  * ```js
  * // register task "site" with composer
- * composer.task('site', ['styles'], function() {
+ * app.task('site', ['styles'], function() {
  *   return app.src('templates/pages/*.hbs')
  *     .pipe(app.dest('_gh_pages'));
  * });
  *
  * // get the "site" task object
- * var task = composer.task('site');
+ * var task = app.task('site');
  * ```
- *
  * @param {String} `name` Name of the task to register
  * @param {Object} `options` Options to set dependencies or control flow.
+ * @param {Object} `options.deps` array of dependencies
+ * @param {Object} `options.flow` How this task will be executed with it's dependencies (`series`, `parallel`, `settleSeries`, `settleParallel`)
  * @param {String|Array|Function} `deps` Additional dependencies for this task.
  * @param {Function} `fn` Final function is the task to register.
- * @return {Object} Return `this` for chaining
+ * @return {Object} Return the instance for chaining
  * @api public
  */
 
-Composer.prototype.task = function(name/*, options, dependencies and task */) {
+Composer.prototype.task = function(name/*, options, deps, task */) {
   if (typeof name !== 'string') {
     throw new TypeError('expected `name` to be a string');
   }
@@ -115,10 +108,10 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
 };
 
 /**
- * Build a task or list of tasks.
+ * Build a task or array of tasks.
  *
  * ```js
- * composer.build('default', function(err, results) {
+ * app.build('default', function(err, results) {
  *   if (err) return console.error(err);
  *   console.log(results);
  * });
@@ -129,7 +122,7 @@ Composer.prototype.task = function(name/*, options, dependencies and task */) {
  * @api public
  */
 
-Composer.prototype.build = function(/* list of tasks/functions to build */) {
+Composer.prototype.build = function(/* tasks, callback */) {
   var args = [].concat.apply([], [].slice.call(arguments));
   var done = args.pop();
   if (typeof done !== 'function') {
@@ -162,12 +155,12 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
  * Compose task or list of tasks into a single function that runs the tasks in series.
  *
  * ```js
- * composer.task('foo', function(done) {
+ * app.task('foo', function(done) {
  *   console.log('this is foo');
  *   done();
  * });
  *
- * var fn = composer.series('foo', function bar(done) {
+ * var fn = app.series('foo', function bar(done) {
  *   console.log('this is bar');
  *   done();
  * });
@@ -180,7 +173,6 @@ Composer.prototype.build = function(/* list of tasks/functions to build */) {
  * //=> this is bar
  * //=> done
  * ```
- *
  * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
  * @return {Function} Composed function that may take a callback function.
  * @api public
@@ -192,14 +184,14 @@ Composer.prototype.series = flowFactory('series');
  * Compose task or list of tasks into a single function that runs the tasks in parallel.
  *
  * ```js
- * composer.task('foo', function(done) {
+ * app.task('foo', function(done) {
  *   setTimeout(function() {
  *     console.log('this is foo');
  *     done();
  *   }, 500);
  * });
  *
- * var fn = composer.parallel('foo', function bar(done) {
+ * var fn = app.parallel('foo', function bar(done) {
  *   console.log('this is bar');
  *   done();
  * });
@@ -221,14 +213,13 @@ Composer.prototype.series = flowFactory('series');
 Composer.prototype.parallel = flowFactory('parallel');
 
 /**
- * Watch a file, directory, or glob pattern for changes and build a task or list of tasks
- * when changes are made. Watch is powered by [chokidar][] so the glob pattern may be
- * anything that [chokidar.watch](https://github.com/paulmillr/chokidar#api) accepts.
+ * Watch a file, directory, or glob pattern for changes and build a task
+ * or list of tasks when changes are made. Watch is powered by [chokidar][]
+ * so arguments can be anything supported by [chokidar.watch](https://github.com/paulmillr/chokidar#api).
  *
  * ```js
- * var watcher = composer.watch('templates/pages/*.hbs', ['site']);
+ * var watcher = app.watch('templates/pages/*.hbs', ['site']);
  * ```
- *
  * @param  {String|Array} `glob` Filename, Directory name, or glob pattern to watch
  * @param  {Object} `options` Additional options to be passed to [chokidar][]
  * @param  {String|Array|Function} `tasks` Tasks that are passed to `.build` when files in the glob are changed.
