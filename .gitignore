@@ -13,3 +13,5 @@ vendor
 .idea
 benchmark
 coverage
+dist
+examples/dist
