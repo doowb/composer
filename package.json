@@ -25,6 +25,7 @@
     "test": "mocha"
   },
   "dependencies": {
+    "array-unique": "^0.2.1",
     "bach": "^0.4.1",
     "chokidar": "^1.4.2",
     "component-emitter": "^1.2.0",
