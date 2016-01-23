@@ -85,9 +85,9 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
     options = deps.shift();
   }
 
-  options.deps = deps
+  options.deps = utils.unique(deps
     .concat(options.deps || [])
-    .map(map.bind(this));
+    .map(map.bind(this)));
 
   var task = new Task({
     name: name,
