@@ -117,7 +117,7 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
  * });
  * ```
  *
- * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions.
+ * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions. (Defaults to `[default]`).
  * @param {Function} `cb` Callback function to be called when all tasks are finished building.
  * @api public
  */
@@ -127,6 +127,10 @@ Composer.prototype.build = function(/* tasks, callback */) {
   var done = args.pop();
   if (typeof done !== 'function') {
     throw new TypeError('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
+  }
+
+  if (args.length === 0) {
+    args = ['default'];
   }
 
   // gather total build time information
