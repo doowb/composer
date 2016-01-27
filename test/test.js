@@ -17,6 +17,8 @@ describe('composer', function() {
       composer.task();
       done(new Error('Expected an error to be thrown'));
     } catch (err) {
+      assert(err);
+      assert.equal(err.message, 'expected `name` to be a string');
       done();
     }
   });
@@ -93,6 +95,20 @@ describe('composer', function() {
     });
 
     composer.build('default', function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should run the `default` task when no task is given', function(done) {
+    var count = 0;
+    composer.task('default', function(cb) {
+      count++;
+      cb();
+    });
+
+    composer.build(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
       done();
