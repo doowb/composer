@@ -5,7 +5,6 @@ var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var utils = require('./lib/utils');
 var map = require('./lib/map-deps');
-var session = require('./lib/session');
 var flowFactory = require('./lib/flow');
 var Emitter = require('component-emitter');
 var builds = [];
@@ -22,11 +21,6 @@ function Composer(name) {
   Emitter.call(this);
   this.tasks = {};
   utils.define(this, '_appname', name || 'composer');
-  utils.define(this, 'currentTask', {
-    get: function() {
-      return session(this._appname).get('task');
-    }
-  });
   utils.define(this, 'buildHistory', {
     get: function() {
       return builds;
@@ -93,7 +87,6 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
     name: name,
     options: options,
     fn: fn,
-    session: session(this._appname),
     app: this
   });
 
