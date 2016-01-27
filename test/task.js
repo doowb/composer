@@ -108,10 +108,10 @@ describe('task', function() {
     });
   });
 
-  it('should have a session with the current task value set', function(done) {
+  it('should have the current task set as `this` inside the function', function(done) {
     var results = [];
     var fn = function(cb) {
-      results.push(this.session.get('task').name);
+      results.push(this.name);
       cb();
     };
     var tasks = [];
