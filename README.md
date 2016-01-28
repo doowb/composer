@@ -1,4 +1,4 @@
-# composer [![NPM version](https://img.shields.io/npm/v/composer.svg)](https://www.npmjs.com/package/composer) [![Build Status](https://img.shields.io/travis/jonschlinkert/composer.svg)](https://travis-ci.org/jonschlinkert/composer)
+# composer [![NPM version](https://img.shields.io/npm/v/composer.svg)](https://www.npmjs.com/package/composer) [![Build Status](https://img.shields.io/travis/doowb/composer.svg)](https://travis-ci.org/doowb/composer)
 
 > API-first task runner with three methods: task, run and watch.
 
@@ -245,7 +245,7 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 **Jon Schlinkert**
 
 * [github/jonschlinkert](https://github.com/jonschlinkert)
-* [twitter/doowb](http://twitter.com/doowb)
+* [twitter/jonschlinkert](http://twitter.com/jonschlinkert)
 
 ## License
 
