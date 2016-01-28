@@ -210,60 +210,6 @@ Composer.prototype.series = flowFactory('series');
 Composer.prototype.parallel = flowFactory('parallel');
 
 /**
- * Watch a file, directory, or glob pattern for changes and build a task
- * or list of tasks when changes are made. Watch is powered by [chokidar][]
- * so arguments can be anything supported by [chokidar.watch](https://github.com/paulmillr/chokidar#api).
- *
- * ```js
- * var watcher = app.watch('templates/pages/*.hbs', ['site']);
- * ```
- * @param  {String|Array} `glob` Filename, Directory name, or glob pattern to watch
- * @param  {Object} `options` Additional options to be passed to [chokidar][]
- * @param  {String|Array|Function} `tasks` Tasks that are passed to `.build` when files in the glob are changed.
- * @return {Object} Returns an instance of `FSWatcher` from [chokidar][]
- * @api public
- */
-
-Composer.prototype.watch = function(glob, options/*, fns/tasks */) {
-  var self = this;
-  var len = arguments.length - 1, i = 0;
-  var args = new Array(len + 1);
-  while (len--) args[i] = arguments[++i];
-  args[i] = done;
-
-  var opts = {};
-  if (typeof options === 'object' && !Array.isArray(options)) {
-    args.shift();
-    opts = utils.extend(opts, options);
-  }
-
-  var building = true;
-  function done(err) {
-    building = false;
-    if (err) console.error(err);
-  }
-
-  var watch = utils.chokidar.watch(glob, opts);
-
-  // only contains our `done` function
-  if (args.length === 1) {
-    return watch;
-  }
-
-  watch
-    .on('ready', function() {
-      building = false;
-    })
-    .on('all', function() {
-      if (building) return;
-      building = true;
-      self.build.apply(self, args);
-    });
-
-  return watch;
-};
-
-/**
  * Expose Composer
  */
 
