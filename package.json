@@ -27,7 +27,6 @@
   "dependencies": {
     "array-unique": "^0.2.1",
     "bach": "^0.4.1",
-    "chokidar": "^1.4.2",
     "component-emitter": "^1.2.0",
     "define-property": "^0.2.5",
     "extend-shallow": "^2.0.1",
@@ -69,16 +68,16 @@
     "related": {
       "list": [
         "assemble",
+        "base",
+        "base-tasks",
+        "base-watch",
+        "composer",
         "generate",
         "templates",
         "update",
         "verb"
       ]
     },
-    "reflinks": [
-      "chokidar",
-      "composer"
-    ],
     "plugins": [
       "gulp-format-md"
     ]
