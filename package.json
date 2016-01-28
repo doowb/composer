@@ -2,15 +2,15 @@
   "name": "composer",
   "description": "API-first task runner with three methods: task, run and watch.",
   "version": "0.10.0",
-  "homepage": "https://github.com/jonschlinkert/composer",
+  "homepage": "https://github.com/doowb/composer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
     "Brian Woodward <brian.woodward@gmail.com> (https://github.com/doowb)",
     "Jon Schlinkert <github@sellside.com> (https://github.com/jonschlinkert)"
   ],
-  "repository": "jonschlinkert/composer",
+  "repository": "doowb/composer",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/composer/issues"
+    "url": "https://github.com/doowb/composer/issues"
   },
   "license": "MIT",
   "files": [
@@ -70,7 +70,6 @@
         "assemble",
         "base",
         "base-tasks",
-        "base-watch",
         "composer",
         "generate",
         "templates",
