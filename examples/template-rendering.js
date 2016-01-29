@@ -2,6 +2,8 @@
 
 // require('time-require');
 
+var Composer = require('..');
+var runtimes = require('composer-runtimes');
 var matter = require('parser-front-matter');
 var extname = require('gulp-extname');
 var Templates = require('templates');
@@ -14,20 +16,20 @@ var loader = require('assemble-loader');
 var streams = require('assemble-streams');
 var renderFile = require('assemble-render-file');
 
-var app = require('./app');
-require('composer-runtimes')()(app);
+var composer = new Composer();
+runtimes(composer);
 
-var templates = new Templates();
-templates.use(loader());
-templates.use(streams);
-templates.use(renderFile());
+var app = new Templates()
+  .use(loader())
+  .use(streams())
+  .use(renderFile());
 
-templates.engine('hbs', require('engine-handlebars'));
-templates.option('renameKey', function (fp) {
+app.engine('hbs', require('engine-handlebars'));
+app.option('renameKey', function(fp) {
   return path.basename(fp, path.extname(fp));
 });
 
-templates.onLoad(/\.hbs$/, function (file, next) {
+app.onLoad(/\.hbs$/, function(file, next) {
   matter.parse(file, next);
 });
 
@@ -37,48 +39,53 @@ var paths = {
   includes: ['./examples/templates/includes/*.hbs']
 };
 
-templates.create('pages');
-templates.create('layouts', {viewType: 'layout'});
-templates.create('includes', {viewType: 'partial'});
+app.create('pages');
+app.create('layouts', {viewType: 'layout'});
+app.create('includes', {viewType: 'partial'});
 
-app.task('layouts', function (done) {
-  templates.layouts(paths.layouts);
+composer.task('layouts', function(done) {
+  console.log('loading layouts');
+  app.layouts(paths.layouts);
   done();
 });
 
-app.task('includes', function (done) {
-  templates.includes(paths.includes);
+composer.task('includes', function(done) {
+  console.log('loading includes');
+  app.includes(paths.includes);
   done();
 });
 
-app.task('pages', function (done) {
-  templates.pages(paths.pages);
+composer.task('pages', function(done) {
+  console.log('loading pages');
+  app.pages(paths.pages);
   done();
 });
 
-app.task('site', function () {
-  return templates.toStream('pages')
-    .pipe(templates.renderFile())
+composer.task('site', function() {
+  console.log('building site');
+  return app.toStream('pages')
+    .pipe(app.renderFile())
     .pipe(extname())
-    .pipe(dest('dist'))
+    .pipe(dest(__dirname + '/dist'))
 });
 
-app.task('watch', function () {
-  app.watch(paths.layouts, ['layouts', 'pages', 'site']);
-  app.watch(paths.includes, ['includes', 'pages', 'site']);
-  app.watch(paths.pages, ['pages', 'site']);
+composer.task('watch', function() {
+  composer.watch(paths.layouts, ['layouts', 'pages', 'site']);
+  composer.watch(paths.includes, ['includes', 'pages', 'site']);
+  composer.watch(paths.pages, ['pages', 'site']);
 });
 
-app.task('default', ['layouts', 'includes', 'pages', 'site']);
-app.task('dev', ['default', 'watch']);
+composer.task('default', ['layouts', 'includes', 'pages', 'site']);
+composer.task('dev', ['default', 'watch']);
 
-app.build('default', function (err) {
+composer.build('default', function(err) {
   if (err) return console.error(err);
   console.log('Finshed');
 });
 
-function dest (dir) {
-  return through.obj(function (file, enc, next) {
+function dest(dir) {
+  console.log('writing files to: "%s"', path.relative(process.cwd(), dir));
+  return through.obj(function(file, enc, next) {
     writeFile(path.join(dir, path.basename(file.path)), file.content, next);
   });
 }

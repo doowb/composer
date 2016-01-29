@@ -2,27 +2,29 @@
 
 var Promise = require('bluebird');
 var through = require('through2');
+var runtimes = require('composer-runtimes');
 
-var app = require('./app');
-require('composer-runtimes')(app);
+var Composer = require('..');
+var composer = new Composer();
+runtimes(composer);
 
-app.task('foo-sync', function(done) {
+composer.task('foo-sync', function(done) {
   console.log('foo-sync');
   done(null, 'foo-sync');
 });
 
-app.task('foo-async', function(done) {
+composer.task('foo-async', function(done) {
   logAfter('foo-async', 3500, done.bind(null, null));
 });
 
-app.task('foo-promise', function() {
+composer.task('foo-promise', function() {
   var promise = new Promise(function(resolve, reject) {
     logAfter('foo-promise', 1000, resolve);
   });
   return promise;
 });
 
-app.task('foo-stream', function() {
+composer.task('foo-stream', function() {
   var stream = through.obj();
   logAfter('foo-stream', 500, function(msg) {
     stream.write(msg);
@@ -31,7 +33,7 @@ app.task('foo-stream', function() {
   return stream;
 });
 
-app.task('beep', [
+composer.task('beep', [
   function(done) {
     console.log(this.name);
     done(null, this.name);
@@ -45,16 +47,16 @@ app.task('beep', [
   logAfter('beep', 2000, done.bind(null, null));
 });
 
-app.task('baz-with-deps', {
+composer.task('baz-with-deps', {
   flow: 'series'
 }, ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function(done) {
   console.log('baz-with-deps\' dependencies finished');
   logAfter('baz-with-deps', 3000, done.bind(null, null));
 });
 
-app.task('default', 'beep', 'baz-with-deps');
+composer.task('default', 'beep', 'baz-with-deps');
 
-app.build('default', function(err, results) {
+composer.build('default', function(err, results) {
   console.log('done');
   console.log(JSON.stringify(results, null, 2));
 });
