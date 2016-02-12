@@ -39,6 +39,9 @@ Emitter(Composer.prototype);
  * return the task object of an already registered task, pass
  * the name of the task without any additional parameters.
  *
+ * Dependencies may also be specified as a glob pattern. Be aware that
+ * the order cannot be guarenteed when using a glob pattern.
+ *
  * ```js
  * // register task "site" with composer
  * app.task('site', ['styles'], function() {
