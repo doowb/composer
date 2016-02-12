@@ -29,8 +29,10 @@
     "bach": "^0.4.2",
     "component-emitter": "^1.2.0",
     "define-property": "^0.2.5",
+    "is-glob": "^2.0.1",
     "isobject": "^2.0.0",
     "lazy-cache": "^1.0.3",
+    "micromatch": "^2.3.7",
     "nanoseconds": "^0.1.0"
   },
   "devDependencies": {
