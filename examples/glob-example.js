@@ -49,8 +49,8 @@ composer.task('beep', [
 
 composer.task('baz-with-deps', {
   flow: 'series'
-}, ['foo-sync', 'foo-async', 'foo-promise', 'foo-stream'], function(done) {
-  console.log('baz-with-deps\' dependencies finished');
+}, ['foo-*'], function(done) {
+  console.log('baz-with-globbed-deps\' dependencies finished');
   logAfter('baz-with-deps', 3000, done.bind(null, null));
 });
 
