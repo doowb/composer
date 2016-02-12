@@ -129,6 +129,20 @@ describe('composer', function() {
     });
   });
 
+  it('should throw an error when a task with globbed dependencies cannot be found', function(done) {
+    var count = 0;
+    composer.task('default', ['a-*'], function(cb) {
+      count++;
+      cb();
+    });
+
+    composer.build('default', function(err) {
+      if (!err) return done(new Error('Expected an error to be thrown.'));
+      assert.equal(count, 0);
+      done();
+    });
+  });
+
   it('should throw an error when `.build` is called without a callback function.', function() {
     try {
       composer.build('default');
@@ -269,6 +283,36 @@ describe('composer', function() {
     composer.build('default', function(err) {
       if (err) return done(err);
       assert.deepEqual(seq, ['foo', 'bar', 'default']);
+      done();
+    });
+  });
+
+  it('should run globbed dependencies before running the dependent task.', function(done) {
+    var seq = [];
+    composer.task('a-foo', function(cb) {
+      seq.push('a-foo');
+      cb();
+    });
+    composer.task('a-bar', function(cb) {
+      seq.push('a-bar');
+      cb();
+    });
+    composer.task('b-foo', function(cb) {
+      seq.push('b-foo');
+      cb();
+    });
+    composer.task('b-bar', function(cb) {
+      seq.push('b-bar');
+      cb();
+    });
+    composer.task('default', ['a-*'], function(cb) {
+      seq.push('default');
+      cb();
+    });
+
+    composer.build(function(err) {
+      if (err) return done(err);
+      assert.deepEqual(seq, ['a-foo', 'a-bar', 'default']);
       done();
     });
   });
