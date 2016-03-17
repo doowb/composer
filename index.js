@@ -5,6 +5,7 @@ var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var utils = require('./lib/utils');
 var map = require('./lib/map-deps');
+var inspect = require('./lib/inspect');
 var flowFactory = require('./lib/flow');
 var Emitter = require('component-emitter');
 var builds = [];
@@ -92,6 +93,8 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
     fn: fn,
     app: this
   });
+
+  inspect(this, task);
 
   // bubble up events from tasks
   task.on('starting', this.emit.bind(this, 'task:starting'));
