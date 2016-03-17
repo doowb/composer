@@ -2,6 +2,7 @@
 
 var async = require('async');
 var assert = require('assert');
+var through = require('through2');
 var Task = require('../lib/task');
 
 describe('task', function() {
@@ -49,6 +50,62 @@ describe('task', function() {
       count++;
       cb();
     };
+
+    var task = new Task({name: 'default', fn: fn});
+    task.run(function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should run a task function that returns a promise when `.run` is called', function(done) {
+    var count = 0;
+    var fn = function() {
+      return new Promise(function(resolve) {
+        setImmediate(function() {
+          count++;
+          resolve();
+        });
+      });
+    };
+
+    var task = new Task({name: 'default', fn: fn});
+    task.run(function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should run a task function that returns a stream when `.run` is called', function(done) {
+    var count = 0;
+    var fn = function() {
+      var stream = through.obj(function(data, enc, next) {
+        count++;
+        next(null);
+      });
+      setImmediate(function() {
+        stream.write(count);
+        stream.end();
+      });
+      return stream;
+    };
+
+    var task = new Task({name: 'default', fn: fn});
+    task.run(function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should run a task given a generator function when `.run` is called', function(done) {
+    var count = 0;
+    var fn = function* () {
+      count++;
+    };
+
     var task = new Task({name: 'default', fn: fn});
     task.run(function(err) {
       if (err) return done(err);
