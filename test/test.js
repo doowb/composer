@@ -287,6 +287,60 @@ describe('composer', function() {
     });
   });
 
+  it('should add inspect function to tasks.', function() {
+    composer.task('foo', function(cb) {
+      cb();
+    });
+    composer.task('bar', function(cb) {
+      cb();
+    });
+    composer.task('default', ['foo', 'bar'], function(cb) {
+      cb();
+    });
+    assert.equal(composer.tasks.foo.inspect(), '<Task "foo" deps: []>');
+    assert.equal(composer.tasks.bar.inspect(), '<Task "bar" deps: []>');
+    assert.equal(composer.tasks.default.inspect(), '<Task "default" deps: [foo, bar]>');
+  });
+
+  it('should add custom inspect function to tasks.', function() {
+    composer.options = {
+      inspectFn: function(task) {
+        return '<Task "' + task.name + '"' + (task.options.deps.length ? ' [' + task.options.deps.join(', ') + ']' : '') + '>';
+      }
+    };
+    composer.task('foo', function(cb) {
+      cb();
+    });
+    composer.task('bar', function(cb) {
+      cb();
+    });
+    composer.task('default', ['foo', 'bar'], function(cb) {
+      cb();
+    });
+    assert.equal(composer.tasks.foo.inspect(), '<Task "foo">');
+    assert.equal(composer.tasks.bar.inspect(), '<Task "bar">');
+    assert.equal(composer.tasks.default.inspect(), '<Task "default" [foo, bar]>');
+  });
+
+  it('should disable inspect function on tasks.', function() {
+    composer.options = {
+      inspectFn: false
+    };
+
+    composer.task('foo', function(cb) {
+      cb();
+    });
+    composer.task('bar', function(cb) {
+      cb();
+    });
+    composer.task('default', ['foo', 'bar'], function(cb) {
+      cb();
+    });
+    assert.equal(typeof composer.tasks.foo.inspect, 'undefined');
+    assert.equal(typeof composer.tasks.bar.inspect, 'undefined');
+    assert.equal(typeof composer.tasks.default.inspect, 'undefined');
+  });
+
   it('should run globbed dependencies before running the dependent task.', function(done) {
     var seq = [];
     composer.task('a-foo', function(cb) {
