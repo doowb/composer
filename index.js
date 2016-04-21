@@ -21,8 +21,9 @@ var builds = [];
 function Composer(name) {
   Emitter.call(this);
   this.tasks = {};
-  utils.define(this, '_appname', name || 'composer');
+  utils.define(this, '_appname', name || this._appname || 'composer');
   utils.define(this, 'buildHistory', {
+    configurable: true,
     get: function() {
       return builds;
     }
