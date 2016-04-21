@@ -1,16 +1,16 @@
-# composer [![NPM version](https://img.shields.io/npm/v/composer.svg)](https://www.npmjs.com/package/composer) [![Build Status](https://img.shields.io/travis/doowb/composer.svg)](https://travis-ci.org/doowb/composer)
+# composer [![NPM version](https://img.shields.io/npm/v/composer.svg?style=flat)](https://www.npmjs.com/package/composer) [![NPM downloads](https://img.shields.io/npm/dm/composer.svg?style=flat)](https://npmjs.org/package/composer) [![Build Status](https://img.shields.io/travis/doowb/composer.svg?style=flat)](https://travis-ci.org/doowb/composer)
 
 > API-first task runner with three methods: task, run and watch.
-
-**Heads up** `.watch` has been removed as of version `0.11.0`. If you need watch functionality, use [base-tasks](https://github.com/jonschlinkert/base-tasks) and [base-watch](https://github.com/node-base/base-watch).
 
 ## Install
 
 Install with [npm](https://www.npmjs.com/):
 
 ```sh
-$ npm i composer --save
+$ npm install composer --save
 ```
+
+**Heads up** the `.watch` method was removed in version `0.11.0`. If you need _watch_ functionality, use [base-tasks](https://github.com/jonschlinkert/base-tasks) and [base-watch](https://github.com/node-base/base-watch).
 
 ## Usage
 
@@ -20,7 +20,7 @@ var Composer = require('composer');
 
 ## API
 
-### [.task](index.js#L65)
+### [.task](index.js#L67)
 
 Register a new task with it's options and dependencies. To return the task object of an already registered task, pass the name of the task without any additional parameters.
 
@@ -50,7 +50,7 @@ app.task('site', ['styles'], function() {
 var task = app.task('site');
 ```
 
-### [.build](index.js#L121)
+### [.build](index.js#L125)
 
 Build a task or array of tasks.
 
@@ -68,7 +68,7 @@ app.build('default', function(err, results) {
 });
 ```
 
-### [.series](index.js#L181)
+### [.series](index.js#L185)
 
 Compose task or list of tasks into a single function that runs the tasks in series.
 
@@ -99,7 +99,7 @@ fn(function(err) {
 //=> done
 ```
 
-### [.parallel](index.js#L213)
+### [.parallel](index.js#L217)
 
 Compose task or list of tasks into a single function that runs the tasks in parallel.
 
@@ -134,13 +134,13 @@ fn(function(err) {
 
 ## Events
 
-[composer](https://github.com/jonschlinkert/composer) is an event emitter that may emit the following events:
+[composer](https://github.com/doowb/composer) is an event emitter that may emit the following events:
 
 ### starting
 
 This event is emitted when a `build` is starting.
 
-The event emits 2 arguments, the current instance of [composer](https://github.com/jonschlinkert/composer) as the `app` and an object containing the build runtime information.
+The event emits 2 arguments, the current instance of [composer](https://github.com/doowb/composer) as the `app` and an object containing the build runtime information.
 
 ```js
 app.on('starting', function(app, build) {});
@@ -153,7 +153,7 @@ app.on('starting', function(app, build) {});
 
 This event is emitted when a `build` has finished.
 
-The event emits 2 arguments, the current instance of [composer](https://github.com/jonschlinkert/composer) as the `app` and an object containing the build runtime information.
+The event emits 2 arguments, the current instance of [composer](https://github.com/doowb/composer) as the `app` and an object containing the build runtime information.
 
 ```js
 app.on('finished', function(app, build) {});
@@ -223,25 +223,39 @@ app.on('task:error', function(err) {});
 
 ## Related projects
 
+You might also be interested in these projects:
+
 * [assemble](https://www.npmjs.com/package/assemble): Assemble is a powerful, extendable and easy to use static site generator for node.js. Used… [more](https://www.npmjs.com/package/assemble) | [homepage](https://github.com/assemble/assemble)
-* [base](https://www.npmjs.com/package/base): base is the foundation for creating modular, unit testable and highly pluggable node.js applications, starting… [more](https://www.npmjs.com/package/base) | [homepage](https://github.com/node-base/base)
 * [base-tasks](https://www.npmjs.com/package/base-tasks): base-methods plugin that provides a very thin wrapper around [https://github.com/jonschlinkert/composer](https://github.com/jonschlinkert/composer) for adding task methods to… [more](https://www.npmjs.com/package/base-tasks) | [homepage](https://github.com/jonschlinkert/base-tasks)
 * [generate](https://www.npmjs.com/package/generate): Fast, composable, highly extendable project generator with a user-friendly and expressive API. | [homepage](https://github.com/generate/generate)
-* [templates](https://www.npmjs.com/package/templates): System for creating and managing template collections, and rendering templates with any node.js template engine.… [more](https://www.npmjs.com/package/templates) | [homepage](https://github.com/jonschlinkert/templates)
 * [update](https://www.npmjs.com/package/update): Easily keep anything in your project up-to-date by installing the updaters you want to use… [more](https://www.npmjs.com/package/update) | [homepage](https://github.com/update/update)
 * [verb](https://www.npmjs.com/package/verb): Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used… [more](https://www.npmjs.com/package/verb) | [homepage](https://github.com/verbose/verb)
+
+## Contributing
+
+Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jonschlinkert/composer/issues/new).
+
+## Building docs
+
+Generate readme and API documentation with [verb](https://github.com/verbose/verb):
+
+```sh
+$ npm install verb && npm run docs
+```
+
+Or, if [verb](https://github.com/verbose/verb) is installed globally:
+
+```sh
+$ verb
+```
 
 ## Running tests
 
 Install dev dependencies:
 
 ```sh
-$ npm i -d && npm test
+$ npm install -d && npm test
 ```
-
-## Contributing
-
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jonschlinkert/composer/issues/new).
 
 ## Author
 
@@ -252,9 +266,9 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 
 ## License
 
-Copyright © 2016 [Jon Schlinkert](https://github.com/jonschlinkert)
+Copyright © 2016, [Jon Schlinkert](https://github.com/jonschlinkert).
 Released under the [MIT license](https://github.com/doowb/composer/blob/master/LICENSE).
 
 ***
 
-_This file was generated by [verb](https://github.com/verbose/verb), v0.1.0, on February 12, 2016._
+_This file was generated by [verb](https://github.com/verbose/verb), v0.9.0, on April 20, 2016._
