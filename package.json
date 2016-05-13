@@ -30,6 +30,7 @@
     "co": "^4.6.0",
     "component-emitter": "^1.2.1",
     "define-property": "^0.2.5",
+    "extend-shallow": "^2.0.1",
     "is-generator": "^1.0.3",
     "is-glob": "^2.0.1",
     "isobject": "^2.1.0",
