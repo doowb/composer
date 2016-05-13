@@ -28,6 +28,45 @@ describe('series', function() {
     });
   });
 
+  it('should compose tasks with options into a function that runs in series', function(done) {
+    var output = [];
+    composer.task('foo', {silent: false}, function(cb) {
+      assert.equal(this.options.silent, false);
+      output.push('this is foo');
+      cb();
+    });
+    var fn = composer.series('foo', function bar(cb) {
+      output.push('this is bar');
+      cb();
+    });
+
+    fn(function(err) {
+      if (err) return done(err);
+      assert.deepEqual(output, ['this is foo', 'this is bar']);
+      done();
+    });
+  });
+
+  it('should compose tasks with additional options into a function that runs in series', function(done) {
+    var output = [];
+    composer.task('foo', {silent: false}, function(cb) {
+      assert.equal(this.options.silent, true);
+      assert.equal(this.options.foo, 'bar');
+      output.push('this is foo');
+      cb();
+    });
+    var fn = composer.series('foo', function bar(cb) {
+      output.push('this is bar');
+      cb();
+    }, {silent: true, foo: 'bar'});
+
+    fn(function(err) {
+      if (err) return done(err);
+      assert.deepEqual(output, ['this is foo', 'this is bar']);
+      done();
+    });
+  });
+
   it('should not throw an error when `fn` is called without a callback function.', function(done) {
     var output = [];
     composer.task('foo', function(cb) {

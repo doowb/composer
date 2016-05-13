@@ -103,6 +103,37 @@ describe('composer', function() {
     });
   });
 
+  it('should run a task with options', function(done) {
+    var count = 0;
+    composer.task('default', {silent: false}, function(cb) {
+      assert.equal(this.options.silent, false);
+      count++;
+      cb();
+    });
+
+    composer.build('default', function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should run a task with additional options', function(done) {
+    var count = 0;
+    composer.task('default', {silent: false}, function(cb) {
+      assert.equal(this.options.silent, true);
+      assert.equal(this.options.foo, 'bar');
+      count++;
+      cb();
+    });
+
+    composer.build('default', {silent: true, foo: 'bar'}, function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
   it('should run the `default` task when no task is given', function(done) {
     var count = 0;
     composer.task('default', function(cb) {
