@@ -59,6 +59,21 @@ describe('task', function() {
     });
   });
 
+  it('should skip a task function when `.options.run === false`', function(done) {
+    var count = 0;
+    var fn = function(cb) {
+      count++;
+      cb();
+    };
+
+    var task = new Task({name: 'default', fn: fn, options: {run: false}});
+    task.run(function(err) {
+      if(err) return done(err);
+      assert.equal(count, 0);
+      done();
+    });
+  });
+
   it('should run a task function that returns a promise when `.run` is called', function(done) {
     var count = 0;
     var fn = function() {

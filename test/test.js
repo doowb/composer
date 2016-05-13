@@ -148,6 +148,93 @@ describe('composer', function() {
     });
   });
 
+  it('should skip tasks when `run === false`', function(done) {
+    var output = [];
+    function fn() {
+      return function(cb) {
+        output.push(`${this.name}`);
+        cb();
+      };
+    }
+
+    composer.task('foo', fn());
+    composer.task('bar', {run: false}, fn());
+    composer.task('baz', fn());
+    composer.task('bang', {run: false}, fn());
+    composer.task('beep', fn());
+    composer.task('boop', fn());
+
+    composer.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
+    composer.build(function(err) {
+      if (err) return done(err);
+      assert.deepEqual(output, ['foo', 'baz', 'beep', 'boop']);
+      done();
+    });
+  });
+
+  it('should skip tasks when `run === false` (with deps skipped)', function(done) {
+    var output = [];
+    function fn() {
+      return function(cb) {
+        output.push(`${this.name}`);
+        cb();
+      };
+    }
+
+    composer.task('foo', fn());
+    composer.task('bar', {run: false}, ['foo'], fn());
+    composer.task('baz', ['bar'], fn());
+    composer.task('bang', {run: false}, ['baz'], fn());
+    composer.task('beep', ['bang'], fn());
+    composer.task('boop', ['beep'], fn());
+
+    composer.task('default', ['boop']);
+    composer.build(function(err) {
+      if (err) return done(err);
+      assert.deepEqual(output, ['beep', 'boop']);
+      done();
+    });
+  });
+
+  it('should skip tasks when `run === false` (complex flow)', function(done) {
+    var output = [];
+    composer.task('foo', function(cb) {
+      output.push(`${this.name}`);
+      // disable running the "bar" task
+      composer.tasks['bar'].options.run = false;
+      cb();
+    });
+    composer.task('bar', function(cb) {
+      output.push(`${this.name}`);
+      cb();
+    });
+    composer.task('baz', function(cb) {
+      output.push(`${this.name}`);
+      // enable running the "bang" task
+      composer.tasks['bang'].options.run = true;
+      cb();
+    });
+    composer.task('bang', {run: false}, function(cb) {
+      output.push(`${this.name}`);
+      cb();
+    });
+    composer.task('beep', function(cb) {
+      output.push(`${this.name}`);
+      cb();
+    });
+    composer.task('boop', function(cb) {
+      output.push(`${this.name}`);
+      cb();
+    });
+
+    composer.task('default', ['foo', 'bar',  'baz', 'bang', 'beep', 'boop']);
+    composer.build(function(err) {
+      if (err) return done(err);
+      assert.deepEqual(output, ['foo', 'baz', 'bang', 'beep', 'boop']);
+      done();
+    });
+  });
+
   it('should throw an error when a task with unregistered dependencies is built', function(done) {
     var count = 0;
     composer.task('default', ['foo', 'bar'], function(cb) {
