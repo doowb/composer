@@ -1,7 +1,7 @@
 {
   "name": "composer",
   "description": "API-first task runner with three methods: task, run and watch.",
-  "version": "0.11.4",
+  "version": "0.12.0",
   "homepage": "https://github.com/doowb/composer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
