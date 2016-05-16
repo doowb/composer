@@ -74,6 +74,51 @@ describe('task', function() {
     });
   });
 
+  it('should skip a task function when `.options.skip` is the task name', function(done) {
+    var count = 0;
+    var fn = function(cb) {
+      count++;
+      cb();
+    };
+
+    var task = new Task({name: 'foo', fn: fn, options: {skip: 'foo'}});
+    task.run(function(err) {
+      if(err) return done(err);
+      assert.equal(count, 0);
+      done();
+    });
+  });
+
+  it('should skip a task function when `.options.skip` is an array with the task name', function(done) {
+    var count = 0;
+    var fn = function(cb) {
+      count++;
+      cb();
+    };
+
+    var task = new Task({name: 'foo', fn: fn, options: {skip: ['bar', 'baz', 'foo']}});
+    task.run(function(err) {
+      if(err) return done(err);
+      assert.equal(count, 0);
+      done();
+    });
+  });
+
+  it('should not skip a task function when `.options.skip` is an array without the task name', function(done) {
+    var count = 0;
+    var fn = function(cb) {
+      count++;
+      cb();
+    };
+
+    var task = new Task({name: 'foo', fn: fn, options: {skip: ['bar', 'baz']}});
+    task.run(function(err) {
+      if(err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
   it('should run a task function that returns a promise when `.run` is called', function(done) {
     var count = 0;
     var fn = function() {
