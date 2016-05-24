@@ -142,8 +142,8 @@ Composer.prototype.build = function(/* [tasks,] [options,] callback */) {
   function finishBuild(err) {
     build.end();
     if (err) {
-      err.app = self;
-      err.build = build;
+      utils.define(err, 'app', self);
+      utils.define(err, 'build', build);
       self.emit('error', err);
     } else {
       self.emit('finished', self, build);
