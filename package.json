@@ -92,7 +92,9 @@
     "reflinks": [
       "base-tasks",
       "composer",
-      "verb"
+      "verb",
+      "base",
+      "base-watch"
     ]
   }
 }
