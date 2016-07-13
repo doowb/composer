@@ -22,6 +22,7 @@ describe('run', function() {
     assert(typeof run.date.end === 'undefined');
     assert(typeof run.hr.end === 'undefined');
     assert(typeof run.hr.duration === 'undefined');
+    assert.equal(run.duration, '');
   });
 
   it('should set run information when ending a run', function() {
@@ -35,5 +36,6 @@ describe('run', function() {
     assert(typeof run.hr.duration !== 'undefined');
     assert(typeof run.hr.diff !== 'undefined');
     assert(typeof run.hr.offset !== 'undefined');
+    assert(run.duration !== '');
   });
 });

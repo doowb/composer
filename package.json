@@ -36,7 +36,8 @@
     "isobject": "^2.1.0",
     "lazy-cache": "^2.0.1",
     "micromatch": "^2.3.8",
-    "nanoseconds": "^0.1.0"
+    "nanoseconds": "^0.1.0",
+    "pretty-time": "^0.2.0"
   },
   "devDependencies": {
     "assemble-loader": "^0.4.0",
