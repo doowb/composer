@@ -2,7 +2,7 @@
 
 var Promise = require('bluebird');
 var through = require('through2');
-var runtimes = require('composer-runtimes');
+var runtimes = require('composer-runtimes')();
 
 var Composer = require('..');
 var composer = new Composer();

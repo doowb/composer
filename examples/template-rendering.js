@@ -3,7 +3,7 @@
 // require('time-require');
 
 var Composer = require('..');
-var runtimes = require('composer-runtimes');
+var runtimes = require('composer-runtimes')();
 var matter = require('parser-front-matter');
 var extname = require('gulp-extname');
 var Templates = require('templates');
