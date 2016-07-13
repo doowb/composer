@@ -91,13 +91,14 @@
       "reflinks": true
     },
     "reflinks": [
+      "bach",
       "base",
       "base-tasks",
       "base-watch",
       "composer",
+      "pretty-time",
       "verb",
-      "verb-readme-generator",
-      "pretty-time"
+      "verb-generate-readme"
     ]
   }
 }

@@ -1,3 +1,16 @@
+### v0.14.0
+
+- Updates [bach][] to `1.0.0`.
+- Errors emitted from inside a task now have the `'in task "foo":'` prefixed to the error message. [see issue #22](../../issues/22)
+- Expose `.runInfo` on the task object for use in event listeners and task functions.
+- Add `.duration` to the `.run/.runInfo` object that shows the duration in a human friendly format. This will also show the current duration from the time the task started to the time it's called if used inside a task function. [see issue #23](../../issues/23)
+
+```js
+app.task('foo', function(cb) {
+  console.log(this.runInfo.duration);
+});
+```
+
 ### v0.13.0
 
 - Skip tasks by setting the `options.skip` option to the name of the task or an array of task names.
