@@ -300,7 +300,7 @@ describe('composer', function() {
   it('should emit an error event when an error is passed back in a task', function(done) {
     composer.on('task:error', function(err) {
       assert(err);
-      assert.equal(err.message, 'This is an error');
+      assert.equal(err.message, 'in task "default": This is an error');
     });
     composer.task('default', function(cb) {
       return cb(new Error('This is an error'));
@@ -316,7 +316,7 @@ describe('composer', function() {
     composer.on('task:error', function(err) {
       errors++;
       assert(err);
-      assert.equal(err.message, 'This is an error');
+      assert.equal(err.message, 'in task "default": This is an error');
     });
     composer.task('default', function() {
       throw new Error('This is an error');
@@ -357,7 +357,7 @@ describe('composer', function() {
   it('should emit a build error event when an error is passed back in a task', function(done) {
     composer.on('error', function(err) {
       assert(err);
-      assert.equal(err.message, 'This is an error');
+      assert.equal(err.message, 'in task "default": This is an error');
     });
     composer.task('default', function(cb) {
       return cb(new Error('This is an error'));
@@ -373,7 +373,7 @@ describe('composer', function() {
     composer.on('error', function(err) {
       errors++;
       assert(err);
-      assert.equal(err.message, 'This is an error');
+      assert.equal(err.message, 'in task "default": This is an error');
     });
     composer.task('default', function() {
       throw new Error('This is an error');
