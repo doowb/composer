@@ -16,13 +16,17 @@ describe('run', function() {
 
   it('should set run information when starting a run', function() {
     var run = new Run(1);
+    assert(typeof run.date.start === 'undefined');
+    assert(typeof run.hr.start === 'undefined');
+    assert(run.duration === '');
+
     run.start();
     assert(typeof run.date.start !== 'undefined');
     assert(typeof run.hr.start !== 'undefined');
     assert(typeof run.date.end === 'undefined');
     assert(typeof run.hr.end === 'undefined');
     assert(typeof run.hr.duration === 'undefined');
-    assert.equal(run.duration, '');
+    assert(run.duration !== '');
   });
 
   it('should set run information when ending a run', function() {
