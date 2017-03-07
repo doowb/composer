@@ -227,7 +227,7 @@ describe('composer', function() {
       cb();
     });
 
-    composer.task('default', ['foo', 'bar',  'baz', 'bang', 'beep', 'boop']);
+    composer.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
     composer.build(function(err) {
       if (err) return done(err);
       assert.deepEqual(output, ['foo', 'baz', 'bang', 'beep', 'boop']);

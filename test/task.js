@@ -68,7 +68,7 @@ describe('task', function() {
 
     var task = new Task({name: 'default', fn: fn, options: {run: false}});
     task.run(function(err) {
-      if(err) return done(err);
+      if (err) return done(err);
       assert.equal(count, 0);
       done();
     });
@@ -83,7 +83,7 @@ describe('task', function() {
 
     var task = new Task({name: 'foo', fn: fn, options: {skip: 'foo'}});
     task.run(function(err) {
-      if(err) return done(err);
+      if (err) return done(err);
       assert.equal(count, 0);
       done();
     });
@@ -98,7 +98,7 @@ describe('task', function() {
 
     var task = new Task({name: 'foo', fn: fn, options: {skip: ['bar', 'baz', 'foo']}});
     task.run(function(err) {
-      if(err) return done(err);
+      if (err) return done(err);
       assert.equal(count, 0);
       done();
     });
@@ -113,7 +113,7 @@ describe('task', function() {
 
     var task = new Task({name: 'foo', fn: fn, options: {skip: ['bar', 'baz']}});
     task.run(function(err) {
-      if(err) return done(err);
+      if (err) return done(err);
       assert.equal(count, 1);
       done();
     });
@@ -162,7 +162,7 @@ describe('task', function() {
 
   it('should run a task given a generator function when `.run` is called', function(done) {
     var count = 0;
-    var fn = function* () {
+    var fn = function * () {
       count++;
     };
 
