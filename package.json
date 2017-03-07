@@ -45,6 +45,7 @@
     "assemble-render-file": "^0.7.2",
     "assemble-streams": "^0.6.0",
     "async": "^1.5.2",
+    "bdd-stdin": "^0.2.0",
     "bluebird": "^3.4.1",
     "composer-runtimes": "^0.7.0",
     "engine-handlebars": "^0.8.0",

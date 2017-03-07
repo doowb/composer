@@ -2,6 +2,7 @@
 
 /* deps: mocha */
 var assert = require('assert');
+var bddStdin = require('bdd-stdin');
 
 var Composer = require('../');
 var noop = require('../lib/noop');
@@ -87,6 +88,62 @@ describe('composer', function() {
     composer.task('default', {flow: 'parallel'}, ['foo', 'bar']);
     assert.equal(typeof composer.tasks.default, 'object');
     assert.equal(composer.tasks.default.fn, noop);
+    assert.equal(composer.tasks.default.options.flow, 'parallel');
+  });
+
+  it('should register a task as a prompt task', function() {
+    composer.task('default', 'Run task?', 'foo');
+    assert.equal(typeof composer.tasks.default, 'object');
+  });
+
+  it('should register a prompt task with options as the third argument', function() {
+    composer.task('default', 'Run task?', {flow: 'parallel'}, ['foo', 'bar']);
+    assert.equal(typeof composer.tasks.default, 'object');
+    assert.equal(composer.tasks.default.options.flow, 'parallel');
+  });
+
+  it('should throw an error when a prompt task does not have a task specified to run', function(done) {
+    try {
+      composer.task('default', 'Run task?');
+      done(new Error('Expected an error to be thrown'));
+    } catch (err) {
+      assert(err);
+      assert.equal(err.message, 'expected a task to be specified that will run when the confirmation is true');
+      done();
+    }
+  });
+
+  it('should throw an error when a prompt task as options but does not have a task specified to run', function(done) {
+    try {
+      composer.task('default', 'Run task?', {flow: 'parallel'});
+      done(new Error('Expected an error to be thrown'));
+    } catch (err) {
+      assert(err);
+      assert.equal(err.message, 'expected a task to be specified that will run when the confirmation is true');
+      done();
+    }
+  });
+
+  it('should throw an error when a prompt task has too many arguments specified', function(done) {
+    try {
+      composer.task('default', 'Run task?', 'foo', 'bar', 'baz');
+      done(new Error('Expected an error to be thrown'));
+    } catch (err) {
+      assert(err);
+      assert.equal(err.message, 'too many arguments passed to `.task`');
+      done();
+    }
+  });
+
+  it('should throw an error when a prompt task with options has too many arguments specified', function(done) {
+    try {
+      composer.task('default', 'Run task?', {flow: 'parallel'}, 'foo', 'bar', 'baz');
+      done(new Error('Expected an error to be thrown'));
+    } catch (err) {
+      assert(err);
+      assert.equal(err.message, 'too many arguments passed to `.task`');
+      done();
+    }
   });
 
   it('should run a task', function(done) {
@@ -99,6 +156,38 @@ describe('composer', function() {
     composer.build('default', function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should run a prompt task', function(done) {
+    var results = [];
+
+    // testing both yes and no in one test because `bddStdin` is causing some
+    // weird issue when run in different tests
+    composer.task('setup', function(cb) {
+      bddStdin(['\n', 'n', '\n']);
+      cb();
+    });
+
+    composer.task('confirm', 'Run task 1?', function(cb) {
+      results.push('yes');
+      cb();
+    });
+
+    composer.task('no-confirm', 'Run task 2?', function(cb) {
+      results.push('yes');
+      cb();
+    }, function(cb) {
+      results.push('no');
+      cb();
+    });
+
+    composer.task('default', ['confirm', 'no-confirm']);
+
+    composer.build(['setup', 'default'], function(err) {
+      if (err) return done(err);
+      assert.deepEqual(results, ['yes', 'no']);
       done();
     });
   });

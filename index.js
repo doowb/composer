@@ -71,7 +71,6 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
 
   // when a prompt is being registered normalize args and register task as a prompt task
   if (utils.isPrompt(args)) {
-    console.log('PROMPT');
     var message = args.shift();
     if (utils.hasOptions(args)) {
       options = args.shift();
