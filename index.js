@@ -5,6 +5,7 @@ var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var utils = require('./lib/utils');
 var map = require('./lib/map-deps');
+var prompt = require('./lib/prompt');
 var inspect = require('./lib/inspect');
 var flowFactory = require('./lib/flow');
 var Emitter = require('component-emitter');
@@ -64,19 +65,40 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
     throw new TypeError('expected `name` to be a string');
   }
 
-  var deps = [].concat.apply([], [].slice.call(arguments, 1));
-
   var options = {};
   var fn = noop;
-  if (deps.length && typeof deps[deps.length - 1] === 'function') {
-    fn = deps.pop();
+  var args = [].concat.apply([], [].slice.call(arguments, 1));
+
+  // when a prompt is being registered normalize args and register task as a prompt task
+  if (utils.isPrompt(args)) {
+    var message = args.shift();
+    if (utils.hasOptions(args)) {
+      options = args.shift();
+    }
+
+    fn = args.shift();
+    if (typeof fn === 'undefined') {
+      throw new Error('expected a task to be specified that will run when the confirmation is true');
+    }
+
+    var inverse = args.length ? args.shift() : noop;
+    if (args.length) {
+      throw new Error('too many arguments passed to `.task`');
+    }
+
+    return this.task(name, options, prompt(this, {name, message, fn, inverse}));
   }
 
-  if (deps.length && utils.isobject(deps[0])) {
-    options = deps.shift();
+  // get the actual task function
+  if (args.length && typeof args[args.length - 1] === 'function') {
+    fn = args.pop();
   }
 
-  options.deps = utils.unique(deps
+  if (utils.hasOptions(args)) {
+    options = args.shift();
+  }
+
+  options.deps = utils.unique(args
     .concat(options.deps || [])
     .map(map.bind(this)));
 
