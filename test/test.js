@@ -161,6 +161,10 @@ describe('composer', function() {
   });
 
   it('should run a prompt task', function(done) {
+    if (process.env.CI) {
+      return done();
+    }
+
     var results = [];
 
     // testing both yes and no in one test because `bddStdin` is causing some
