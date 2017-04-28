@@ -5,8 +5,8 @@
   "homepage": "https://github.com/doowb/composer",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "contributors": [
-    "Brian Woodward <brian.woodward@gmail.com> (https://github.com/doowb)",
-    "Jon Schlinkert <github@sellside.com> (https://github.com/jonschlinkert)"
+    "Brian Woodward <brian.woodward@gmail.com> (https://twitter.com/doowb)",
+    "Jon Schlinkert <jon.schlinkert@sellside.com> (http://twitter.com/jonschlinkert)"
   ],
   "repository": "doowb/composer",
   "bugs": {
@@ -19,7 +19,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=4.0"
+    "node": ">=0.10.0"
   },
   "scripts": {
     "test": "mocha"
