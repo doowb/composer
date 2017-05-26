@@ -2,7 +2,6 @@
 
 /* deps: mocha */
 var assert = require('assert');
-var bddStdin = require('bdd-stdin');
 
 var Composer = require('../');
 var noop = require('../lib/noop');
