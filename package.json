@@ -25,20 +25,19 @@
     "test": "mocha"
   },
   "dependencies": {
-    "array-unique": "^0.2.1",
-    "bach": "^1.0.0",
+    "array-unique": "^0.3.2",
+    "bach": "^1.1.0",
     "co": "^4.6.0",
     "component-emitter": "^1.2.1",
-    "define-property": "^0.2.5",
+    "define-property": "^1.0.0",
     "extend-shallow": "^2.0.1",
     "is-generator": "^1.0.3",
-    "is-glob": "^2.0.1",
-    "isobject": "^2.1.0",
-    "lazy-cache": "^2.0.1",
-    "micromatch": "^2.3.10",
+    "is-glob": "^3.1.0",
+    "isobject": "^3.0.0",
+    "lazy-cache": "^2.0.2",
+    "micromatch": "^2.3.11",
     "nanoseconds": "^0.1.0",
-    "pretty-time": "^0.2.0",
-    "prompt-confirm": "^0.2.1"
+    "pretty-time": "^0.2.0"
   },
   "devDependencies": {
     "assemble-loader": "^0.6.1",
