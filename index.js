@@ -5,7 +5,6 @@ var Task = require('./lib/task');
 var noop = require('./lib/noop');
 var utils = require('./lib/utils');
 var map = require('./lib/map-deps');
-var prompt = require('./lib/prompt');
 var inspect = require('./lib/inspect');
 var flowFactory = require('./lib/flow');
 var Emitter = require('component-emitter');
@@ -68,26 +67,6 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
   var options = {};
   var fn = noop;
   var args = [].concat.apply([], [].slice.call(arguments, 1));
-
-  // when a prompt is being registered normalize args and register task as a prompt task
-  if (utils.isPrompt(args)) {
-    var message = args.shift();
-    if (utils.hasOptions(args)) {
-      options = args.shift();
-    }
-
-    fn = args.shift();
-    if (typeof fn === 'undefined') {
-      throw new Error('expected a task to be specified that will run when the confirmation is true');
-    }
-
-    var inverse = args.length ? args.shift() : noop;
-    if (args.length) {
-      throw new Error('too many arguments passed to `.task`');
-    }
-
-    return this.task(name, options, prompt(this, {name, message, fn, inverse}));
-  }
 
   // get the actual task function
   if (args.length && typeof args[args.length - 1] === 'function') {
