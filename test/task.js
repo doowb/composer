@@ -160,20 +160,6 @@ describe('task', function() {
     });
   });
 
-  it('should run a task given a generator function when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function * () {
-      count++;
-    };
-
-    var task = new Task({name: 'default', fn: fn});
-    task.run(function(err) {
-      if (err) return done(err);
-      assert.equal(count, 1);
-      done();
-    });
-  });
-
   it('should emit a `starting` event when the task starts running', function(done) {
     var count = 0;
     var fn = function(cb) {

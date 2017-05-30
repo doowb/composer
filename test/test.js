@@ -536,3 +536,10 @@ describe('composer', function() {
     });
   });
 });
+
+// version regex from kind-of tests
+// https://github.com/jonschlinkert/kind-of/blob/19fa8aba91e84ed7da93ebabb3164b00cea9a954/test/test.js#L7
+var version = process.version.match(/^v(\d+)\.(\d+)\.(\d+)/);
+if (version[1] >= 4) {
+  require('./es2015');
+}
