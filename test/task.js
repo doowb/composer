@@ -119,25 +119,6 @@ describe('task', function() {
     });
   });
 
-  it('should run a task function that returns a promise when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function() {
-      return new Promise(function(resolve) {
-        setImmediate(function() {
-          count++;
-          resolve();
-        });
-      });
-    };
-
-    var task = new Task({name: 'default', fn: fn});
-    task.run(function(err) {
-      if (err) return done(err);
-      assert.equal(count, 1);
-      done();
-    });
-  });
-
   it('should run a task function that returns a stream when `.run` is called', function(done) {
     var count = 0;
     var fn = function() {
