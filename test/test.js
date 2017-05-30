@@ -158,7 +158,7 @@ describe('composer', function() {
     var output = [];
     function fn() {
       return function(cb) {
-        output.push(`${this.name}`);
+        output.push(this.name);
         cb();
       };
     }
@@ -182,7 +182,7 @@ describe('composer', function() {
     var output = [];
     function fn() {
       return function(cb) {
-        output.push(`${this.name}`);
+        output.push(this.name);
         cb();
       };
     }
@@ -205,31 +205,31 @@ describe('composer', function() {
   it('should skip tasks when `run === false` (complex flow)', function(done) {
     var output = [];
     composer.task('foo', function(cb) {
-      output.push(`${this.name}`);
+      output.push(this.name);
       // disable running the "bar" task
       composer.tasks['bar'].options.run = false;
       cb();
     });
     composer.task('bar', function(cb) {
-      output.push(`${this.name}`);
+      output.push(this.name);
       cb();
     });
     composer.task('baz', function(cb) {
-      output.push(`${this.name}`);
+      output.push(this.name);
       // enable running the "bang" task
       composer.tasks['bang'].options.run = true;
       cb();
     });
     composer.task('bang', {run: false}, function(cb) {
-      output.push(`${this.name}`);
+      output.push(this.name);
       cb();
     });
     composer.task('beep', function(cb) {
-      output.push(`${this.name}`);
+      output.push(this.name);
       cb();
     });
     composer.task('boop', function(cb) {
-      output.push(`${this.name}`);
+      output.push(this.name);
       cb();
     });
 
