@@ -1,4 +1,4 @@
-# composer [![NPM version](https://img.shields.io/npm/v/composer.svg?style=flat)](https://www.npmjs.com/package/composer) [![NPM monthly downloads](https://img.shields.io/npm/dm/composer.svg?style=flat)](https://npmjs.org/package/composer)  [![NPM total downloads](https://img.shields.io/npm/dt/composer.svg?style=flat)](https://npmjs.org/package/composer) [![Linux Build Status](https://img.shields.io/travis/doowb/composer.svg?style=flat&label=Travis)](https://travis-ci.org/doowb/composer)
+# composer [![NPM version](https://img.shields.io/npm/v/composer.svg?style=flat)](https://www.npmjs.com/package/composer) [![NPM monthly downloads](https://img.shields.io/npm/dm/composer.svg?style=flat)](https://npmjs.org/package/composer)  [![NPM total downloads](https://img.shields.io/npm/dt/composer.svg?style=flat)](https://npmjs.org/package/composer) [![Linux Build Status](https://img.shields.io/travis/doowb/composer.svg?style=flat&label=Travis)](https://travis-ci.org/doowb/composer) [![Windows Build Status](https://img.shields.io/appveyor/ci/doowb/composer.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/doowb/composer)
 
 > API-first task runner with three methods: task, run and watch.
 
@@ -38,7 +38,7 @@ var Composer = require('composer');
 
 ## API
 
-### [.task](index.js#L62)
+### [.task](index.js#L55)
 
 Register a new task with it's options and dependencies.
 
@@ -65,7 +65,7 @@ app.task('site', ['styles'], function() {
 });
 ```
 
-### [.build](index.js#L119)
+### [.build](index.js#L113)
 
 Build a task or array of tasks.
 
@@ -84,7 +84,7 @@ app.build('default', function(err, results) {
 });
 ```
 
-### [.series](index.js#L186)
+### [.series](index.js#L180)
 
 Compose task or list of tasks into a single function that runs the tasks in series.
 
@@ -115,7 +115,7 @@ fn(function(err) {
 //=> done
 ```
 
-### [.parallel](index.js#L218)
+### [.parallel](index.js#L212)
 
 Compose task or list of tasks into a single function that runs the tasks in parallel.
 
@@ -171,31 +171,36 @@ The `.duration` property is a computed property that uses [pretty-time](https://
 
 [composer](https://github.com/doowb/composer) is an event emitter that may emit the following events:
 
-### starting
+### build
 
-This event is emitted when a `build` is starting.
-
-The event emits 2 arguments, the current instance of [composer](https://github.com/doowb/composer) as the `app` and an object containing the build runtime information.
+This event is emitted when the build is starting and when it's finished. The event emits an object containing the build runtime information.
 
 ```js
-app.on('starting', function(app, build) {});
+app.on('build', function(build) {});
 ```
 
+* `build` exposes a `.app` object that is the instance of composer.
+* `build` exposes a `.status` property that is either `starting` or `finished`.
 * `build` exposes a `.date` object that has a `.start` property containing the start time as a `Date` object.
 * `build` exposes a `.hr` object that has a `.start` property containing the start time as an `hrtime` array.
+* when `build.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`.
 
-### finished
+### task
 
-This event is emitted when a `build` has finished.
-
-The event emits 2 arguments, the current instance of [composer](https://github.com/doowb/composer) as the `app` and an object containing the build runtime information.
+This event is emitted when the task is registered, starting, and when it's finished. The event emits 2 arguments, the current instance of the task object and an object containing the task runtime information.
 
 ```js
-app.on('finished', function(app, build) {});
+app.on('task', function(task, run) {});
 ```
+The `task` parameter exposes:
 
-* `build` exposes a `.date` object that has `.start` and `.end` properties containing start and end times of the build as `Date` objects.
-* `build` exposes a `.hr` object that has `.start`, `.end`, `.duration`, and `.diff` properties containing timing information calculated using `process.hrtime`
+* `.status` **{String}**: current status of the task. May be `register`, `starting`, or `finished`.
+
+The `run` parameter exposes:
+
+* `.date` **{Object}**: has a `.start` property containing the start time as a `Date` object.
+* `.hr` **{Object}**: has a `.start` property containing the start time as an `hrtime` array.
+* when `task.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`.
 
 ### error
 
@@ -210,49 +215,6 @@ Additional properties:
 
 * `app`: current composer instance running the build
 * `build`: current build runtime information
-* `task`: current task instance running when the error occurred
-* `run`: current task runtime information
-
-### task:starting
-
-This event is emitted when a task is starting.
-The event emits 2 arguments, the current instance of the task object and an object containing the task runtime information.
-
-```js
-app.on('task:starting', function(task, run) {});
-```
-
-The `run` parameter exposes:
-
-* `.date` **{Object}**: has a `.start` property containing the start time as a `Date` object.
-* `.hr` **{Object}**: has a `.start` property containing the start time as an `hrtime` array.
-
-### task:finished
-
-This event is emitted when a task has finished.
-
-The event emits 2 arguments, the current instance of the task object and an object containing the task runtime information.
-
-```js
-app.on('task:finished', function(task, run) {});
-```
-
-The `run` parameter exposes:
-
-* `.date` **{Object}**: has a `.date` object that has `.start` and `.end` properties containing start and end times of the task as `Date` objects.
-* `run` **{Object}**: has an `.hr` object that has `.start`, `.end`, `.duration`, and `.diff` properties containing timing information calculated using `process.hrtime`
-
-### task:error
-
-This event is emitted when an error occurrs while running a task.
-The event emits 1 argument as an `Error` object containing additional information about the task running when the error occurred.
-
-```js
-app.on('task:error', function(err) {});
-```
-
-**Additional properties**
-
 * `task`: current task instance running when the error occurred
 * `run`: current task runtime information
 
@@ -369,7 +331,7 @@ Pull requests and stars are always welcome. For bugs and feature requests, [plea
 
 | **Commits** | **Contributor** |  
 | --- | --- |  
-| 195 | [doowb](https://github.com/doowb) |  
+| 207 | [doowb](https://github.com/doowb) |  
 | 36  | [jonschlinkert](https://github.com/jonschlinkert) |  
 
 ### Building docs
@@ -404,4 +366,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on May 26, 2017._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on September 12, 2017._

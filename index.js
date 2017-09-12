@@ -84,12 +84,13 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
   inspect(this, task);
 
   // bubble up events from tasks
-  task.on('starting', this.emit.bind(this, 'task:starting'));
-  task.on('finished', this.emit.bind(this, 'task:finished'));
-  task.on('error', this.emit.bind(this, 'task:error'));
+  task.on('starting', this.emit.bind(this, 'task'));
+  task.on('finished', this.emit.bind(this, 'task'));
+  task.on('error', this.emit.bind(this, 'error'));
 
   this.tasks[name] = task;
-  this.emit('task', this.name, task);
+  task.status = 'register';
+  this.emit('task', task);
   return this;
 };
 
@@ -130,8 +131,9 @@ Composer.prototype.build = function(/* [tasks,] [options,] callback */) {
   // gather total build time information
   var self = this;
   var build = new Run(runId++);
+  utils.define(build, 'app', this);
   build.start();
-  this.emit('starting', this, build);
+  this.emit('build', build);
   function finishBuild(err) {
     build.end();
     if (err) {
@@ -139,7 +141,7 @@ Composer.prototype.build = function(/* [tasks,] [options,] callback */) {
       utils.define(err, 'build', build);
       self.emit('error', err);
     } else {
-      self.emit('finished', self, build);
+      self.emit('build', build);
     }
     return done.apply(null, arguments);
   };
