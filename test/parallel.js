@@ -30,6 +30,18 @@ describe('parallel', function() {
     });
   });
 
+  it('should return an error when no functions are passed to parallel', function(done) {
+    var fn = composer.parallel();
+    fn(function(err) {
+      if (!err) {
+        done(new Error('expected an error'));
+        return;
+      }
+      assert.equal(err.message, 'A set of functions to combine is required');
+      done();
+    });
+  });
+
   it('should compose tasks with options into a function that runs in parallel', function(done) {
     var output = [];
     composer.task('foo', {silent: false}, function(cb) {
