@@ -337,13 +337,13 @@ describe('composer', function() {
   it('should emit build events', function(done) {
     var events = [];
     composer.on('starting', function(app, run) {
-      events.push('starting.' + app._appname);
+      events.push('starting');
     });
     composer.on('finished', function(app, run) {
-      events.push('finished.' + app._appname);
+      events.push('finished');
     });
     composer.on('error', function(err) {
-      events.push('error.' + err.app._appname);
+      events.push('error');
     });
 
     composer.task('foo', function(cb) {
@@ -355,7 +355,7 @@ describe('composer', function() {
     composer.task('default', ['bar']);
     composer.build('default', function(err) {
       if (err) return done(err);
-      assert.deepEqual(events, ['starting.composer', 'finished.composer']);
+      assert.deepEqual(events, ['starting', 'finished']);
       done();
     });
   });
@@ -510,26 +510,6 @@ describe('composer', function() {
     }
     composer.build(tasks, function(err) {
       if (err) return done(err);
-      assert.equal(results.length, 10);
-      assert.deepEqual(results, ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
-      done();
-    });
-  });
-
-  it('should get the build history after a build', function(done) {
-    var results = [];
-    var fn = function(cb) {
-      results.push(this.name);
-      cb();
-    };
-    var tasks = [];
-    for (var i = 0; i < 10; i++) {
-      tasks.push('task-' + i);
-      composer.task('task-' + i, fn);
-    }
-    composer.build(tasks, function(err) {
-      if (err) return done(err);
-      assert(composer.buildHistory.length > 0);
       assert.equal(results.length, 10);
       assert.deepEqual(results, ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
       done();

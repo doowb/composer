@@ -8,7 +8,7 @@ var map = require('./lib/map-deps');
 var inspect = require('./lib/inspect');
 var flowFactory = require('./lib/flow');
 var Emitter = require('component-emitter');
-var builds = [];
+var runId = 0;
 
 /**
  * Composer constructor. Create an instance of `Composer`
@@ -21,13 +21,6 @@ var builds = [];
 function Composer(name) {
   Emitter.call(this);
   this.tasks = {};
-  utils.define(this, '_appname', name || this._appname || 'composer');
-  utils.define(this, 'buildHistory', {
-    configurable: true,
-    get: function() {
-      return builds;
-    }
-  });
 }
 
 /**
@@ -136,8 +129,7 @@ Composer.prototype.build = function(/* [tasks,] [options,] callback */) {
 
   // gather total build time information
   var self = this;
-  var build = new Run(builds.length);
-  builds.push(build);
+  var build = new Run(runId++);
   build.start();
   this.emit('starting', this, build);
   function finishBuild(err) {
