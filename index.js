@@ -104,29 +104,31 @@ Composer.prototype.task = function(name/*, options, deps, task */) {
  * });
  * ```
  *
- * @param {String|Array|Function} `tasks` List of tasks by name, function, or array of names/functions. (Defaults to `[default]`).
+ * @param {String|Array} `tasks` Array of task names to build. (Defaults to `[default]`).
  * @param {Object} `options` Optional options object to merge onto each task's options when building.
- * @param {Function} `cb` Callback function to be called when all tasks are finished building.
+ * @param {Function} `cb` Optional callback function to be called when all tasks are finished building. If omitted, a Promise is returned.
+ * @return {Promise} When `cb` is omitted, a Promise is returned that will resolve when the tasks are finished building.
  * @api public
  */
 
-Composer.prototype.build = function(/* [tasks,] [options,] callback */) {
-  var args = [].concat.apply([], [].slice.call(arguments));
-  var done = args.pop();
-  if (typeof done !== 'function') {
-    throw new TypeError('Expected the last argument to be a callback function, but got `' + typeof done + '`.');
+Composer.prototype.build = function(tasks, options, cb) {
+  if (typeof options === 'function') {
+    cb = options;
+    options = null;
   }
 
-  var options = {};
-  if (args.length && utils.isobject(args[args.length - 1])) {
-    options = args.pop();
+  if (typeof tasks === 'function') {
+    cb = tasks;
+    tasks = [];
   }
 
-  if (args.length === 0) {
-    args = ['default'];
+  tasks = utils.arrayify(tasks);
+  if (tasks.length === 0) {
+    tasks = ['default'];
   }
 
-  args.push(options);
+  var opts = utils.extend({}, options);
+  tasks.push(opts);
 
   // gather total build time information
   var self = this;
@@ -134,20 +136,33 @@ Composer.prototype.build = function(/* [tasks,] [options,] callback */) {
   utils.define(build, 'app', this);
   build.start();
   this.emit('build', build);
-  function finishBuild(err) {
-    build.end();
-    if (err) {
-      utils.define(err, 'app', self);
-      utils.define(err, 'build', build);
-      self.emit('error', err);
-    } else {
-      self.emit('build', build);
-    }
-    return done.apply(null, arguments);
-  };
+  var fn = this.series.apply(this, tasks);
 
-  var fn = this.series.apply(this, args);
-  return fn(finishBuild);
+  return new Promise(function(resolve, reject) {
+    fn(function(err, result) {
+      build.end();
+      if (err) {
+        utils.define(err, 'app', self);
+        utils.define(err, 'build', build);
+        self.emit('error', err);
+        reject(err);
+      } else {
+        self.emit('build', build);
+        resolve(result);
+      }
+    });
+  })
+  .then(function(result) {
+    if (typeof cb === 'function') {
+      cb(null, result);
+    }
+    return result;
+  })
+  .catch(function(err) {
+    if (typeof cb === 'function') {
+      cb(err);
+    }
+  });
 };
 
 /**

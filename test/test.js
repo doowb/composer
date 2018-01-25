@@ -269,14 +269,6 @@ describe('composer', function() {
     });
   });
 
-  it('should throw an error when `.build` is called without a callback function.', function() {
-    try {
-      composer.build('default');
-      throw new Error('Expected an error to be thrown.');
-    } catch (err) {
-    }
-  });
-
   it('should emit task events', function(done) {
     var events = [];
     composer.on('task', function(task) {
