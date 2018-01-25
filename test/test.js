@@ -109,6 +109,19 @@ describe('composer', function() {
     });
   });
 
+  it('should run a task and return a promise', function() {
+    var count = 0;
+    composer.task('default', function(cb) {
+      count++;
+      cb();
+    });
+
+    return composer.build('default')
+      .then(function() {
+        assert.equal(count, 1);
+      });
+  });
+
   it('should run a task with options', function(done) {
     var count = 0;
     composer.task('default', {silent: false}, function(cb) {
@@ -269,23 +282,15 @@ describe('composer', function() {
     });
   });
 
-  it('should throw an error when `.build` is called without a callback function.', function() {
-    try {
-      composer.build('default');
-      throw new Error('Expected an error to be thrown.');
-    } catch (err) {
-    }
-  });
-
   it('should emit task events', function(done) {
     var events = [];
-    composer.on('task:starting', function(task, run) {
-      events.push('starting.' + task.name);
+    composer.on('task', function(task) {
+      events.push(task.status + '.' + task.name);
     });
-    composer.on('task:finished', function(task, run) {
-      events.push('finished.' + task.name);
-    });
-    composer.on('task:error', function(err) {
+    composer.on('error', function(err) {
+      if (err.build) {
+        return;
+      }
       events.push('error.' + err.task.name);
     });
 
@@ -298,7 +303,17 @@ describe('composer', function() {
     composer.task('default', ['bar']);
     composer.build('default', function(err) {
       if (err) return done(err);
-      assert.deepEqual(events, ['starting.default', 'starting.bar', 'starting.foo', 'finished.foo', 'finished.bar', 'finished.default']);
+      assert.deepEqual(events, [
+        'register.foo',
+        'register.bar',
+        'register.default',
+        'starting.default',
+        'starting.bar',
+        'starting.foo',
+        'finished.foo',
+        'finished.bar',
+        'finished.default'
+      ]);
       done();
     });
   });
@@ -319,9 +334,12 @@ describe('composer', function() {
 
   it('should emit an error event when an error is thrown in a task', function(done) {
     var errors = 0;
-    composer.on('task:error', function(err) {
-      errors++;
+    composer.on('error', function(err) {
       assert(err);
+      if (err.build) {
+        return;
+      }
+      errors++;
       assert.equal(err.message, 'in task "default": This is an error');
     });
     composer.task('default', function() {
@@ -336,14 +354,13 @@ describe('composer', function() {
 
   it('should emit build events', function(done) {
     var events = [];
-    composer.on('starting', function(app, run) {
-      events.push('starting.' + app._appname);
-    });
-    composer.on('finished', function(app, run) {
-      events.push('finished.' + app._appname);
+    composer.on('build', function(build) {
+      events.push('build:' + build.status);
     });
     composer.on('error', function(err) {
-      events.push('error.' + err.app._appname);
+      if (err.build) {
+        events.push('error');
+      }
     });
 
     composer.task('foo', function(cb) {
@@ -355,7 +372,7 @@ describe('composer', function() {
     composer.task('default', ['bar']);
     composer.build('default', function(err) {
       if (err) return done(err);
-      assert.deepEqual(events, ['starting.composer', 'finished.composer']);
+      assert.deepEqual(events, ['build:starting', 'build:finished']);
       done();
     });
   });
@@ -374,11 +391,31 @@ describe('composer', function() {
     });
   });
 
+  it('should emit a build error event when an error is passed back in a task (with promise)', function(done) {
+    composer.on('error', function(err) {
+      assert(err);
+      assert.equal(err.message, 'in task "default": This is an error');
+    });
+    composer.task('default', function(cb) {
+      return cb(new Error('This is an error'));
+    });
+    composer.build('default')
+      .then(function() {
+        done(new Error('Expected an error'));
+      })
+      .catch(function(err) {
+        done();
+      })
+  });
+
   it('should emit a build error event when an error is thrown in a task', function(done) {
     var errors = 0;
     composer.on('error', function(err) {
-      errors++;
       assert(err);
+      if (!err.build) {
+        return;
+      }
+      errors++;
       assert.equal(err.message, 'in task "default": This is an error');
     });
     composer.task('default', function() {
@@ -510,26 +547,6 @@ describe('composer', function() {
     }
     composer.build(tasks, function(err) {
       if (err) return done(err);
-      assert.equal(results.length, 10);
-      assert.deepEqual(results, ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
-      done();
-    });
-  });
-
-  it('should get the build history after a build', function(done) {
-    var results = [];
-    var fn = function(cb) {
-      results.push(this.name);
-      cb();
-    };
-    var tasks = [];
-    for (var i = 0; i < 10; i++) {
-      tasks.push('task-' + i);
-      composer.task('task-' + i, fn);
-    }
-    composer.build(tasks, function(err) {
-      if (err) return done(err);
-      assert(composer.buildHistory.length > 0);
       assert.equal(results.length, 10);
       assert.deepEqual(results, ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
       done();

@@ -47,6 +47,18 @@ describe('series', function() {
     });
   });
 
+  it('should return an error when no functions are passed to series', function(done) {
+    var fn = composer.series();
+    fn(function(err) {
+      if (!err) {
+        done(new Error('expected an error'));
+        return;
+      }
+      assert.equal(err.message, 'A set of functions to combine is required');
+      done();
+    });
+  });
+
   it('should compose tasks with additional options into a function that runs in series', function(done) {
     var output = [];
     composer.task('foo', {silent: false}, function(cb) {
