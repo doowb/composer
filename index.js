@@ -161,7 +161,9 @@ Composer.prototype.build = function(tasks, options, cb) {
   .catch(function(err) {
     if (typeof cb === 'function') {
       cb(err);
+      return;
     }
+    throw err;
   });
 };
 

@@ -109,6 +109,19 @@ describe('composer', function() {
     });
   });
 
+  it('should run a task and return a promise', function() {
+    var count = 0;
+    composer.task('default', function(cb) {
+      count++;
+      cb();
+    });
+
+    return composer.build('default')
+      .then(function() {
+        assert.equal(count, 1);
+      });
+  });
+
   it('should run a task with options', function(done) {
     var count = 0;
     composer.task('default', {silent: false}, function(cb) {
@@ -376,6 +389,23 @@ describe('composer', function() {
       if (err) return done();
       done(new Error('Expected an error'));
     });
+  });
+
+  it('should emit a build error event when an error is passed back in a task (with promise)', function(done) {
+    composer.on('error', function(err) {
+      assert(err);
+      assert.equal(err.message, 'in task "default": This is an error');
+    });
+    composer.task('default', function(cb) {
+      return cb(new Error('This is an error'));
+    });
+    composer.build('default')
+      .then(function() {
+        done(new Error('Expected an error'));
+      })
+      .catch(function(err) {
+        done();
+      })
   });
 
   it('should emit a build error event when an error is thrown in a task', function(done) {
