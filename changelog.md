@@ -1,3 +1,10 @@
+### v1.0.0
+
+- Updates the events that are emitted and adds statuses to the objects emitted on the events. see issues [#20](../../issues/20) and [#21](../../issues/21)
+- Updates the event objects to expose human readable durations. [see issue #23](../../issues/23)
+- Removes unused properties. [see issue #24](../../issues/24)
+- Updates `.build` to return a promise when the callback is not passed in. [see issue #28](../../issues/28)
+
 ### v0.14.0
 
 - Updates [bach][] to `1.0.0`.
