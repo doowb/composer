@@ -11,6 +11,9 @@ app.on('build', function(build) {});
 * `build` exposes a `.status` property that is either `starting` or `finished`.
 * `build` exposes a `.date` object that has a `.start` property containing the start time as a `Date` object.
 * `build` exposes a `.hr` object that has a `.start` property containing the start time as an `hrtime` array.
+* `build` exposes a `.duration` getter that will provide the duration in a human readable format.
+* `build` exposes a `.diff` getter that will provide the diff between the start and end times.
+* `build` exposes a `.offset` getter that will provide the offset between the start date and the start hr time in case it's necessary for timing calculations.
 * when `build.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`.
 
 ### task
@@ -28,6 +31,9 @@ The `run` parameter exposes:
 
 * `.date` **{Object}**: has a `.start` property containing the start time as a `Date` object.
 * `.hr` **{Object}**: has a `.start` property containing the start time as an `hrtime` array.
+* `.duration` getter that will provide the duration in a human readable format.
+* `.diff` getter that will provide the diff between the start and end times.
+* `.offset` getter that will provide the offset between the start date and the start hr time in case it's necessary for timing calculations.
 * when `task.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`.
 
 ### error
