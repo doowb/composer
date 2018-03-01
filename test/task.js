@@ -1,57 +1,53 @@
 'use strict';
 
-var async = require('async');
-var assert = require('assert');
-var through = require('through2');
-var Task = require('../lib/task');
+require('mocha');
+const async = require('async');
+const assert = require('assert');
+const through = require('through2');
+const Task = require('../lib/task');
 
 describe('task', function() {
-  it('should throw an error when nothing is passed to Task', function() {
-    try {
-      Task();
-      throw new Error('Expected `new Task()` to throw an error.');
-    } catch (err) {}
+  it('should throw an error when Task is not instantiated', function() {
+    assert.throws(() => Task(), /cannot be invoked without 'new'/);
+  });
+
+  it('should throw an error when nothing is passed to new Task', function() {
+    assert.throws(() => new Task(), /expected/i);
   });
 
   it('should throw an error when `name` is not passed on `task`.', function() {
-    try {
-      Task({});
-      throw new Error('Expected `new Task({})` to throw an error when `name` is not passed.');
-    } catch (err) {}
+    assert.throws(() => new Task({}), /expected/i);
   });
 
   it('should create a new task with a given `name`', function() {
-    var task = new Task({name: 'default'});
+    const task = new Task({ name: 'default' });
     assert.equal(task.name, 'default');
   });
 
   it('should create a new task with a given task function', function() {
-    var fn = function(done) {
-      return done();
-    };
-    var task = new Task({name: 'default', fn: fn});
-    assert.equal(task.fn, fn);
+    const callback = cb => cb();
+    const task = new Task({ name: 'default', callback: callback });
+    assert.equal(task.callback, callback);
   });
 
   it('should create a new task with the given dependencies', function() {
-    var task = new Task({name: 'default', deps: ['foo', 'bar']});
+    const task = new Task({ name: 'default', deps: ['foo', 'bar'] });
     assert.deepEqual(task.deps, ['foo', 'bar']);
   });
 
   it('should create a new task with deps from the `options` property', function() {
-    var opts = {deps: ['foo', 'bar']};
-    var task = new Task({name: 'default', options: opts});
+    const task = new Task({ name: 'default', options: { deps: ['foo', 'bar'] } });
     assert.deepEqual(task.deps, ['foo', 'bar']);
   });
 
   it('should run a task function when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
 
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
@@ -60,13 +56,13 @@ describe('task', function() {
   });
 
   it('should skip a task function when `.options.run === false`', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
 
-    var task = new Task({name: 'default', fn: fn, options: {run: false}});
+    const task = new Task({ name: 'default', callback: callback, options: { run: false } });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 0);
@@ -75,13 +71,13 @@ describe('task', function() {
   });
 
   it('should skip a task function when `.options.skip` is the task name', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
 
-    var task = new Task({name: 'foo', fn: fn, options: {skip: 'foo'}});
+    const task = new Task({ name: 'foo', callback: callback, options: { skip: 'foo' } });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 0);
@@ -90,13 +86,13 @@ describe('task', function() {
   });
 
   it('should skip a task function when `.options.skip` is an array with the task name', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
 
-    var task = new Task({name: 'foo', fn: fn, options: {skip: ['bar', 'baz', 'foo']}});
+    const task = new Task({ name: 'foo', callback: callback, options: { skip: ['bar', 'baz', 'foo'] } });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 0);
@@ -105,13 +101,13 @@ describe('task', function() {
   });
 
   it('should not skip a task function when `.options.skip` is an array without the task name', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
 
-    var task = new Task({name: 'foo', fn: fn, options: {skip: ['bar', 'baz']}});
+    const task = new Task({ name: 'foo', callback: callback, options: { skip: ['bar', 'baz'] } });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
@@ -120,9 +116,9 @@ describe('task', function() {
   });
 
   it('should run a task function that returns a stream when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function() {
-      var stream = through.obj(function(data, enc, next) {
+    let count = 0;
+    const callback = function() {
+      const stream = through.obj(function(data, enc, next) {
         count++;
         next(null);
       });
@@ -133,7 +129,7 @@ describe('task', function() {
       return stream;
     };
 
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
@@ -142,8 +138,8 @@ describe('task', function() {
   });
 
   it('should run a task that returns a non stream when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       setImmediate(function() {
         count++;
         cb();
@@ -151,7 +147,7 @@ describe('task', function() {
       return count;
     };
 
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
@@ -160,12 +156,12 @@ describe('task', function() {
   });
 
   it('should emit a `starting` event when the task starts running', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.on('starting', function(t, run) {
       count++;
     });
@@ -177,12 +173,12 @@ describe('task', function() {
   });
 
   it('should emit a `finished` event when the task finishes running', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb();
     };
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.on('finished', function(t, run) {
       count++;
     });
@@ -194,12 +190,12 @@ describe('task', function() {
   });
 
   it('should emit an `error` event when there is an error during task execution', function(done) {
-    var count = 0;
-    var fn = function(cb) {
+    let count = 0;
+    const callback = function(cb) {
       count++;
       cb(new Error('Expected error'));
     };
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.on('error', function(err) {
       if (err) count++;
     });
@@ -210,23 +206,37 @@ describe('task', function() {
     });
   });
 
-  it('should have the current task set as `this` inside the function', function(done) {
-    var results = [];
-    var fn = function(cb) {
+  it('should have the current task set as `this` inside the function', function(cb) {
+    const results = [];
+    const tasks = [];
+
+    const callback = function(next) {
       results.push(this.name);
-      cb();
+      next();
     };
-    var tasks = [];
-    for (var i = 0; i < 10; i++) {
-      tasks.push(new Task({name: 'task-' + i, fn: fn}));
+
+    for (let i = 0; i < 10; i++) {
+      tasks.push(new Task({ name: 'task-' + i, callback: callback }));
     }
+
     async.eachSeries(tasks, function(task, next) {
       task.run(next);
     }, function(err) {
-      if (err) return done(err);
+      if (err) return cb(err);
       assert.equal(results.length, 10);
-      assert.deepEqual(results, ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
-      done();
+      assert.deepEqual(results, [
+        'task-0',
+        'task-1',
+        'task-2',
+        'task-3',
+        'task-4',
+        'task-5',
+        'task-6',
+        'task-7',
+        'task-8',
+        'task-9'
+      ]);
+      cb();
     });
   });
 });

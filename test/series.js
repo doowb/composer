@@ -1,9 +1,9 @@
 'use strict';
 
-var assert = require('assert');
-
-var Composer = require('../');
-var composer;
+require('mocha');
+const assert = require('assert');
+const Composer = require('../');
+let composer;
 
 describe('series', function() {
   beforeEach(function() {
@@ -11,117 +11,127 @@ describe('series', function() {
   });
 
   it('should compose tasks into a function that runs in series', function(done) {
-    var output = [];
+    const expected = [];
+
     composer.task('foo', function(cb) {
-      output.push('this is foo');
-      cb();
-    });
-    var fn = composer.series('foo', function bar(cb) {
-      output.push('this is bar');
+      expected.push('this is foo');
       cb();
     });
 
-    fn(function(err) {
+    const build = composer.series('foo', function bar(cb) {
+      expected.push('this is bar');
+      cb();
+    });
+
+    build(function(err) {
       if (err) return done(err);
-      assert.deepEqual(output, ['this is foo', 'this is bar']);
+      assert.deepEqual(expected, ['this is foo', 'this is bar']);
       done();
     });
   });
 
   it('should compose tasks with options into a function that runs in series', function(done) {
-    var output = [];
-    composer.task('foo', {silent: false}, function(cb) {
+    const expected = [];
+
+    composer.task('foo', { silent: false }, function(cb) {
       assert.equal(this.options.silent, false);
-      output.push('this is foo');
-      cb();
-    });
-    var fn = composer.series('foo', function bar(cb) {
-      output.push('this is bar');
+      expected.push('this is foo');
       cb();
     });
 
-    fn(function(err) {
+    const build = composer.series('foo', function bar(cb) {
+      expected.push('this is bar');
+      cb();
+    });
+
+    build(function(err) {
       if (err) return done(err);
-      assert.deepEqual(output, ['this is foo', 'this is bar']);
+      assert.deepEqual(expected, ['this is foo', 'this is bar']);
       done();
     });
   });
 
   it('should return an error when no functions are passed to series', function(done) {
-    var fn = composer.series();
-    fn(function(err) {
-      if (!err) {
-        done(new Error('expected an error'));
-        return;
-      }
+    const build = composer.series();
+
+    build(function(err) {
+      assert(err);
       assert.equal(err.message, 'A set of functions to combine is required');
       done();
     });
   });
 
   it('should compose tasks with additional options into a function that runs in series', function(done) {
-    var output = [];
-    composer.task('foo', {silent: false}, function(cb) {
+    const expected = [];
+
+    composer.task('foo', { silent: false }, function(cb) {
       assert.equal(this.options.silent, true);
       assert.equal(this.options.foo, 'bar');
-      output.push('this is foo');
+      expected.push('this is foo');
       cb();
     });
-    var fn = composer.series('foo', function bar(cb) {
-      output.push('this is bar');
-      cb();
-    }, {silent: true, foo: 'bar'});
 
-    fn(function(err) {
-      if (err) return done(err);
-      assert.deepEqual(output, ['this is foo', 'this is bar']);
+    const options = { silent: true, foo: 'bar' };
+    const build = composer.series('foo', function bar(cb) {
+      expected.push('this is bar');
+      cb();
+    }, options);
+
+    build(function(err) {
+      if (err) {
+        done(err);
+        return;
+      }
+      assert.deepEqual(expected, ['this is foo', 'this is bar']);
       done();
     });
   });
 
-  it('should not throw an error when `fn` is called without a callback function.', function(done) {
-    var output = [];
+  it('should not throw an error when `build` is called without a callback function.', function(done) {
+    const expected = [];
+
     composer.task('foo', function(cb) {
-      output.push('this is foo');
-      cb();
-    });
-    var fn = composer.series('foo', function bar(cb) {
-      output.push('this is bar');
+      expected.push('this is foo');
       cb();
     });
 
-    fn();
+    const build = composer.series('foo', function bar(cb) {
+      expected.push('this is bar');
+      cb();
+    });
+
+    build();
 
     setTimeout(function() {
-      assert.deepEqual(output, ['this is foo', 'this is bar']);
+      assert.deepEqual(expected, ['this is foo', 'this is bar']);
       done();
     }, 10);
   });
 
-  it('should emit an error when a task returns an error and when `fn` is called without a callback function.', function(done) {
-    var output = [];
-    var finished = false;
+  it('should emit an error when a task returns an error and when `build` is called without a callback function.', function(done) {
+    const expected = [];
+    let finished = false;
+
     composer.on('error', function(err) {
-      finished = true;
-      assert.deepEqual(output, ['this is foo']);
+      assert.deepEqual(expected, ['this is foo']);
       assert.equal(err.message, 'bar error');
-      done();
+      finished = true;
     });
 
     composer.task('foo', function(cb) {
-      output.push('this is foo');
+      expected.push('this is foo');
       cb();
     });
-    var fn = composer.series('foo', function bar(cb) {
+
+    const build = composer.series('foo', function bar(cb) {
       cb(new Error('bar error'));
     });
 
-    fn();
+    build();
 
     setTimeout(function() {
-      if (!finished) {
-        done(new Error('Expected an error'));
-      }
+      assert(finished);
+      done();
     }, 10);
   });
 });
