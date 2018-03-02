@@ -19,7 +19,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=0.12.0"
+    "node": ">=8"
   },
   "scripts": {
     "test": "mocha"
@@ -61,6 +61,7 @@
     "build",
     "build-system",
     "compose",
+    "composer",
     "flow",
     "run",
     "system",

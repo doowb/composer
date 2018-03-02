@@ -5,10 +5,5 @@ os:
 language: node_js
 node_js:
   - node
+  - '9'
   - '8'
-  - '6'
-  - '4'
-  - '0.12'
-matrix:
-  allow_failures: []
-  fast_finish: true
