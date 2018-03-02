@@ -155,6 +155,52 @@ describe('task', function() {
     });
   });
 
+  it('should run a task using a noop when `.run` is called', function(done) {
+    let count = 0;
+    const callback = function(cb) {
+      setImmediate(function() {
+        count++;
+        cb();
+      });
+      return count;
+    };
+
+    const app = {};
+    app.tasks = {
+      foo: new Task({ name: 'foo', callback: callback, app: app}),
+      default: new Task({ name: 'default', deps: ['foo'], app: app})
+    };
+
+    app.tasks.default.run(function(err) {
+      if (err) return done(err);
+      assert.equal(count, 1);
+      done();
+    });
+  });
+
+  it('should cause an error if invalid deps are resolved `.run` is called', function(done) {
+    let count = 0;
+    const callback = function(cb) {
+      setImmediate(function() {
+        count++;
+        cb();
+      });
+      return count;
+    };
+
+    const app = {};
+    app.tasks = {
+      foo: new Task({ name: 'foo', callback: callback, app: app}),
+      default: new Task({ name: 'default', deps: ['foo', {foo: 'bar'}, {bang: 'baz'}], app: app})
+    };
+
+    app.tasks.default.run(function(err) {
+      if (!err) return done(new Error('Expected an error'));
+      assert.equal(count, 0);
+      done();
+    });
+  });
+
   it('should emit a `starting` event when the task starts running', function(done) {
     let count = 0;
     const callback = function(cb) {
