@@ -1,45 +1,43 @@
 'use strict';
 
-var assert = require('assert');
-var Run = require('../lib/run');
+require('mocha');
+const assert = require('assert');
+const Run = require('../lib/run');
+let run;
 
 describe('run', function() {
-  it('should create a new run with a given `id`', function() {
-    var run = new Run(1);
-    assert.equal(run.runId, 1);
+  beforeEach(function() {
+    run = new Run(1);
   });
 
-  it('should create a new run with a given `id` without using new', function() {
-    var run = Run(1);
+  it('should create a new run with a given `id`', function() {
     assert.equal(run.runId, 1);
   });
 
   it('should set run information when starting a run', function() {
-    var run = new Run(1);
-    assert(typeof run.date.start === 'undefined');
-    assert(typeof run.hr.start === 'undefined');
-    assert(run.duration === '');
+    assert.equal(typeof run.date.start, 'undefined');
+    assert.equal(typeof run.hr.start, 'undefined');
+    assert.equal(run.duration, '');
 
     run.start();
-    assert(typeof run.date.start !== 'undefined');
-    assert(typeof run.hr.start !== 'undefined');
-    assert(typeof run.date.end === 'undefined');
-    assert(typeof run.hr.end === 'undefined');
-    assert(typeof run.hr.duration === 'undefined');
-    assert(run.duration !== '');
+    assert.notEqual(typeof run.date.start, 'undefined');
+    assert.notEqual(typeof run.hr.start, 'undefined');
+    assert.equal(typeof run.date.end, 'undefined');
+    assert.equal(typeof run.hr.end, 'undefined');
+    assert.equal(typeof run.hr.duration, 'undefined');
+    assert.notEqual(run.duration, '');
   });
 
   it('should set run information when ending a run', function() {
-    var run = new Run(1);
     run.start();
     run.end();
-    assert(typeof run.date.start !== 'undefined');
-    assert(typeof run.hr.start !== 'undefined');
-    assert(typeof run.date.end !== 'undefined');
-    assert(typeof run.hr.end !== 'undefined');
-    assert(typeof run.hr.duration !== 'undefined');
-    assert(typeof run.hr.diff !== 'undefined');
-    assert(typeof run.hr.offset !== 'undefined');
-    assert(run.duration !== '');
+    assert.notEqual(typeof run.date.start, 'undefined');
+    assert.notEqual(typeof run.hr.start, 'undefined');
+    assert.notEqual(typeof run.date.end, 'undefined');
+    assert.notEqual(typeof run.hr.end, 'undefined');
+    assert.notEqual(typeof run.hr.duration, 'undefined');
+    assert.notEqual(typeof run.hr.diff, 'undefined');
+    assert.notEqual(typeof run.hr.offset, 'undefined');
+    assert.notEqual(run.duration, '');
   });
 });

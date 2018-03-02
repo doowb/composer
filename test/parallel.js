@@ -1,9 +1,9 @@
 'use strict';
 
-var assert = require('assert');
-
-var Composer = require('../');
-var composer;
+require('mocha');
+const assert = require('assert');
+const Composer = require('../');
+let composer;
 
 describe('parallel', function() {
   beforeEach(function() {
@@ -11,127 +11,136 @@ describe('parallel', function() {
   });
 
   it('should compose tasks into a function that runs in parallel', function(done) {
-    var output = [];
+    const expected = [];
+
     composer.task('foo', function(cb) {
       setTimeout(function() {
-        output.push('this is foo');
+        expected.push('this is foo');
         cb();
       }, 10);
     });
-    var fn = composer.parallel('foo', function bar(cb) {
-      output.push('this is bar');
+
+    const build = composer.parallel('foo', function bar(cb) {
+      expected.push('this is bar');
       cb();
     });
 
-    fn(function(err) {
+    build(function(err) {
       if (err) return done(err);
-      assert.deepEqual(output, ['this is bar', 'this is foo']);
+      assert.deepEqual(expected, ['this is bar', 'this is foo']);
       done();
     });
   });
 
   it('should return an error when no functions are passed to parallel', function(done) {
-    var fn = composer.parallel();
-    fn(function(err) {
-      if (!err) {
-        done(new Error('expected an error'));
-        return;
-      }
+    const build = composer.parallel();
+
+    build(function(err) {
+      assert(err);
       assert.equal(err.message, 'A set of functions to combine is required');
       done();
     });
   });
 
   it('should compose tasks with options into a function that runs in parallel', function(done) {
-    var output = [];
+    const expected = [];
+
     composer.task('foo', {silent: false}, function(cb) {
       assert.equal(this.options.silent, false);
       setTimeout(function() {
-        output.push('this is foo');
+        expected.push('this is foo');
         cb();
       });
     });
-    var fn = composer.parallel('foo', function bar(cb) {
-      output.push('this is bar');
+
+    const build = composer.parallel('foo', function bar(cb) {
+      expected.push('this is bar');
       cb();
     });
 
-    fn(function(err) {
+    build(function(err) {
       if (err) return done(err);
-      assert.deepEqual(output, ['this is bar', 'this is foo']);
+      assert.deepEqual(expected, ['this is bar', 'this is foo']);
       done();
     });
   });
 
   it('should compose tasks with additional options into a function that runs in parallel', function(done) {
-    var output = [];
+    const expected = [];
     composer.task('foo', {silent: false}, function(cb) {
       assert.equal(this.options.silent, true);
       assert.equal(this.options.foo, 'bar');
       setTimeout(function() {
-        output.push('this is foo');
+        expected.push('this is foo');
         cb();
       });
     });
-    var fn = composer.parallel('foo', function bar(cb) {
-      output.push('this is bar');
-      cb();
-    }, {silent: true, foo: 'bar'});
 
-    fn(function(err) {
-      if (err) return done(err);
-      assert.deepEqual(output, ['this is bar', 'this is foo']);
+    const options = { silent: true, foo: 'bar' };
+    function bar(cb) {
+      expected.push('this is bar');
+      cb();
+    }
+
+    const build = composer.parallel('foo', bar, options);
+
+    build(function(err) {
+      if (err) {
+        done(err);
+        return;
+      }
+      assert.deepEqual(expected, ['this is bar', 'this is foo']);
       done();
     });
   });
 
   it('should not throw an error when `fn` is called without a callback function.', function(done) {
-    var output = [];
+    const expected = [];
+
     composer.task('foo', function(cb) {
       setTimeout(function() {
-        output.push('this is foo');
+        expected.push('this is foo');
         cb();
       }, 10);
     });
-    var fn = composer.parallel('foo', function bar(cb) {
-      output.push('this is bar');
+
+    const build = composer.parallel('foo', function bar(cb) {
+      expected.push('this is bar');
       cb();
     });
 
-    fn();
+    build();
 
     setTimeout(function() {
-      assert.deepEqual(output, ['this is bar', 'this is foo']);
+      assert.deepEqual(expected, ['this is bar', 'this is foo']);
       done();
     }, 20);
   });
 
   it('should emit an error when a task returns an error and when `fn` is called without a callback function.', function(done) {
-    var output = [];
-    var finished = false;
+    const expected = [];
+    let finished = false;
+
     composer.on('error', function(err) {
       finished = true;
-      assert.deepEqual(output, []);
+      assert.deepEqual(expected, []);
       assert.equal(err.message, 'bar error');
       done();
     });
 
     composer.task('foo', function(cb) {
       setTimeout(function() {
-        output.push('this is foo');
+        expected.push('this is foo');
         cb();
       }, 10);
     });
-    var fn = composer.parallel('foo', function bar(cb) {
+
+    const build = composer.parallel('foo', function bar(cb) {
       cb(new Error('bar error'));
     });
 
-    fn();
+    build();
 
-    setTimeout(function() {
-      if (!finished) {
-        done(new Error('Expected an error'));
-      }
-    }, 20);
+    setTimeout(() => assert(finished), 20);
   });
 });

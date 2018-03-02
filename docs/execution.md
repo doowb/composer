@@ -1,4 +1,6 @@
-When an individual task is executed (or run), a new [Run](lib/run.js) instance is created with start, end, and duration information. This `run` object is emitted with [some events](#taskstarting) and also exposed on the `task` instance as the `.runInfo` property.
+When an individual task is run, a new [Run](lib/run.js) instance is created with start, end, and duration information. This `run` object is emitted with [some events](#taskstarting) and also exposed on the `task` instance as the `.runInfo` property.
+
+### properties
 
 The `run` instance has the the following properties
 

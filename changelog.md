@@ -1,3 +1,7 @@
+### v2.0.0
+
+- Now requires Node.js v8.0 or higher
+
 ### v1.0.0
 
 - Updates the events that are emitted and adds statuses to the objects emitted on the events. see issues [#20](../../issues/20) and [#21](../../issues/21)

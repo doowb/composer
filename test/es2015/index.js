@@ -4,22 +4,22 @@
  * Additional tests than can only be run on newer versions of Node.js
  */
 
-var assert = require('assert');
-var Task = require('../../lib/task');
+const assert = require('assert');
+const Task = require('../../lib/task');
 
 describe('es2015', function() {
   it('should run a task function that returns a promise when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function() {
+    let count = 0;
+    const callback = function() {
       return new Promise(function(resolve) {
-        setImmediate(function() {
+        setImmediate(() => {
           count++;
           resolve();
         });
       });
     };
 
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);
@@ -28,12 +28,13 @@ describe('es2015', function() {
   });
 
   it('should run a task given a generator function when `.run` is called', function(done) {
-    var count = 0;
-    var fn = function*() {
+    let count = 0;
+
+    const callback = function*() {
       count++;
     };
 
-    var task = new Task({name: 'default', fn: fn});
+    const task = new Task({ name: 'default', callback: callback });
     task.run(function(err) {
       if (err) return done(err);
       assert.equal(count, 1);

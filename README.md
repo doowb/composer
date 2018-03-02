@@ -1,8 +1,8 @@
-# composer [![NPM version](https://img.shields.io/npm/v/composer.svg?style=flat)](https://www.npmjs.com/package/composer) [![NPM monthly downloads](https://img.shields.io/npm/dm/composer.svg?style=flat)](https://npmjs.org/package/composer)  [![NPM total downloads](https://img.shields.io/npm/dt/composer.svg?style=flat)](https://npmjs.org/package/composer) [![Linux Build Status](https://img.shields.io/travis/doowb/composer.svg?style=flat&label=Travis)](https://travis-ci.org/doowb/composer) [![Windows Build Status](https://img.shields.io/appveyor/ci/doowb/composer.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/doowb/composer)
+# composer [![NPM version](https://img.shields.io/npm/v/composer.svg?style=flat)](https://www.npmjs.com/package/composer) [![NPM monthly downloads](https://img.shields.io/npm/dm/composer.svg?style=flat)](https://npmjs.org/package/composer) [![NPM total downloads](https://img.shields.io/npm/dt/composer.svg?style=flat)](https://npmjs.org/package/composer) [![Linux Build Status](https://img.shields.io/travis/doowb/composer.svg?style=flat&label=Travis)](https://travis-ci.org/doowb/composer) [![Windows Build Status](https://img.shields.io/appveyor/ci/doowb/composer.svg?style=flat&label=AppVeyor)](https://ci.appveyor.com/project/doowb/composer)
 
 > API-first task runner with three methods: task, run and watch.
 
-## Table of Contents
+Please consider following this project's author, [Brian Woodward](https://github.com/doowb), and consider starring the project to show your :heart: and support.
 
 - [Install](#install)
 - [Usage](#usage)
@@ -22,25 +22,31 @@ Install with [npm](https://www.npmjs.com/):
 $ npm install --save composer
 ```
 
-Install with [yarn](https://yarnpkg.com):
-
-```sh
-$ yarn add composer
-```
-
 **Heads up** the `.watch` method was removed in version `0.11.0`. If you need _watch_ functionality, use [base-tasks](https://github.com/jonschlinkert/base-tasks) and [base-watch](https://github.com/node-base/base-watch).
 
 ## Usage
 
 ```js
-var Composer = require('composer');
+const Composer = require('composer');
+const composer = new Composer();
+
+composer.task('default', cb => {
+  console.log('Task: ', this.name);
+  cb();
+});
+
+composer.build('default')
+  .then(() => console.log('done!'))
+  .catch(console.error);
 ```
 
 ## API
 
-### [.task](index.js#L55)
+**Example**
 
-Register a new task with it's options and dependencies.
+```js
+const composer = new Composer();
+```
 
 Dependencies may also be specified as a glob pattern. Be aware that
 the order cannot be guarenteed when using a glob pattern.
@@ -65,10 +71,6 @@ app.task('site', ['styles'], function() {
 });
 ```
 
-### [.build](index.js#L114)
-
-Build a task or array of tasks.
-
 **Params**
 
 * `tasks` **{String|Array}**: Array of task names to build. (Defaults to `[default]`).
@@ -85,10 +87,6 @@ app.build('default', function(err, results) {
 });
 ```
 
-### [.series](index.js#L197)
-
-Compose task or list of tasks into a single function that runs the tasks in series.
-
 **Params**
 
 * `tasks` **{String|Array|Function}**: List of tasks by name, function, or array of names/functions.
@@ -102,7 +100,7 @@ app.task('foo', function(done) {
   done();
 });
 
-var fn = app.series('foo', function bar(done) {
+const fn = app.series('foo', function bar(done) {
   console.log('this is bar');
   done();
 });
@@ -115,10 +113,6 @@ fn(function(err) {
 //=> this is bar
 //=> done
 ```
-
-### [.parallel](index.js#L229)
-
-Compose task or list of tasks into a single function that runs the tasks in parallel.
 
 **Params**
 
@@ -135,7 +129,7 @@ app.task('foo', function(done) {
   }, 500);
 });
 
-var fn = app.parallel('foo', function bar(done) {
+const fn = app.parallel('foo', function bar(done) {
   console.log('this is bar');
   done();
 });
@@ -151,7 +145,9 @@ fn(function(err) {
 
 ## Task execution
 
-When an individual task is executed (or run), a new [Run](lib/run.js) instance is created with start, end, and duration information. This `run` object is emitted with [some events](#taskstarting) and also exposed on the `task` instance as the `.runInfo` property.
+When an individual task is run, a new [Run](lib/run.js) instance is created with start, end, and duration information. This `run` object is emitted with [some events](#taskstarting) and also exposed on the `task` instance as the `.runInfo` property.
+
+### properties
 
 The `run` instance has the the following properties
 
@@ -177,48 +173,48 @@ The `.duration` property is a computed property that uses [pretty-time](https://
 This event is emitted when the build is starting and when it's finished. The event emits an object containing the build runtime information.
 
 ```js
-app.on('build', function(build) {});
+app.on('build', build => {});
 ```
 
-* `build` exposes a `.app` object that is the instance of composer.
-* `build` exposes a `.status` property that is either `starting` or `finished`.
-* `build` exposes a `.date` object that has a `.start` property containing the start time as a `Date` object.
-* `build` exposes a `.hr` object that has a `.start` property containing the start time as an `hrtime` array.
-* `build` exposes a `.duration` getter that will provide the duration in a human readable format.
-* `build` exposes a `.diff` getter that will provide the diff between the start and end times.
-* `build` exposes a `.offset` getter that will provide the offset between the start date and the start hr time in case it's necessary for timing calculations.
-* when `build.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`.
+#### `build` properties
+
+* `.app` (object) - instance of Composer
+* `.status` (string) - current build status<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>, either `register`, `starting` or `finished`.
+* `.date` (object) - with a `.start` property indicating start time as a `Date` object.
+* `.hr` (object) - with a `.start` property indicating the start time as an `hrtime` array.
+* `.duration` (string) - that will provide the duration in a human readable format.
+* `.diff` (string) - diff between the start and end times.
+* `.offset` (string) offset between the start date and the start `hr` time
 
 ### task
 
 This event is emitted when the task is registered, starting, and when it's finished. The event emits 2 arguments, the current instance of the task object and an object containing the task runtime information.
 
 ```js
-app.on('task', function(task, run) {});
+app.on('task', (task, run) => {});
 ```
-The `task` parameter exposes:
 
-* `.status` **{String}**: current status of the task. May be `register`, `starting`, or `finished`.
+#### `task` properties
 
-The `run` parameter exposes:
+* `.status` (string) - current status<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup> of the task. May be `register`, `starting`, or `finished`.
 
-* `.date` **{Object}**: has a `.start` property containing the start time as a `Date` object.
-* `.hr` **{Object}**: has a `.start` property containing the start time as an `hrtime` array.
-* `.duration` getter that will provide the duration in a human readable format.
-* `.diff` getter that will provide the diff between the start and end times.
-* `.offset` getter that will provide the offset between the start date and the start hr time in case it's necessary for timing calculations.
-* when `task.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`.
+#### `run` properties
+
+* `.date` (object) - has a `.start` property indicating the start time as a `Date` object.
+* `.hr` (object) - has a `.start` property indicating the start time as an `hrtime` array.
+* `.duration` (string) that will provide the duration in a human readable format.
+* `.diff` (string) that will provide the diff between the start and end times.
+* `.offset` (string) offset between the start date and the start hr time
 
 ### error
 
-This event is emitted when an error occurrs during a `build`.
-The event emits 1 argument as an `Error` object containing additional information about the build and the task running when the error occurred.
+This event is emitted when an error occurrs during a `build`. The event emits an `Error` object with extra properties for debugging the _build and task_ that were running when the error occurred.
 
 ```js
-app.on('error', function(err) {});
+app.on('error', err => {});
 ```
 
-Additional properties:
+#### err properties
 
 * `app`: current composer instance running the build
 * `build`: current build runtime information
@@ -226,6 +222,10 @@ Additional properties:
 * `run`: current task runtime information
 
 ## History
+
+### v2.0.0
+
+* Now requires Node.js v8.0 or higher
 
 ### v1.0.0
 
@@ -329,26 +329,26 @@ app.task('foo', function(cb) {
 
 ## About
 
-### Related projects
-
-* [assemble](https://www.npmjs.com/package/assemble): Get the rocks out of your socks! Assemble makes you fast at creating web projects… [more](https://github.com/assemble/assemble) | [homepage](https://github.com/assemble/assemble "Get the rocks out of your socks! Assemble makes you fast at creating web projects. Assemble is used by thousands of projects for rapid prototyping, creating themes, scaffolds, boilerplates, e-books, UI components, API documentation, blogs, building websit")
-* [base-tasks](https://www.npmjs.com/package/base-tasks): base-methods plugin that provides a very thin wrapper around [https://github.com/jonschlinkert/composer](https://github.com/jonschlinkert/composer) for adding task methods to… [more](https://github.com/jonschlinkert/base-tasks) | [homepage](https://github.com/jonschlinkert/base-tasks "base-methods plugin that provides a very thin wrapper around <https://github.com/jonschlinkert/composer> for adding task methods to your application.")
-* [generate](https://www.npmjs.com/package/generate): Command line tool and developer framework for scaffolding out new GitHub projects. Generate offers the… [more](https://github.com/generate/generate) | [homepage](https://github.com/generate/generate "Command line tool and developer framework for scaffolding out new GitHub projects. Generate offers the robustness and configurability of Yeoman, the expressiveness and simplicity of Slush, and more powerful flow control and composability than either.")
-* [update](https://www.npmjs.com/package/update): Be scalable! Update is a new, open source developer framework and CLI for automating updates… [more](https://github.com/update/update) | [homepage](https://github.com/update/update "Be scalable! Update is a new, open source developer framework and CLI for automating updates of any kind in code projects.")
-* [verb](https://www.npmjs.com/package/verb): Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used… [more](https://github.com/verbose/verb) | [homepage](https://github.com/verbose/verb "Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used on hundreds of projects of all sizes to generate everything from API docs to readmes.")
-
-### Contributing
+<details>
+<summary><strong>Contributing</strong></summary>
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
 
-### Contributors
+</details>
 
-| **Commits** | **Contributor** |  
-| --- | --- |  
-| 216 | [doowb](https://github.com/doowb) |  
-| 36  | [jonschlinkert](https://github.com/jonschlinkert) |  
+<details>
+<summary><strong>Running Tests</strong></summary>
 
-### Building docs
+Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+
+```sh
+$ npm install && npm test
+```
+
+</details>
+
+<details>
+<summary><strong>Building docs</strong></summary>
 
 _(This project's readme.md is generated by [verb](https://github.com/verbose/verb-generate-readme), please don't edit the readme directly. Any changes to the readme must be made in the [.verb.md](.verb.md) readme template.)_
 
@@ -358,26 +358,50 @@ To generate the readme, run the following command:
 $ npm install -g verbose/verb#dev verb-generate-readme && verb
 ```
 
-### Running tests
+</details>
 
-Running and reviewing unit tests is a great way to get familiarized with a library and its API. You can install dependencies and run tests with the following command:
+### Related projects
 
-```sh
-$ npm install && npm test
-```
+You might also be interested in these projects:
+
+* [assemble](https://www.npmjs.com/package/assemble): Get the rocks out of your socks! Assemble makes you fast at creating web projects… [more](https://github.com/assemble/assemble) | [homepage](https://github.com/assemble/assemble "Get the rocks out of your socks! Assemble makes you fast at creating web projects. Assemble is used by thousands of projects for rapid prototyping, creating themes, scaffolds, boilerplates, e-books, UI components, API documentation, blogs, building websit")
+* [base-tasks](https://www.npmjs.com/package/base-tasks): base-methods plugin that provides a very thin wrapper around [https://github.com/jonschlinkert/composer](https://github.com/jonschlinkert/composer) for adding task methods to… [more](https://github.com/jonschlinkert/base-tasks) | [homepage](https://github.com/jonschlinkert/base-tasks "base-methods plugin that provides a very thin wrapper around <https://github.com/jonschlinkert/composer> for adding task methods to your application.")
+* [generate](https://www.npmjs.com/package/generate): Command line tool and developer framework for scaffolding out new GitHub projects. Generate offers the… [more](https://github.com/generate/generate) | [homepage](https://github.com/generate/generate "Command line tool and developer framework for scaffolding out new GitHub projects. Generate offers the robustness and configurability of Yeoman, the expressiveness and simplicity of Slush, and more powerful flow control and composability than either.")
+* [update](https://www.npmjs.com/package/update): Be scalable! Update is a new, open source developer framework and CLI for automating updates… [more](https://github.com/update/update) | [homepage](https://github.com/update/update "Be scalable! Update is a new, open source developer framework and CLI for automating updates of any kind in code projects.")
+* [verb](https://www.npmjs.com/package/verb): Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used… [more](https://github.com/verbose/verb) | [homepage](https://github.com/verbose/verb "Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used on hundreds of projects of all sizes to generate everything from API docs to readmes.")
+
+### Contributors
+
+| **Commits** | **Contributor** | 
+| --- | --- |
+| 219 | [doowb](https://github.com/doowb) |
+| 36 | [jonschlinkert](https://github.com/jonschlinkert) |
 
 ### Author
 
-**Jon Schlinkert**
+**Brian Woodward**
 
-* [github/jonschlinkert](https://github.com/jonschlinkert)
-* [twitter/jonschlinkert](https://twitter.com/jonschlinkert)
+* [linkedin/in/doowb](https://linkedin.com/in/doowb)
+* [github/doowb](https://github.com/doowb)
+* [twitter/doowb](https://twitter.com/doowb)
 
 ### License
 
-Copyright © 2018, [Jon Schlinkert](https://github.com/jonschlinkert).
+Copyright © 2018, [Brian Woodward](https://github.com/doowb).
 Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on January 26, 2018._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on March 01, 2018._
+
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1"  class="footnote-item">When `build.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`. <a href="#fnref1" class="footnote-backref">↩</a>
+
+</li>
+<li id="fn2"  class="footnote-item">When `task.status` is `finished`, the `.hr` object also has `.duration` and `.diff` properties containing timing information calculated using `process.hrtime`. <a href="#fnref2" class="footnote-backref">↩</a>
+
+</li>
+</ol>
+</section>

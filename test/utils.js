@@ -1,7 +1,8 @@
 'use strict';
 
-var assert = require('assert');
-var utils = require('../lib/utils');
+require('mocha');
+const assert = require('assert');
+const utils = require('../lib/utils');
 
 describe('utils', function() {
   describe('arrayify', function() {
