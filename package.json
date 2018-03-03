@@ -1,7 +1,7 @@
 {
   "name": "composer",
   "description": "API-first task runner with three methods: task, run and watch.",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "homepage": "https://github.com/doowb/composer",
   "author": "Brian Woodward (https://github.com/doowb)",
   "contributors": [
