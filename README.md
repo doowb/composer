@@ -375,7 +375,7 @@ You might also be interested in these projects:
 | **Commits** | **Contributor** | 
 | --- | --- |
 | 222 | [doowb](https://github.com/doowb) |
-| 39 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 42 | [jonschlinkert](https://github.com/jonschlinkert) |
 
 ### Author
 
