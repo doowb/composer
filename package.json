@@ -69,9 +69,23 @@
     "workflow"
   ],
   "verb": {
+    "toc": true,
+    "layout": "default",
+    "data": {
+      "author": {
+        "linkedin": "woodwardbrian",
+        "twitter": "doowb"
+      }
+    },
     "plugins": [
       "gulp-format-md"
     ],
+    "tasks": [
+      "readme"
+    ],
+    "lint": {
+      "reflinks": true
+    },
     "related": {
       "list": [
         "assemble",
@@ -81,23 +95,13 @@
         "verb"
       ]
     },
-    "toc": true,
-    "layout": "default",
-    "tasks": [
-      "readme"
-    ],
-    "lint": {
-      "reflinks": true
-    },
     "reflinks": [
       "bach",
       "base",
       "base-tasks",
       "base-watch",
       "composer",
-      "pretty-time",
-      "verb",
-      "verb-generate-readme"
+      "pretty-time"
     ]
   }
 }
