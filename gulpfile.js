@@ -1,13 +1,13 @@
 'use strict';
 
-var gulp = require('gulp');
-var mocha = require('gulp-mocha');
-var istanbul = require('gulp-istanbul');
-var eslint = require('gulp-eslint');
+const gulp = require('gulp');
+const mocha = require('gulp-mocha');
+const istanbul = require('gulp-istanbul');
+const eslint = require('gulp-eslint');
 
 gulp.task('coverage', function() {
   return gulp.src(['index.js', 'lib/*.js'])
-    .pipe(istanbul({includeUntested: true}))
+    .pipe(istanbul({ includeUntested: true }))
     .pipe(istanbul.hookRequire());
 });
 
