@@ -19,7 +19,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=8"
+    "node": ">=4"
   },
   "scripts": {
     "test": "mocha"
@@ -31,24 +31,10 @@
     "pretty-time": "^0.2.0"
   },
   "devDependencies": {
-    "assemble-loader": "^1.0.5",
-    "assemble-render-file": "^1.0.3",
-    "assemble-streams": "^1.0.1",
-    "async": "^2.6.0",
-    "bluebird": "^3.5.1",
-    "composer-runtimes": "^0.7.0",
-    "engine-handlebars": "^0.8.2",
-    "gulp": "^3.9.1",
-    "gulp-eslint": "^4.0.2",
-    "gulp-extname": "^0.2.2",
     "gulp-format-md": "^1.0.0",
-    "gulp-istanbul": "^1.1.3",
-    "gulp-mocha": "^5.0.0",
     "mocha": "^3.5.3",
-    "parser-front-matter": "^1.6.4",
-    "templates": "^1.2.9",
     "through2": "^2.0.3",
-    "write": "^1.0.3"
+    "time-require": "github:jonschlinkert/time-require"
   },
   "keywords": [
     "build",

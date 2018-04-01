@@ -144,7 +144,7 @@ describe('series', function() {
         .then(() => {
           throw new Error('actual an error');
         })
-        .catch(err => {
+        .catch(() => {
           assert.equal(count, 3);
           assert.deepEqual(actual, ['foo', 'an error']);
         });

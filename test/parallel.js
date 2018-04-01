@@ -18,14 +18,14 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 20);
+        }, 4);
       });
 
       app.task('bar', function(next) {
         setTimeout(function() {
           actual.push('bar');
           next();
-        }, 10);
+        }, 2);
       });
 
       app.task('baz', function(next) {
@@ -85,7 +85,7 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 10);
+        }, 2);
       });
 
       const options = { silent: true, foo: 'bar' };
@@ -112,21 +112,21 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 20);
+        }, 10);
       });
 
       app.task('bar', ['qux'], function(next) {
         setTimeout(function() {
           actual.push('bar');
           next();
-        }, 12);
+        }, 5);
       });
 
       app.task('baz', function(next) {
         setTimeout(function() {
           actual.push('baz');
           next();
-        }, 5);
+        }, 3);
       });
 
       app.task('qux', function(next) {
@@ -153,14 +153,14 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 20);
+        }, 5);
       });
 
       app.task('bar', function(next) {
         setTimeout(function() {
           actual.push('bar');
           next();
-        }, 10);
+        }, 1);
       });
 
       app.task('baz', function(next) {
@@ -215,7 +215,7 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 10);
+        }, 2);
       });
 
       const options = { silent: true, foo: 'bar' };
@@ -246,7 +246,7 @@ describe('parallel', function() {
           actual.push('foo');
           count++;
           next();
-        }, 10);
+        }, 2);
       });
 
       const build = app.parallel('foo', function(next) {

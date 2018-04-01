@@ -1,5 +1,5 @@
 'use strict';
 
-const Tasks = require('./lib/tasks');
-module.exports = Tasks(require('@sellside/emitter'));
-module.exports.create = Tasks;
+const Composer = require('./lib/tasks');
+module.exports = Composer(require('@sellside/emitter'));
+module.exports.create = Composer;

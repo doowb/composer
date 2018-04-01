@@ -1,9 +1,7 @@
 'use strict';
 
 require('mocha');
-const async = require('async');
 const assert = require('assert');
-const through = require('through2');
 const Tasks = require('..');
 
 describe('tasks', function() {
@@ -30,16 +28,6 @@ describe('tasks', function() {
 
   it('should cause an error if invalid deps are resolved `.run` is called', function() {
     const tasks = [];
-    let count = 0;
-
-    const callback = function(cb) {
-      setImmediate(function() {
-        count++;
-        cb();
-      });
-      return count;
-    };
-
     const app = new Tasks();
     app.on('task', task => tasks.push(`${task.name}:${task.status}`));
 
@@ -52,6 +40,6 @@ describe('tasks', function() {
       })
       .catch(err => {
         assert(/expected/.test(err.message));
-      })
+      });
   });
 });

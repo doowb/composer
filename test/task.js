@@ -1,7 +1,6 @@
 'use strict';
 
 require('mocha');
-const async = require('async');
 const assert = require('assert');
 const through = require('through2');
 const Task = require('../lib/task');
@@ -217,7 +216,7 @@ describe('task', function() {
     const callback = cb => cb(new Error('expected an error'));
     const task = new Task({ name: 'default', callback: callback });
 
-    task.on('error', function(err) {
+    task.on('error', function() {
       count++;
     });
 
@@ -242,7 +241,7 @@ describe('task', function() {
       tasks.push(new Task({ name: 'task-' + i, callback: callback }));
     }
 
-    const series = async () => {
+    const series = async() => {
       for (const task of tasks) {
         await task.run()();
       }

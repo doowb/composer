@@ -2,7 +2,7 @@
 
 require('mocha');
 const assert = require('assert');
-const Composer = require('../');
+const Composer = require('..');
 let app;
 
 describe('composer', function() {
@@ -172,9 +172,9 @@ describe('composer', function() {
     }
 
     app.task('foo', callback());
-    app.task('bar', {run: false}, ['foo'], callback());
+    app.task('bar', { run: false }, ['foo'], callback());
     app.task('baz', ['bar'], callback());
-    app.task('bang', {run: false}, ['baz'], callback());
+    app.task('bang', { run: false }, ['baz'], callback());
     app.task('beep', ['bang'], callback());
     app.task('boop', ['beep'], callback());
 
@@ -317,7 +317,7 @@ describe('composer', function() {
       events.push(build.status);
     });
 
-    app.on('error', function(err) {
+    app.on('error', function() {
       events.push('error');
     });
 
@@ -334,7 +334,7 @@ describe('composer', function() {
   it('should emit a build error event when an error is passed back in a task', function() {
     let count = 0;
 
-    app.on('error', function(err) {
+    app.on('error', function() {
       count++;
     });
 
@@ -346,7 +346,7 @@ describe('composer', function() {
       .then(() => {
         throw new Error('exected an error');
       })
-      .catch(err => {
+      .catch(() => {
         assert.equal(count, 1);
       });
   });
@@ -354,7 +354,7 @@ describe('composer', function() {
   it('should emit an error event when an error is thrown in a task', function() {
     let count = 0;
 
-    app.on('error', function(err) {
+    app.on('error', function() {
       count++;
     });
 
@@ -366,7 +366,7 @@ describe('composer', function() {
       .then(() => {
         throw new Error('exected an error');
       })
-      .catch(err => {
+      .catch(() => {
         assert.equal(count, 1);
       });
   });
