@@ -3,154 +3,142 @@
 require('mocha');
 const assert = require('assert');
 const Composer = require('../');
-let composer;
+let app;
 
 describe('composer', function() {
   beforeEach(function() {
-    composer = new Composer();
+    app = new Composer();
   });
 
   it('should throw an error when a name is not given for a task', function() {
-    assert.throws(() => composer.task(), /expected/);
+    assert.throws(() => app.task(), /expected/);
   });
 
   it('should register a task', function() {
-    composer.task('default', () => {});
-    assert(composer.tasks.default);
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.equal(composer.tasks.default.callback.name, '');
+    app.task('default', () => {});
+    assert(app.tasks.default);
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.equal(app.tasks.default.callback.name, '');
   });
 
   it('should register a noop task when only name is given', function() {
-    composer.task('default');
-    assert(composer.tasks.default);
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.equal(composer.tasks.default.callback.name, 'callback');
+    app.task('default');
+    assert(app.tasks.default);
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.equal(typeof app.tasks.default.callback, 'function');
   });
 
   it('should register a noop task when a name and an empty dependencies array is given', function() {
-    composer.task('default', []);
-    assert(composer.tasks.default);
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.equal(composer.tasks.default.callback.name, 'callback');
+    app.task('default', []);
+    assert(app.tasks.default);
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.equal(typeof app.tasks.default.callback, 'function');
   });
 
   it('should register a task with an array of named dependencies', function() {
-    composer.task('default', ['foo', 'bar'], done => done());
-    assert(composer.tasks.default);
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.deepEqual(composer.tasks.default.deps, ['foo', 'bar']);
-  });
-
-  it('should register a task with an array of function dependencies', function() {
-    const bar = cb => cb();
-    const Baz = cb => cb();
-    Baz.taskName = 'Baz';
-
-    const deps = ['foo', bar, Baz, cb => cb()];
-    composer.task('default', deps, cb => cb());
-
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.deepEqual(composer.tasks.default.deps, ['foo', 'bar', 'Baz', '[anonymous (1)]']);
+    app.task('default', ['foo', 'bar'], cb => cb());
+    assert(app.tasks.default);
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.deepEqual(app.tasks.default.deps, ['foo', 'bar']);
   });
 
   it('should register a task with a list of strings as dependencies', function() {
-    composer.task('default', 'foo', 'bar', cb => cb());
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.deepEqual(composer.tasks.default.deps, ['foo', 'bar']);
+    app.task('default', 'foo', 'bar', cb => cb());
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.deepEqual(app.tasks.default.deps, ['foo', 'bar']);
   });
 
   it('should register a task as a noop function when only dependencies are given', function() {
-    composer.task('default', ['foo', 'bar']);
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.equal(composer.tasks.default.callback.name, 'callback');
+    app.task('default', ['foo', 'bar']);
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.equal(typeof app.tasks.default.callback, 'function');
   });
 
   it('should register a task with options as the second argument', function() {
-    composer.task('default', {flow: 'parallel'}, ['foo', 'bar']);
-    assert.equal(typeof composer.tasks.default, 'object');
-    assert.equal(composer.tasks.default.callback.name, 'callback');
-    assert.equal(composer.tasks.default.options.flow, 'parallel');
+    app.task('default', {flow: 'parallel'}, ['foo', 'bar']);
+    assert.equal(typeof app.tasks.default, 'object');
+    assert.equal(typeof app.tasks.default.callback, 'function');
+    assert.equal(app.tasks.default.options.flow, 'parallel');
   });
 
   it('should register a task as a prompt task', function() {
-    composer.task('default', 'Run task?', 'foo');
-    assert.equal(typeof composer.tasks.default, 'object');
+    app.task('default', 'Run task?', 'foo');
+    assert.equal(typeof app.tasks.default, 'object');
   });
 
-  it('should run a task', function(done) {
+  it('should run a task', function(cb) {
     let count = 0;
-    composer.task('default', function(cb) {
+    app.task('default', function(cb) {
       count++;
       cb();
     });
 
-    composer.build('default', function(err) {
-      if (err) return done(err);
+    app.build('default', function(err) {
+      if (err) return cb(err);
       assert.equal(count, 1);
-      done();
+      cb();
     });
   });
 
   it('should run a task and return a promise', function() {
     let count = 0;
-    composer.task('default', function(cb) {
+    app.task('default', function(cb) {
       count++;
       cb();
     });
 
-    return composer.build('default')
+    return app.build('default')
       .then(function() {
         assert.equal(count, 1);
       });
   });
 
-  it('should run a task with options', function(done) {
+  it('should run a task with options', function(cb) {
     let count = 0;
-    composer.task('default', {silent: false}, function(cb) {
+    app.task('default', {silent: false}, function(cb) {
       assert.equal(this.options.silent, false);
       count++;
       cb();
     });
 
-    composer.build('default', function(err) {
-      if (err) return done(err);
+    app.build('default', function(err) {
+      if (err) return cb(err);
       assert.equal(count, 1);
-      done();
+      cb();
     });
   });
 
-  it('should run a task with additional options', function(done) {
+  it('should run a task with additional options', function(cb) {
     let count = 0;
-    composer.task('default', {silent: false}, function(cb) {
+    app.task('default', {silent: false}, function(cb) {
       assert.equal(this.options.silent, true);
       assert.equal(this.options.foo, 'bar');
       count++;
       cb();
     });
 
-    composer.build('default', {silent: true, foo: 'bar'}, function(err) {
-      if (err) return done(err);
+    app.build('default', {silent: true, foo: 'bar'}, function(err) {
+      if (err) return cb(err);
       assert.equal(count, 1);
-      done();
+      cb();
     });
   });
 
-  it('should run the `default` task when no task is given', function(done) {
+  it('should run the `default` task when no task is given', function(cb) {
     let count = 0;
-    composer.task('default', function(cb) {
+    app.task('default', function(cb) {
       count++;
       cb();
     });
 
-    composer.build(function(err) {
-      if (err) return done(err);
+    app.build(function(err) {
+      if (err) return cb(err);
       assert.equal(count, 1);
-      done();
+      cb();
     });
   });
 
-  it('should skip tasks when `run === false`', function(done) {
+  it('should skip tasks when `run === false`', function(cb) {
     const expected = [];
     function callback() {
       return function(cb) {
@@ -159,22 +147,22 @@ describe('composer', function() {
       };
     }
 
-    composer.task('foo', callback());
-    composer.task('bar', {run: false}, callback());
-    composer.task('baz', callback());
-    composer.task('bang', {run: false}, callback());
-    composer.task('beep', callback());
-    composer.task('boop', callback());
+    app.task('foo', callback());
+    app.task('bar', {run: false}, callback());
+    app.task('baz', callback());
+    app.task('bang', {run: false}, callback());
+    app.task('beep', callback());
+    app.task('boop', callback());
 
-    composer.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
-    composer.build(function(err) {
-      if (err) return done(err);
+    app.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
+    app.build(function(err) {
+      if (err) return cb(err);
       assert.deepEqual(expected, ['foo', 'baz', 'beep', 'boop']);
-      done();
+      cb();
     });
   });
 
-  it('should skip tasks when `run === false` (with deps skipped)', function(done) {
+  it('should skip tasks when `run === false` (with deps skipped)', function(cb) {
     const expected = [];
     function callback() {
       return function(cb) {
@@ -183,122 +171,118 @@ describe('composer', function() {
       };
     }
 
-    composer.task('foo', callback());
-    composer.task('bar', {run: false}, ['foo'], callback());
-    composer.task('baz', ['bar'], callback());
-    composer.task('bang', {run: false}, ['baz'], callback());
-    composer.task('beep', ['bang'], callback());
-    composer.task('boop', ['beep'], callback());
+    app.task('foo', callback());
+    app.task('bar', {run: false}, ['foo'], callback());
+    app.task('baz', ['bar'], callback());
+    app.task('bang', {run: false}, ['baz'], callback());
+    app.task('beep', ['bang'], callback());
+    app.task('boop', ['beep'], callback());
 
-    composer.task('default', ['boop']);
-    composer.build(function(err) {
-      if (err) return done(err);
+    app.task('default', ['boop']);
+    app.build(function(err) {
+      if (err) return cb(err);
       assert.deepEqual(expected, ['beep', 'boop']);
-      done();
+      cb();
     });
   });
 
-  it('should skip tasks when `run === false` (complex flow)', function(done) {
+  it('should skip tasks when `run === false` (complex flow)', function(cb) {
     const expected = [];
 
-    composer.task('foo', function(cb) {
+    app.task('foo', function(cb) {
       expected.push(this.name);
       // disable running the "bar" task
-      composer.tasks['bar'].options.run = false;
+      app.tasks['bar'].options.run = false;
       cb();
     });
 
-    composer.task('bar', function(cb) {
+    app.task('bar', function(cb) {
       expected.push(this.name);
       cb();
     });
 
-    composer.task('baz', function(cb) {
+    app.task('baz', function(cb) {
       expected.push(this.name);
       // enable running the "bang" task
-      composer.tasks['bang'].options.run = true;
+      app.tasks['bang'].options.run = true;
       cb();
     });
 
-    composer.task('bang', {run: false}, function(cb) {
+    app.task('bang', {run: false}, function(cb) {
       expected.push(this.name);
       cb();
     });
 
-    composer.task('beep', function(cb) {
+    app.task('beep', function(cb) {
       expected.push(this.name);
       cb();
     });
 
-    composer.task('boop', function(cb) {
+    app.task('boop', function(cb) {
       expected.push(this.name);
       cb();
     });
 
-    composer.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
-    composer.build(function(err) {
-      if (err) return done(err);
+    app.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
+    app.build(function(err) {
+      if (err) return cb(err);
       assert.deepEqual(expected, ['foo', 'baz', 'bang', 'beep', 'boop']);
-      done();
+      cb();
     });
   });
 
-  it('should throw an error when a task with unregistered dependencies is built', function(done) {
+  it('should throw an error when a task with unregistered dependencies is run', function(cb) {
     let count = 0;
-    composer.task('default', ['foo', 'bar'], function(cb) {
+    app.task('default', ['foo', 'bar'], function(cb) {
       count++;
       cb();
     });
 
-    composer.build('default', function(err) {
-      if (!err) return done(new Error('Expected an error to be thrown.'));
+    app.build('default', function(err) {
+      if (!err) return cb(new Error('Expected an error to be thrown.'));
       assert.equal(count, 0);
-      done();
+      cb();
     });
   });
 
-  it('should throw an error when a task with globbed dependencies cannot be found', function(done) {
+  it('should throw an error when a task with globbed dependencies cannot be found', function(cb) {
     let count = 0;
-    composer.task('default', ['a-*'], function(cb) {
+    app.task('default', ['a-*'], function(cb) {
       count++;
       cb();
     });
 
-    composer.build('default', function(err) {
-      if (!err) return done(new Error('Expected an error to be thrown.'));
+    app.build('default', function(err) {
+      if (!err) return cb(new Error('Expected an error to be thrown.'));
       assert.equal(count, 0);
-      done();
+      cb();
     });
   });
 
-  it('should emit task events', function(done) {
+  it('should emit task events', function(cb) {
     const events = [];
-    composer.on('task', function(task) {
+    app.on('task', function(task) {
       events.push(task.status + '.' + task.name);
     });
 
-    composer.on('error', function(err) {
+    app.on('error', function(err) {
       if (err.build) {
         return;
       }
       events.push('error.' + err.task.name);
     });
 
-    composer.task('foo', function(cb) {
-      cb();
-    });
+    app.task('foo', cb => cb());
 
-    composer.task('bar', ['foo'], function(cb) {
-      cb();
-    });
+    app.task('bar', ['foo'], cb => cb());
 
-    composer.task('default', ['bar']);
-    composer.build('default', function(err) {
-      if (err) return done(err);
+    app.task('default', ['bar']);
+    app.build('default', function(err) {
+      if (err) return cb(err);
       assert.deepEqual(events, [
-        'register.foo',
-        'register.bar',
-        'register.default',
+        'pending.foo',
+        'pending.bar',
+        'pending.default',
         'starting.default',
         'starting.bar',
         'starting.foo',
@@ -306,268 +290,188 @@ describe('composer', function() {
         'finished.bar',
         'finished.default'
       ]);
-      done();
+      cb();
     });
   });
 
-  it('should emit an error event when an error is passed back in a task', function(done) {
-    composer.on('task:error', function(err) {
+  it('should emit an error event when an error is passed back in a task', function(cb) {
+    app.on('task:error', function(err) {
       assert(err);
       assert.equal(err.message, 'in task "default": This is an error');
     });
 
-    composer.task('default', function(cb) {
+    app.task('default', function(cb) {
       return cb(new Error('This is an error'));
     });
 
-    composer.build('default', function(err) {
-      if (err) return done();
-      done(new Error('Expected an error'));
+    app.build('default', function(err) {
+      if (err) return cb();
+      cb(new Error('Expected an error'));
     });
   });
 
-  it('should emit an error event when an error is thrown in a task', function(done) {
-    let count = 0;
-    composer.on('error', function(err) {
-      assert(err);
-      if (err.build) {
-        return;
-      }
-      count++;
-      assert.equal(err.message, 'in task "default": This is an error');
-    });
-
-    composer.task('default', function() {
-      throw new Error('This is an error');
-    });
-
-    composer.build('default', function(err) {
-      assert.equal(count, 1);
-      if (err) return done();
-      done(new Error('Expected an error'));
-    });
-  });
-
-  it('should emit build events', function(done) {
+  it('should emit build events', function() {
     const events = [];
-    composer.on('build', function(build) {
-      events.push('build:' + build.status);
+
+    app.on('build', function(build) {
+      events.push(build.status);
     });
 
-    composer.on('error', function(err) {
-      if (err.build) {
-        events.push('error');
-      }
+    app.on('error', function(err) {
+      events.push('error');
     });
 
-    composer.task('foo', cb => cb());
-    composer.task('bar', ['foo'], cb => cb());
+    app.task('foo', cb => cb());
+    app.task('bar', ['foo'], cb => cb());
+    app.task('default', ['bar']);
 
-    composer.task('default', ['bar']);
-    composer.build('default', function(err) {
-      if (err) return done(err);
-      assert.deepEqual(events, ['build:starting', 'build:finished']);
-      done();
-    });
+    return app.build('default')
+      .then(() => {
+        assert.deepEqual(events, ['starting', 'finished']);
+      });
   });
 
-  it('should emit a build error event when an error is passed back in a task', function(done) {
-    composer.on('error', function(err) {
-      assert(err);
-      assert.equal(err.message, 'in task "default": This is an error');
+  it('should emit a build error event when an error is passed back in a task', function() {
+    let count = 0;
+
+    app.on('error', function(err) {
+      count++;
     });
 
-    composer.task('default', function(cb) {
-      return cb(new Error('This is an error'));
-    });
-
-    composer.build('default', function(err) {
-      if (err) return done();
-      done(new Error('Expected an error'));
-    });
-  });
-
-  it('should emit a build error event when an error is passed back in a task (with promise)', function(done) {
-    composer.on('error', function(err) {
-      assert(err);
-      assert.equal(err.message, 'in task "default": This is an error');
-    });
-
-    composer.task('default', function(cb) {
+    app.task('default', function(cb) {
       cb(new Error('This is an error'));
     });
 
-    composer.build('default')
-      .then(() => done(new Error('Expected an error')))
-      .catch(() => done());
+    return app.build('default')
+      .then(() => {
+        throw new Error('exected an error');
+      })
+      .catch(err => {
+        assert.equal(count, 1);
+      });
   });
 
-  it('should emit a build error event when an error is thrown in a task', function(done) {
+  it('should emit an error event when an error is thrown in a task', function() {
     let count = 0;
 
-    composer.on('error', function(err) {
-      assert(err);
-      if (!err.build) {
-        return;
-      }
+    app.on('error', function(err) {
       count++;
-      assert.equal(err.message, 'in task "default": This is an error');
     });
 
-    composer.task('default', function() {
+    app.task('default', function() {
       throw new Error('This is an error');
     });
 
-    composer.build('default', function(err) {
-      assert.equal(count, 1);
-      if (err) return done();
-      done(new Error('Expected an error'));
-    });
+    return app.build('default')
+      .then(() => {
+        throw new Error('exected an error');
+      })
+      .catch(err => {
+        assert.equal(count, 1);
+      });
   });
 
-  it('should run dependencies before running the dependent task.', function(done) {
-    const seq = [];
-    composer.task('foo', function(cb) {
-      seq.push('foo');
+  it('should run dependencies before running the dependent task.', function() {
+    const events = [];
+
+    app.task('foo', function(cb) {
+      events.push('foo');
       cb();
     });
 
-    composer.task('bar', function(cb) {
-      seq.push('bar');
+    app.task('bar', function(cb) {
+      events.push('bar');
       cb();
     });
 
-    composer.task('default', ['foo', 'bar'], function(cb) {
-      seq.push('default');
+    app.task('default', ['foo', 'bar'], function(cb) {
+      events.push('default');
       cb();
     });
 
-    composer.build('default', function(err) {
-      if (err) return done(err);
-      assert.deepEqual(seq, ['foo', 'bar', 'default']);
-      done();
-    });
+    return app.build('default')
+      .then(() => {
+        assert.deepEqual(events, ['foo', 'bar', 'default']);
+      });
   });
 
   it('should add inspect function to tasks.', function() {
-    composer.task('foo', function(cb) {
-      cb();
-    });
+    app.task('foo', cb => cb());
+    app.task('bar', cb => cb());
+    app.task('default', ['foo', 'bar'], cb => cb());
 
-    composer.task('bar', function(cb) {
-      cb();
-    });
-
-    composer.task('default', ['foo', 'bar'], function(cb) {
-      cb();
-    });
-    assert.equal(composer.tasks.foo.inspect(), '<Task "foo" deps: []>');
-    assert.equal(composer.tasks.bar.inspect(), '<Task "bar" deps: []>');
-    assert.equal(composer.tasks.default.inspect(), '<Task "default" deps: [foo, bar]>');
+    assert.equal(app.tasks.foo.inspect(), '<Task "foo" deps: []>');
+    assert.equal(app.tasks.bar.inspect(), '<Task "bar" deps: []>');
+    assert.equal(app.tasks.default.inspect(), '<Task "default" deps: [foo, bar]>');
   });
 
   it('should add custom inspect function to tasks.', function() {
-    composer.options = {
+    app.options = {
       inspectFn: function(task) {
-        return '<Task "' + task.name + '"' + (task.options.deps.length ? ' [' + task.options.deps.join(', ') + ']' : '') + '>';
+        return '<Task "'
+          + task.name + '"'
+          + (task.deps.length ? ' [' + task.deps.join(', ') + ']' : '')
+          + '>';
       }
     };
-    composer.task('foo', function(cb) {
-      cb();
-    });
 
-    composer.task('bar', function(cb) {
-      cb();
-    });
+    app.task('foo', cb => cb());
+    app.task('bar', cb => cb());
+    app.task('default', ['foo', 'bar'], cb => cb());
 
-    composer.task('default', ['foo', 'bar'], function(cb) {
-      cb();
-    });
-    assert.equal(composer.tasks.foo.inspect(), '<Task "foo">');
-    assert.equal(composer.tasks.bar.inspect(), '<Task "bar">');
-    assert.equal(composer.tasks.default.inspect(), '<Task "default" [foo, bar]>');
+    assert.equal(app.tasks.foo.inspect(), '<Task "foo">');
+    assert.equal(app.tasks.bar.inspect(), '<Task "bar">');
+    assert.equal(app.tasks.default.inspect(), '<Task "default" [foo, bar]>');
   });
 
   it('should disable inspect function on tasks.', function() {
-    composer.options = { inspectFn: false };
+    app.options = { inspectFn: false };
 
-    composer.task('foo', function(cb) {
-      cb();
-    });
+    app.task('foo', cb => cb());
+    app.task('bar', cb => cb());
+    app.task('default', ['foo', 'bar'], cb => cb());
 
-    composer.task('bar', function(cb) {
-      cb();
-    });
-
-    composer.task('default', ['foo', 'bar'], function(cb) {
-      cb();
-    });
-
-    assert.equal(typeof composer.tasks.foo.inspect, 'undefined');
-    assert.equal(typeof composer.tasks.bar.inspect, 'undefined');
-    assert.equal(typeof composer.tasks.default.inspect, 'undefined');
+    assert.equal(typeof app.tasks.foo.inspect, 'undefined');
+    assert.equal(typeof app.tasks.bar.inspect, 'undefined');
+    assert.equal(typeof app.tasks.default.inspect, 'undefined');
   });
 
-  it('should run globbed dependencies before running the dependent task.', function(done) {
-    const tasks = [];
-    composer.task('a-foo', function(cb) {
-      tasks.push('a-foo');
+  it('should run globbed dependencies before running the dependent task.', function() {
+    const events = [];
+    const task = function(cb) {
+      events.push(this.name);
       cb();
-    });
+    };
 
-    composer.task('a-bar', function(cb) {
-      tasks.push('a-bar');
-      cb();
-    });
+    app.task('foo', task);
+    app.task('bar', task);
+    app.task('baz', task);
+    app.task('qux', task);
+    app.task('default', ['b*'], task);
 
-    composer.task('b-foo', function(cb) {
-      tasks.push('b-foo');
-      cb();
-    });
-
-    composer.task('b-bar', function(cb) {
-      tasks.push('b-bar');
-      cb();
-    });
-
-    composer.task('default', ['a-*'], function(cb) {
-      tasks.push('default');
-      cb();
-    });
-
-    composer.build(function(err) {
-      if (err) return done(err);
-      assert.deepEqual(tasks, ['a-foo', 'a-bar', 'default']);
-      done();
-    });
+    return app.build('default')
+      .then(() => {
+        assert.deepEqual(events, ['bar', 'baz', 'default']);
+      });
   });
 
-  it('should get the current task name from `this`', function(done) {
-    const results = [];
+  it('should get the current task name from `this`', function() {
+    const names = [];
     const tasks = [];
 
     const callback = function(cb) {
-      results.push(this.name);
+      names.push(this.name);
       cb();
     };
 
     for (let i = 0; i < 10; i++) {
-      tasks.push('task-' + i);
-      composer.task('task-' + i, callback);
+      tasks.push(String(i));
+      app.task(String(i), callback);
     }
 
-    composer.build(tasks, function(err) {
-      if (err) return done(err);
-      assert.equal(results.length, 10);
-      assert.deepEqual(results, ['task-0', 'task-1', 'task-2', 'task-3', 'task-4', 'task-5', 'task-6', 'task-7', 'task-8', 'task-9']);
-      done();
-    });
+    return app.build(tasks)
+      .then(() => {
+        assert.deepEqual(names, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+      });
   });
 });
-
-// version regex from kind-of tests
-// https://github.com/jonschlinkert/kind-of/blob/19fa8aba91e84ed7da93ebabb3164b00cea9a954/test/test.js#L7
-const version = process.version.match(/^v(\d+)\.(\d+)\.(\d+)/);
-if (version[1] >= 4) {
-  require('./es2015');
-}
