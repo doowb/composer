@@ -14,6 +14,19 @@ describe('composer', function() {
     assert.throws(() => app.task(), /expected/);
   });
 
+  it('should disable inspect function on tasks.', function() {
+    const enable = app.disableInspect();
+
+    app.task('foo', cb => cb());
+    app.task('bar', cb => cb());
+    app.task('default', ['foo', 'bar'], cb => cb());
+
+    assert.equal(typeof app.tasks.foo.inspect, 'undefined');
+    assert.equal(typeof app.tasks.bar.inspect, 'undefined');
+    assert.equal(typeof app.tasks.default.inspect, 'undefined');
+    enable();
+  });
+
   it('should register a task', function() {
     app.task('default', () => {});
     assert(app.tasks.default);
