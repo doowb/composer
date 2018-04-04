@@ -18,14 +18,14 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 4);
+        }, 6);
       });
 
       app.task('bar', function(next) {
         setTimeout(function() {
           actual.push('bar');
           next();
-        }, 2);
+        }, 1);
       });
 
       app.task('baz', function(next) {
@@ -112,28 +112,28 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 10);
+        }, 15);
       });
 
       app.task('bar', ['qux'], function(next) {
         setTimeout(function() {
           actual.push('bar');
           next();
-        }, 5);
+        }, 10);
       });
 
       app.task('baz', function(next) {
         setTimeout(function() {
           actual.push('baz');
           next();
-        }, 3);
+        }, 5);
       });
 
       app.task('qux', function(next) {
         setTimeout(function() {
           actual.push('qux');
           next();
-        }, 1);
+        }, 0);
       });
 
       const build = app.parallel(['foo', 'bar']);
@@ -153,7 +153,7 @@ describe('parallel', function() {
         setTimeout(function() {
           actual.push('foo');
           next();
-        }, 5);
+        }, 8);
       });
 
       app.task('bar', function(next) {
@@ -197,11 +197,11 @@ describe('parallel', function() {
         };
       };
 
-      const build = app.parallel([task(10), task(8), task(6), task(4), task(2)]);
+      const build = app.parallel([task(20), task(15), task(10), task(5), task(0)]);
 
       return build()
         .then(() => {
-          assert.deepEqual(res, [2, 4, 6, 8, 10]);
+          assert.deepEqual(res, [0, 5, 10, 15, 20]);
         });
     });
 

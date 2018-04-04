@@ -18,7 +18,9 @@ describe('tasks', function() {
       assert.deepEqual(tasks, [
         'foo:pending',
         'default:pending',
+        'default:preparing',
         'default:starting',
+        'foo:preparing',
         'foo:starting',
         'foo:finished',
         'default:finished'
