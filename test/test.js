@@ -297,19 +297,20 @@ describe('composer', function() {
     });
   });
 
-  it('should emit an error event when an error is passed back in a task', function(cb) {
-    app.on('task:error', function(err) {
-      assert(err);
-      assert.equal(err.message, 'in task "default": This is an error');
+  it('-should emit an error event when an error is passed back in a task', function(cb) {
+    const errors = [];
+    app.on('error', function(err) {
+      errors.push(err);
     });
 
-    app.task('default', function(cb) {
-      return cb(new Error('This is an error'));
+    app.task('default', function(next) {
+      next(new Error('This is an error'));
     });
 
     app.build('default', function(err) {
-      if (err) return cb();
-      cb(new Error('Expected an error'));
+      assert(err);
+      assert.equal(errors.length, 1);
+      cb();
     });
   });
 

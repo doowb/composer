@@ -1,9 +1,9 @@
 'use strict';
 
-const Emitter = require('@sellside/emitter');
-const Composer = require('./lib/tasks');
+const Emitter = require('./lib/events');
+const Tasks = require('./lib/tasks');
 const Task = require('./lib/task');
 
-module.exports = Composer(Emitter);
-module.exports.Task = Task(Emitter);
-module.exports.create = Composer;
+module.exports = Tasks(Emitter);
+module.exports.create = Tasks;
+module.exports.Task = Task;

@@ -2,6 +2,7 @@
 
 require('mocha');
 const assert = require('assert');
+const through = require('through2');
 const Tasks = require('..');
 
 describe('tasks', function() {
@@ -42,6 +43,29 @@ describe('tasks', function() {
       })
       .catch(err => {
         assert(/expected/.test(err.message));
+      });
+  });
+
+  it('should signal that a task is complete when a stream is returned', function() {
+    const app = new Tasks();
+    const events = [];
+    let count = 0;
+
+    app.on('task', task => events.push(task.status));
+    app.task('default', function() {
+      const stream = through.obj(function(data, enc, next) {
+        count++;
+        next();
+      });
+      stream.write(count);
+      stream.end();
+      return stream;
+    });
+
+    return app.build('default')
+      .then(() => {
+        assert.deepEqual(events, [ 'pending', 'preparing', 'starting', 'finished' ]);
+        assert.equal(count, 1);
       });
   });
 });

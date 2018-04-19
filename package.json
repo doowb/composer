@@ -1,6 +1,6 @@
 {
   "name": "composer",
-  "description": "API-first task runner with three methods: task, run and watch.",
+  "description": "Run and compose async tasks. Easily define groups of tasks to run in series or parallel.",
   "version": "2.0.2",
   "homepage": "https://github.com/doowb/composer",
   "author": "Brian Woodward (https://github.com/doowb)",
@@ -25,21 +25,24 @@
     "test": "mocha"
   },
   "dependencies": {
-    "@sellside/emitter": "^1.2.1",
     "kind-of": "^6.0.2",
     "nanoseconds": "^1.0.1",
     "pretty-time": "^1.0.0"
   },
   "devDependencies": {
-    "gulp-format-md": "^1.0.0",
     "mocha": "^3.5.3",
-    "through2": "^2.0.3"
+    "through2": "^2.0.3",
+    "gulp-format-md": "^1.0.0"
   },
   "keywords": [
+    "async",
+    "await",
     "build",
     "build-system",
     "compose",
     "composer",
+    "composition",
+    "control",
     "flow",
     "run",
     "system",
@@ -55,31 +58,22 @@
         "twitter": "doowb"
       }
     },
-    "plugins": [
-      "gulp-format-md"
-    ],
     "tasks": [
       "readme"
     ],
-    "lint": {
-      "reflinks": true
-    },
+    "plugins": [
+      "gulp-format-md"
+    ],
     "related": {
       "list": [
         "assemble",
-        "base-tasks",
         "generate",
         "update",
         "verb"
       ]
     },
-    "reflinks": [
-      "bach",
-      "base",
-      "base-tasks",
-      "base-watch",
-      "composer",
-      "pretty-time"
-    ]
+    "lint": {
+      "reflinks": true
+    }
   }
 }

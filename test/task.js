@@ -156,7 +156,7 @@ describe('task', function() {
       });
   });
 
-  it('should run a task that returns a non stream when `.run` is called', function() {
+  it('should run a task that returns a non-stream when `.run` is called', function() {
     let count = 0;
     const callback = function(cb) {
       setImmediate(function() {
