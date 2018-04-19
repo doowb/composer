@@ -16,54 +16,54 @@ describe('composer', function() {
 
   it('should register a task', function() {
     app.task('default', () => {});
-    assert(app.tasks.default);
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.equal(app.tasks.default.callback.name, '');
+    assert(app.tasks.get('default'));
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.equal(app.tasks.get('default').callback.name, '');
   });
 
   it('should register a noop task when only name is given', function() {
     app.task('default');
-    assert(app.tasks.default);
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.equal(typeof app.tasks.default.callback, 'function');
+    assert(app.tasks.get('default'));
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
   it('should register a noop task when a name and an empty dependencies array is given', function() {
     app.task('default', []);
-    assert(app.tasks.default);
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.equal(typeof app.tasks.default.callback, 'function');
+    assert(app.tasks.get('default'));
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
   it('should register a task with an array of named dependencies', function() {
     app.task('default', ['foo', 'bar'], cb => cb());
-    assert(app.tasks.default);
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.deepEqual(app.tasks.default.deps, ['foo', 'bar']);
+    assert(app.tasks.get('default'));
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.deepEqual(app.tasks.get('default').deps, ['foo', 'bar']);
   });
 
   it('should register a task with a list of strings as dependencies', function() {
     app.task('default', 'foo', 'bar', cb => cb());
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.deepEqual(app.tasks.default.deps, ['foo', 'bar']);
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.deepEqual(app.tasks.get('default').deps, ['foo', 'bar']);
   });
 
   it('should register a task as a noop function when only dependencies are given', function() {
     app.task('default', ['foo', 'bar']);
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.equal(typeof app.tasks.default.callback, 'function');
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
   it('should register a task with options as the second argument', function() {
     app.task('default', {flow: 'parallel'}, ['foo', 'bar']);
-    assert.equal(typeof app.tasks.default, 'object');
-    assert.equal(typeof app.tasks.default.callback, 'function');
-    assert.equal(app.tasks.default.options.flow, 'parallel');
+    assert.equal(typeof app.tasks.get('default'), 'object');
+    assert.equal(typeof app.tasks.get('default').callback, 'function');
+    assert.equal(app.tasks.get('default').options.flow, 'parallel');
   });
 
   it('should register a task as a prompt task', function() {
     app.task('default', 'Run task?', 'foo');
-    assert.equal(typeof app.tasks.default, 'object');
+    assert.equal(typeof app.tasks.get('default'), 'object');
   });
 
   it('should run a task', function(cb) {
@@ -192,7 +192,7 @@ describe('composer', function() {
     app.task('foo', function(cb) {
       expected.push(this.name);
       // disable running the "bar" task
-      app.tasks['bar'].options.run = false;
+      app.tasks.get('bar').options.run = false;
       cb();
     });
 
@@ -204,7 +204,7 @@ describe('composer', function() {
     app.task('baz', function(cb) {
       expected.push(this.name);
       // enable running the "bang" task
-      app.tasks['bang'].options.run = true;
+      app.tasks.get('bang').options.run = true;
       cb();
     });
 
@@ -354,6 +354,24 @@ describe('composer', function() {
       });
   });
 
+  it('should stop build and return errors when thrown in a task', function() {
+    let count = 0;
+
+    app.task('foo', function() {
+      throw new Error('This is an error');
+    });
+
+    app.task('bar', function() {
+      count++;
+    });
+
+    return app.build(['foo', 'bar'])
+      .catch(err => {
+        assert(err);
+        assert.equal(count, 0);
+      });
+  });
+
   it('should emit an error event when an error is thrown in a task', function() {
     let count = 0;
 
@@ -403,9 +421,9 @@ describe('composer', function() {
     app.task('bar', cb => cb());
     app.task('default', ['foo', 'bar'], cb => cb());
 
-    assert.equal(app.tasks.foo.inspect(), '<Task "foo" deps: []>');
-    assert.equal(app.tasks.bar.inspect(), '<Task "bar" deps: []>');
-    assert.equal(app.tasks.default.inspect(), '<Task "default" deps: [foo, bar]>');
+    assert.equal(app.tasks.get('foo').inspect(), '<Task "foo" deps: []>');
+    assert.equal(app.tasks.get('bar').inspect(), '<Task "bar" deps: []>');
+    assert.equal(app.tasks.get('default').inspect(), '<Task "default" deps: [foo, bar]>');
   });
 
   it('should add custom inspect function to tasks.', function() {
@@ -422,9 +440,9 @@ describe('composer', function() {
     app.task('bar', cb => cb());
     app.task('default', ['foo', 'bar'], cb => cb());
 
-    assert.equal(app.tasks.foo.inspect(), '<Task "foo">');
-    assert.equal(app.tasks.bar.inspect(), '<Task "bar">');
-    assert.equal(app.tasks.default.inspect(), '<Task "default" [foo, bar]>');
+    assert.equal(app.tasks.get('foo').inspect(), '<Task "foo">');
+    assert.equal(app.tasks.get('bar').inspect(), '<Task "bar">');
+    assert.equal(app.tasks.get('default').inspect(), '<Task "default" [foo, bar]>');
   });
 
   it('should disable inspect function on tasks.', function() {
@@ -434,9 +452,9 @@ describe('composer', function() {
     app.task('bar', cb => cb());
     app.task('default', ['foo', 'bar'], cb => cb());
 
-    assert.equal(typeof app.tasks.foo.inspect, 'undefined');
-    assert.equal(typeof app.tasks.bar.inspect, 'undefined');
-    assert.equal(typeof app.tasks.default.inspect, 'undefined');
+    assert.equal(typeof app.tasks.get('foo').inspect, 'undefined');
+    assert.equal(typeof app.tasks.get('bar').inspect, 'undefined');
+    assert.equal(typeof app.tasks.get('default').inspect, 'undefined');
   });
 
   it('should run globbed dependencies before running the dependent task.', function() {
