@@ -7,6 +7,8 @@ Please consider following this project's author, [Brian Woodward](https://github
 - [Install](#install)
 - [Usage](#usage)
 - [API](#api)
+  * [Tasks](#tasks)
+  * [Generators](#generators)
 - [Events](#events)
 - [Release history](#release-history)
 - [About](#about)
@@ -39,26 +41,29 @@ composer.build('default')
 
 ## API
 
-### [.create](lib/tasks.js#L23)
+### [.create](lib/tasks.js#L27)
 
-Static factory method for creating a custom `Composer` class that extends the given `Emitter`.
+Factory for creating a custom `Tasks` class that extends the given `Emitter`. Or, simply call the factory function to use the built-in emitter.
 
 **Params**
 
 * `Emitter` **{function}**: Event emitter.
-* `returns` **{Class}**: Returns a custom `Composer` class.
+* `returns` **{Class}**: Returns a custom `Tasks` class.
 
 **Example**
 
 ```js
+// custom emitter
 const Emitter = require('events');
-const Composer = require('composer').create(Emitter);
-const composer = new Composer();
+const Tasks = require('composer/lib/tasks')(Emitter);
+// built-in emitter
+const Tasks = require('composer/lib/tasks')();
+const composer = new Tasks();
 ```
 
-### [Composer](lib/tasks.js#L38)
+### [Tasks](lib/tasks.js#L42)
 
-Create an instance of `Composer` with the given `options`.
+Create an instance of `Tasks` with the given `options`.
 
 **Params**
 
@@ -67,11 +72,11 @@ Create an instance of `Composer` with the given `options`.
 **Example**
 
 ```js
-const Composer = require('composer');
-const composer = new Composer();
+const Tasks = require('composer');
+const composer = new Tasks();
 ```
 
-### [.task](lib/tasks.js#L77)
+### [.task](lib/tasks.js#L81)
 
 Define a task. Tasks run asynchronously, either in series (by default) or parallel (when `options.parallel` is true). In order for the build to determine when a task is complete, _one of the following_ things must happen: 1) the callback must be called, 2) a promise must be returned, or 3) a stream must be returned.
 
@@ -100,7 +105,7 @@ app.task('default', function() {
 });
 ```
 
-### [.build](lib/tasks.js#L198)
+### [.build](lib/tasks.js#L209)
 
 Run one or more tasks.
 
@@ -122,7 +127,7 @@ build(function() {
 });
 ```
 
-### [.series](lib/tasks.js#L240)
+### [.series](lib/tasks.js#L251)
 
 Compose a function to run the given tasks in series.
 
@@ -144,7 +149,7 @@ build(function() {
 });
 ```
 
-### [.parallel](lib/tasks.js#L293)
+### [.parallel](lib/tasks.js#L304)
 
 Compose a function to run the given tasks in parallel.
 
@@ -168,6 +173,255 @@ build(function() {
 // example task usage
 app.task('default', build);
 ```
+
+### [.create](lib/generator.js#L23)
+
+Static factory method for creating a custom `Composer` class that extends the given `Emitter`.
+
+**Params**
+
+* `Emitter` **{function}**: Event emitter.
+* `returns` **{Class}**: Returns a custom `Composer` class.
+
+**Example**
+
+```js
+const Emitter = require('events');
+const Composer = require('composer').create(Emitter);
+const composer = new Composer();
+```
+
+Create a wrapped generator function with the given `name`, `config`, and `fn`.
+
+**Params**
+
+* `name` **{string}**
+* `config` **{object}**: (optional)
+* `fn` **{function}**
+* `returns` **{function}**
+
+Returns true if the given value is a Composer generator object.
+
+**Params**
+
+* `val` **{object}**
+* `returns` **{boolean}**
+
+### [.register](lib/generator.js#L146)
+
+Alias to `.setGenerator`.
+
+**Params**
+
+* `name` **{string}**: The generator's name
+* `options` **{object|Function|String}**: or generator
+* `generator` **{object|Function|String}**: Generator function, instance or filepath.
+* `returns` **{object}**: Returns the generator instance.
+
+**Example**
+
+```js
+app.register('foo', function(app, base) {
+  // "app" is a private instance created for the generator
+  // "base" is a shared instance
+});
+```
+
+### [.generator](lib/generator.js#L169)
+
+Get and invoke generator `name`, or register generator `name` with the given `val` and `options`, then invoke and return the generator instance. This method differs from `.register`, which lazily invokes generator functions when `.generate` is called.
+
+**Params**
+
+* `name` **{string}**
+* `fn` **{function|Object}**: Generator function, instance or filepath.
+* `returns` **{object}**: Returns the generator instance or undefined if not resolved.
+
+**Example**
+
+```js
+app.generator('foo', function(app, options) {
+  // "app" - private instance created for generator "foo"
+  // "options" - options passed to the generator
+});
+```
+
+### [.setGenerator](lib/generator.js#L201)
+
+Store a generator by file path or instance with the given `name` and `options`.
+
+**Params**
+
+* `name` **{string}**: The generator's name
+* `options` **{object|Function|String}**: or generator
+* `generator` **{object|Function|String}**: Generator function, instance or filepath.
+* `returns` **{object}**: Returns the generator instance.
+
+**Example**
+
+```js
+app.setGenerator('foo', function(app, options) {
+  // "app" - new instance of Generator created for generator "foo"
+  // "options" - options passed to the generator
+});
+```
+
+### [.getGenerator](lib/generator.js#L226)
+
+Get generator `name` from `app.generators`, same as [findGenerator], but also invokes the returned generator with the current instance. Dot-notation may be used for getting sub-generators.
+
+**Params**
+
+* `name` **{string}**: Generator name.
+* `returns` **{object|undefined}**: Returns the generator instance or undefined.
+
+**Example**
+
+```js
+const foo = app.getGenerator('foo');
+
+// get a sub-generator
+const baz = app.getGenerator('foo.bar.baz');
+```
+
+### [.findGenerator](lib/generator.js#L259)
+
+Find generator `name`, by first searching the cache, then searching the cache of the `base` generator. Use this to get a generator without invoking it.
+
+**Params**
+
+* `name` **{string}**
+* `options` **{function}**: Optionally supply a rename function on `options.toAlias`
+* `returns` **{object|undefined}**: Returns the generator instance if found, or undefined.
+
+**Example**
+
+```js
+// search by "alias"
+const foo = app.findGenerator('foo');
+
+// search by "full name"
+const foo = app.findGenerator('generate-foo');
+```
+
+**Params**
+
+* `name` **{string}**
+* `returns` **{boolean}**
+
+**Example**
+
+```js
+console.log(app.hasGenerator('foo'));
+console.log(app.hasGenerator('foo.bar'));
+```
+
+### [.generate](lib/generator.js#L341)
+
+Run one or more tasks or sub-generators and returns a promise.
+
+**Params**
+
+* `name` **{string}**
+* `tasks` **{string|Array}**
+* `returns` **{promise}**
+
+**Events**
+
+* `emits`: `generate` with the generator `name` and the array of `tasks` that are queued to run.
+
+**Example**
+
+```js
+// run tasks `bar` and `baz` on generator `foo`
+app.generate('foo', ['bar', 'baz']);
+
+// or use shorthand
+app.generate('foo:bar,baz');
+
+// run the `default` task on generator `foo`
+app.generate('foo');
+
+// run the `default` task on the `default` generator, if defined
+app.generate();
+```
+
+### [.toAlias](lib/generator.js#L391)
+
+Create a generator alias from the given `name`. By default, `generate-` is stripped from beginning of the generator name.
+
+**Params**
+
+* `name` **{string}**
+* `options` **{object}**
+* `returns` **{string}**: Returns the alias.
+
+**Example**
+
+```js
+// customize the alias
+const app = new Generate({ toAlias: require('camel-case') });
+```
+
+### [.isGenerators](lib/generator.js#L412)
+
+Returns true if every name in the given array is a registered generator.
+
+**Params**
+
+* `names` **{array}**
+* `returns` **{boolean}**
+
+### [.formatError](lib/generator.js#L432)
+
+Format task and generator errors.
+
+**Params**
+
+* `name` **{string}**
+* `returns` **{error}**
+
+### [.base](lib/generator.js#L453)
+
+Get the first ancestor instance when `generator.parent` is defined on nested instances.
+
+Get or set the generator name.
+
+**Params**
+
+* **{string}**
+
+* `returns` **{string}**
+
+Get or set the generator `alias`. By default, the generator alias is created
+by passing the generator name to the [.toAlias](#toAlias) method.
+
+**Params**
+
+* **{string}**
+
+* `returns` **{string}**
+
+Get the generator namespace. The namespace is created by joining the generator's `alias`
+to the alias of each ancestor generator.
+
+**Params**
+
+* **{string}**
+
+* `returns` **{string}**
+
+Get the depth of a generator - useful for debugging. The root generator
+has a depth of `0`, sub-generators add `1` for each level of nesting.
+
+* `returns` **{number}**
+
+Static method that returns true if the given `val` is an instance of Generate.
+
+**Params**
+
+* `val` **{object}**
+* `returns` **{boolean}**
 
 ## Events
 
@@ -260,4 +514,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on April 19, 2018._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on April 21, 2018._

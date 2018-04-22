@@ -27,12 +27,14 @@
   "dependencies": {
     "kind-of": "^6.0.2",
     "nanoseconds": "^1.0.1",
-    "pretty-time": "^1.0.0"
+    "pretty-time": "^1.0.0",
+    "use": "^3.1.0"
   },
   "devDependencies": {
+    "generate-foo": "^0.1.5",
+    "gulp-format-md": "^1.0.0",
     "mocha": "^3.5.3",
-    "through2": "^2.0.3",
-    "gulp-format-md": "^1.0.0"
+    "through2": "^2.0.3"
   },
   "keywords": [
     "async",
