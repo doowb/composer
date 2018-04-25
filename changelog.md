@@ -1,6 +1,11 @@
+### v3.0.0
+
+- Completely refactored from the ground up. 
+- For the most part, `.task`, `.build`, `.series` and `.parallel` work the same way. However, event handling has changed. Please see the readme for more information and documentation.
+
 ### v2.0.0
 
-- Now requires Node.js v8.0 or higher
+- Now requires Node.js v4.0 or higher
 
 ### v1.0.0
 
