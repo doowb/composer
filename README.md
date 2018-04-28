@@ -41,7 +41,7 @@ composer.build('default')
 
 ## API
 
-### [.create](lib/tasks.js#L27)
+### [.create](lib/tasks.js#L28)
 
 Factory for creating a custom `Tasks` class that extends the given `Emitter`. Or, simply call the factory function to use the built-in emitter.
 
@@ -61,7 +61,7 @@ const Tasks = require('composer/lib/tasks')();
 const composer = new Tasks();
 ```
 
-### [Tasks](lib/tasks.js#L42)
+### [Tasks](lib/tasks.js#L43)
 
 Create an instance of `Tasks` with the given `options`.
 
@@ -72,7 +72,7 @@ Create an instance of `Tasks` with the given `options`.
 **Example**
 
 ```js
-const Tasks = require('composer');
+const Tasks = require('composer').Tasks;
 const composer = new Tasks();
 ```
 
@@ -99,13 +99,13 @@ app.task('default', cb => {
 app.task('default', () => {
   return Promise.resolve(null);
 });
-// 3. stream (using vinyl-fs or the lib of your choice)
+// 3. stream (using vinyl-fs or your stream of choice)
 app.task('default', function() {
   return vfs.src('foo/*.js');
 });
 ```
 
-### [.build](lib/tasks.js#L209)
+### [.build](lib/tasks.js#L207)
 
 Run one or more tasks.
 
@@ -127,7 +127,7 @@ build(function() {
 });
 ```
 
-### [.series](lib/tasks.js#L251)
+### [.series](lib/tasks.js#L249)
 
 Compose a function to run the given tasks in series.
 
@@ -149,7 +149,7 @@ build(function() {
 });
 ```
 
-### [.parallel](lib/tasks.js#L304)
+### [.parallel](lib/tasks.js#L302)
 
 Compose a function to run the given tasks in parallel.
 
@@ -174,7 +174,7 @@ build(function() {
 app.task('default', build);
 ```
 
-### [.create](lib/generator.js#L23)
+### [.create](lib/generator.js#L25)
 
 Static factory method for creating a custom `Composer` class that extends the given `Emitter`.
 
@@ -207,7 +207,7 @@ Returns true if the given value is a Composer generator object.
 * `val` **{object}**
 * `returns` **{boolean}**
 
-### [.register](lib/generator.js#L146)
+### [.register](lib/generator.js#L141)
 
 Alias to `.setGenerator`.
 
@@ -227,7 +227,7 @@ app.register('foo', function(app, base) {
 });
 ```
 
-### [.generator](lib/generator.js#L169)
+### [.generator](lib/generator.js#L164)
 
 Get and invoke generator `name`, or register generator `name` with the given `val` and `options`, then invoke and return the generator instance. This method differs from `.register`, which lazily invokes generator functions when `.generate` is called.
 
@@ -246,7 +246,7 @@ app.generator('foo', function(app, options) {
 });
 ```
 
-### [.setGenerator](lib/generator.js#L201)
+### [.setGenerator](lib/generator.js#L196)
 
 Store a generator by file path or instance with the given `name` and `options`.
 
@@ -266,7 +266,7 @@ app.setGenerator('foo', function(app, options) {
 });
 ```
 
-### [.getGenerator](lib/generator.js#L226)
+### [.getGenerator](lib/generator.js#L221)
 
 Get generator `name` from `app.generators`, same as [findGenerator], but also invokes the returned generator with the current instance. Dot-notation may be used for getting sub-generators.
 
@@ -284,7 +284,7 @@ const foo = app.getGenerator('foo');
 const baz = app.getGenerator('foo.bar.baz');
 ```
 
-### [.findGenerator](lib/generator.js#L259)
+### [.findGenerator](lib/generator.js#L254)
 
 Find generator `name`, by first searching the cache, then searching the cache of the `base` generator. Use this to get a generator without invoking it.
 
@@ -316,7 +316,7 @@ console.log(app.hasGenerator('foo'));
 console.log(app.hasGenerator('foo.bar'));
 ```
 
-### [.generate](lib/generator.js#L341)
+### [.generate](lib/generator.js#L336)
 
 Run one or more tasks or sub-generators and returns a promise.
 
@@ -346,7 +346,7 @@ app.generate('foo');
 app.generate();
 ```
 
-### [.toAlias](lib/generator.js#L391)
+### [.toAlias](lib/generator.js#L386)
 
 Create a generator alias from the given `name`. By default, `generate-` is stripped from beginning of the generator name.
 
@@ -363,7 +363,7 @@ Create a generator alias from the given `name`. By default, `generate-` is strip
 const app = new Generate({ toAlias: require('camel-case') });
 ```
 
-### [.isGenerators](lib/generator.js#L412)
+### [.isGenerators](lib/generator.js#L407)
 
 Returns true if every name in the given array is a registered generator.
 
@@ -372,7 +372,7 @@ Returns true if every name in the given array is a registered generator.
 * `names` **{array}**
 * `returns` **{boolean}**
 
-### [.formatError](lib/generator.js#L432)
+### [.formatError](lib/generator.js#L442)
 
 Format task and generator errors.
 
@@ -381,7 +381,7 @@ Format task and generator errors.
 * `name` **{string}**
 * `returns` **{error}**
 
-### [.base](lib/generator.js#L453)
+### [.base](lib/generator.js#L463)
 
 Get the first ancestor instance when `generator.parent` is defined on nested instances.
 
@@ -496,8 +496,8 @@ You might also be interested in these projects:
 
 | **Commits** | **Contributor** | 
 | --- | --- |
-| 222 | [doowb](https://github.com/doowb) |
-| 44 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 226 | [doowb](https://github.com/doowb) |
+| 59 | [jonschlinkert](https://github.com/jonschlinkert) |
 
 ### Author
 
@@ -514,4 +514,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on April 21, 2018._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on April 28, 2018._
