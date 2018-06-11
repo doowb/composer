@@ -1,4 +1,4 @@
 'use strict';
 
-const Generator = require('./lib/generator');
-module.exports = Generator();
+const Composer = require('./lib/generator');
+module.exports = Composer();
