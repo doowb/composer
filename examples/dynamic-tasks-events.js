@@ -1,5 +1,5 @@
 const Composer = require('..');
-const app = new Composer({skip: []});
+const app = new Composer({ skip: [] });
 const task = cb => cb();
 
 app.on('build', function(build) {
