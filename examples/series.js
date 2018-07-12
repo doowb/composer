@@ -32,4 +32,6 @@ app.task('names', function(cb) {
 app.task('one', app.series(['foo', 'bar', 'baz', 'names']));
 app.task('two', app.series(['foo', 'bar', 'baz', 'names']));
 app.task('default', ['one', 'two']);
-app.build(err => err && console.error(err));
+app.build('default')
+  .then(() => console.log('done'))
+  .catch(console.error);

@@ -5,48 +5,48 @@ const assert = require('assert');
 const through = require('through2');
 const Task = require('../lib/task');
 
-describe('task', function() {
-  it('should throw an error when Task is not instantiated', function() {
+describe('task', () => {
+  it('should throw an error when Task is not instantiated', () => {
     assert.throws(() => Task(), /cannot be invoked without 'new'/);
   });
 
-  it('should throw an error when nothing is passed to new Task', function() {
+  it('should throw an error when nothing is passed to new Task', () => {
     assert.throws(() => new Task(), /expected/i);
   });
 
-  it('should throw an error when `name` is not passed on `task`.', function() {
+  it('should throw an error when `name` is not passed on `task`.', () => {
     assert.throws(() => new Task({}), /expected/i);
   });
 
-  it('should create a new task with a given `name`', function() {
+  it('should create a new task with a given `name`', () => {
     const task = new Task({ name: 'default' });
     assert.equal(task.name, 'default');
   });
 
-  it('should create a new task with a given task function', function() {
+  it('should create a new task with a given task function', () => {
     const callback = cb => cb();
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     assert.equal(task.callback, callback);
   });
 
-  it('should create a new task with the given dependencies', function() {
+  it('should create a new task with the given dependencies', () => {
     const task = new Task({ name: 'default', deps: ['foo', 'bar'] });
     assert.deepEqual(task.deps, ['foo', 'bar']);
   });
 
-  it('should create a new task with deps from the `options` property', function() {
+  it('should create a new task with deps from the `options` property', () => {
     const task = new Task({ name: 'default', options: { deps: ['foo', 'bar'] } });
     assert.deepEqual(task.deps, ['foo', 'bar']);
   });
 
-  it('should run a task function when `.run` is called', function() {
+  it('should run a task function when `.run` is called', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
 
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     const run = task.run();
     return run()
       .then(() => {
@@ -54,7 +54,7 @@ describe('task', function() {
       });
   });
 
-  it('should run a task function that returns a promise when `.run` is called', function() {
+  it('should run a task function that returns a promise when `.run` is called', () => {
     let count = 0;
     const callback = function() {
       return new Promise(function(resolve) {
@@ -65,7 +65,7 @@ describe('task', function() {
       });
     };
 
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     const run = task.run();
     return run()
       .then(() => {
@@ -73,67 +73,76 @@ describe('task', function() {
       });
   });
 
-  it('should skip a task function when `.options.run === false`', function() {
+  it('should skip a task function when `.options.run === false`', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
 
-    const task = new Task({ name: 'default', callback: callback, options: { run: false } });
+    const task = new Task({ name: 'default', callback, options: { run: false } });
     const run = task.run();
+
     return run()
       .then(() => {
         assert.equal(count, 0);
       });
   });
-
-  it('should skip a task function when `.options.skip` is the task name', function() {
+  it('should skip a task function when `.options.skip` is the task name', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
 
-    const task = new Task({ name: 'foo', callback: callback, options: { skip: 'foo' } });
+    const task = new Task({
+      name: 'foo',
+      callback,
+      options: { skip: 'foo' }
+    });
+
     const run = task.run();
-    return run()
-      .then(() => {
-        assert.equal(count, 0);
-      });
+    return run().then(() => {
+      assert.equal(count, 0);
+    });
   });
 
-  it('should skip a task function when `.options.skip` is an array with the task name', function() {
+  it('should skip a task function when `.options.skip` is an array with the task name', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
 
-    const task = new Task({ name: 'foo', callback: callback, options: { skip: ['bar', 'baz', 'foo'] } });
+    const task = new Task({
+      name: 'foo',
+      callback,
+      options: { skip: ['bar', 'baz', 'foo'] }
+    });
+
     const run = task.run();
-    return run()
-      .then(() => {
-        assert.equal(count, 0);
-      });
+    return run().then(() => {
+      assert.equal(count, 0);
+    });
   });
 
-  it('should not skip a task function when `.options.skip` is an array without the task name', function() {
+  it('should not skip a task function when `.options.skip` is an array without the task name', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
 
-    const task = new Task({ name: 'foo', callback: callback, options: { skip: ['bar', 'baz'] } });
+    const task = new Task({name: 'foo', callback, options: { skip: ['bar', 'baz'] } });
     const run = task.run();
+
     return run()
       .then(() => {
         assert.equal(count, 1);
       });
   });
 
-  it('should run a task function that returns a stream when `.run` is called', function() {
+  it('should run a task function that returns a stream when `.run` is called', () => {
     let count = 0;
 
     const callback = function() {
@@ -148,15 +157,16 @@ describe('task', function() {
       return stream;
     };
 
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     const run = task.run();
+
     return run()
       .then(() => {
         assert.equal(count, 1);
       });
   });
 
-  it('should run a task that returns a non-stream when `.run` is called', function() {
+  it('should run a task that returns a non-stream when `.run` is called', () => {
     let count = 0;
     const callback = function(cb) {
       setImmediate(function() {
@@ -166,22 +176,23 @@ describe('task', function() {
       return count;
     };
 
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     const run = task.run();
+
     return run()
       .then(() => {
         assert.equal(count, 1);
       });
   });
 
-  it('should emit a `starting` event when the task starts running', function() {
+  it('should emit a `starting` event when the task starts running', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
 
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     task.on('starting', () => {
       count++;
     });
@@ -193,13 +204,13 @@ describe('task', function() {
       });
   });
 
-  it('should emit a `finished` event when the task finishes running', function() {
+  it('should emit a `finished` event when the task finishes running', () => {
     let count = 0;
     const callback = function(cb) {
       count++;
       cb();
     };
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
     task.on('finished', () => {
       count++;
     });
@@ -210,13 +221,13 @@ describe('task', function() {
       });
   });
 
-  it('should emit an `error` event when there is an error during task execution', function() {
+  it('should emit an `error` event when there is an error during task execution', () => {
     let count = 0;
 
     const callback = cb => cb(new Error('expected an error'));
-    const task = new Task({ name: 'default', callback: callback });
+    const task = new Task({ name: 'default', callback });
 
-    task.on('error', function() {
+    task.on('error', () => {
       count++;
     });
 
@@ -238,7 +249,7 @@ describe('task', function() {
     };
 
     for (let i = 0; i < 10; i++) {
-      tasks.push(new Task({ name: 'task-' + i, callback: callback }));
+      tasks.push(new Task({ name: 'task-' + i, callback }));
     }
 
     const series = async() => {
