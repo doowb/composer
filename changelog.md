@@ -1,5 +1,11 @@
 ### v3.0.0
 
+**Breaking changes**
+
+- Support for custom inspect methods was removed. Please follow Node's [recommended practices](https://nodejs.org/api/util.html#util_util_inspect_custom) for creating a custom inspect method.
+
+### v3.0.0
+
 - Completely refactored from the ground up. 
 - For the most part, `.task`, `.build`, `.series` and `.parallel` work the same way. However, event handling has changed. Please see the readme for more information and documentation.
 
