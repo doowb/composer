@@ -2,6 +2,7 @@
 
 require('mocha');
 const assert = require('assert');
+const util = require('util');
 const Generator = require('..');
 let app;
 
@@ -456,34 +457,9 @@ describe('.tasks', function() {
     app.task('default', ['foo', 'bar'], function(cb) {
       cb();
     });
-    assert.equal(app.tasks.get('foo').inspect(), '<Task "foo" deps: []>');
-    assert.equal(app.tasks.get('bar').inspect(), '<Task "bar" deps: []>');
-    assert.equal(app.tasks.get('default').inspect(), '<Task "default" deps: [foo, bar]>');
-  });
-
-  it('should add custom inspect function to tasks.', function() {
-    app.options = {
-      inspectFn: function(task) {
-        return '<Task "' + task.name + '"'
-          + (task.deps.length ? ' [' + task.deps.join(', ') + ']' : '')
-          + '>';
-      }
-    };
-    app.task('foo', function(cb) {
-      cb();
-    });
-
-    app.task('bar', function(cb) {
-      cb();
-    });
-
-    app.task('default', ['foo', 'bar'], function(cb) {
-      cb();
-    });
-
-    assert.equal(app.tasks.get('foo').inspect(), '<Task "foo">');
-    assert.equal(app.tasks.get('bar').inspect(), '<Task "bar">');
-    assert.equal(app.tasks.get('default').inspect(), '<Task "default" [foo, bar]>');
+    assert.equal(app.tasks.get('foo')[util.inspect.custom](), '<Task "foo" deps: []>');
+    assert.equal(app.tasks.get('bar')[util.inspect.custom](), '<Task "bar" deps: []>');
+    assert.equal(app.tasks.get('default')[util.inspect.custom](), '<Task "default" deps: [foo, bar]>');
   });
 
   it('should run globbed dependencies before running the dependent task.', function(cb) {
