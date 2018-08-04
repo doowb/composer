@@ -5,29 +5,29 @@ const assert = require('assert');
 const Generator = require('..');
 let base;
 
-describe('.getGenerator', function() {
-  beforeEach(function() {
+describe('.getGenerator', () => {
+  beforeEach(() => {
     base = new Generator();
   });
 
-  it('should get a generator from the base instance', function() {
-    base.register('abc', function() {});
+  it('should get a generator from the base instance', () => {
+    base.register('abc', () => {});
     const generator = base.getGenerator('abc');
     assert(Generator.isGenerator(generator));
     assert.equal(generator.name, 'abc');
   });
 
-  it('should throw an error when a generator is not found', function() {
-    base.register('foo', function() {});
+  it('should throw an error when a generator is not found', () => {
+    base.register('foo', () => {});
     assert.throws(() => base.getGenerator('whatever'), /is not registered/);
     assert.throws(() => base.getGenerator('foo.whatever'), /is not registered/);
   });
 
-  it('should get a generator from the base instance from a nested generator', function() {
+  it('should get a generator from the base instance from a nested generator', () => {
     let count = 0;
 
-    base.register('abc', function() {});
-    base.register('xyz', function(app) {
+    base.register('abc', () => {});
+    base.register('xyz', app => {
       app.register('one', function() {
         const generator = this.base.getGenerator('abc');
         assert(generator);
@@ -36,7 +36,7 @@ describe('.getGenerator', function() {
         count++;
       });
 
-      app.register('two', function() {
+      app.register('two', () => {
         const generator = base.getGenerator('abc');
         assert(generator);
         assert.equal(typeof generator, 'object');
@@ -59,9 +59,9 @@ describe('.getGenerator', function() {
     assert.equal(count, 3);
   });
 
-  it('should get a generator from the base instance using `this`', function() {
-    base.register('abc', function() {});
-    base.register('xyz', function(app) {
+  it('should get a generator from the base instance using `this`', () => {
+    base.register('abc', () => {});
+    base.register('xyz', app => {
       app.register('sub', function(sub) {
         const generator = this.getGenerator('abc');
         assert(generator);
@@ -72,9 +72,9 @@ describe('.getGenerator', function() {
     base.getGenerator('xyz');
   });
 
-  it('should get a base generator from "app" from a nested generator', function() {
-    base.register('abc', function() {});
-    base.register('xyz', function(app) {
+  it('should get a base generator from "app" from a nested generator', () => {
+    base.register('abc', () => {});
+    base.register('xyz', app => {
       app.register('sub', function(sub) {
         const generator = app.getGenerator('abc');
         assert(generator);
@@ -85,7 +85,7 @@ describe('.getGenerator', function() {
     base.getGenerator('xyz');
   });
 
-  it('should get a nested generator', function() {
+  it('should get a nested generator', () => {
     base.register('abc', function(abc) {
       abc.register('def', function(def) {});
     });
@@ -96,12 +96,12 @@ describe('.getGenerator', function() {
     assert.equal(generator.name, 'def');
   });
 
-  it('should get a deeply nested generator', function() {
+  it('should get a deeply nested generator', () => {
     base.register('abc', function(abc) {
       abc.register('def', function(def) {
         def.register('ghi', function(ghi) {
           ghi.register('jkl', function(jkl) {
-            jkl.register('mno', function() {});
+            jkl.register('mno', () => {});
           });
         });
       });
@@ -113,14 +113,14 @@ describe('.getGenerator', function() {
     assert.equal(generator.name, 'mno');
   });
 
-  it('should set deeply nested generators on the base instance cache', function() {
+  it('should set deeply nested generators on the base instance cache', () => {
     base.disableInspect();
 
     base.register('abc', function(abc) {
       this.register('def', function(def) {
         this.register('ghi', function(ghi) {
           this.register('jkl', function(jkl) {
-            this.register('mno', function() {});
+            this.register('mno', () => {});
           });
         });
       });
@@ -135,7 +135,7 @@ describe('.getGenerator', function() {
     assert(base.namespaces.has('generate.abc.def.ghi.jkl.mno'));
   });
 
-  it('should allow a generator to be called on multiple instances', function() {
+  it('should allow a generator to be called on multiple instances', () => {
     const parents = [];
 
     function generator() {
@@ -156,7 +156,7 @@ describe('.getGenerator', function() {
     assert.equal(base.findGenerator('two.sub').called, 1);
   });
 
-  it('should only invoke generators once by default', function() {
+  it('should only invoke generators once by default', () => {
     let called = 0;
 
     base.register('one', function() {
@@ -185,7 +185,7 @@ describe('.getGenerator', function() {
     assert.equal(base.findGenerator('one.child').called, called);
   });
 
-  it('should invoke generator functions multiple times when options.once is false', function() {
+  it('should invoke generator functions multiple times when options.once is false', () => {
     let called = 0;
 
     base.register('one', function() {
@@ -214,7 +214,7 @@ describe('.getGenerator', function() {
     assert.equal(base.findGenerator('one.child').called, called);
   });
 
-  it('should keep the original (unwrapped) function on generator.fn', function() {
+  it('should keep the original (unwrapped) function on generator.fn', () => {
     let called = 0;
 
     base.register('one', function() {

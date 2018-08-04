@@ -5,13 +5,13 @@ const assert = require('assert');
 const Generator = require('..');
 let base;
 
-describe('.generate', function() {
-  beforeEach(function() {
+describe('.generate', () => {
+  beforeEach(() => {
     base = new Generator();
   });
 
-  describe('generators', function() {
-    it('should throw an error when a generator is not found', function() {
+  describe('generators', () => {
+    it('should throw an error when a generator is not found', () => {
       return base.generate('fdsslsllsfjssl')
         .catch(err => {
           assert(err);
@@ -19,8 +19,8 @@ describe('.generate', function() {
         });
     });
 
-    it('should throw an error when the default task is not found', function() {
-      base.register('foo', function() {});
+    it('should throw an error when the default task is not found', () => {
+      base.register('foo', () => {});
       return base.generate('foo', ['default'])
         .catch(err => {
           assert(err);
@@ -28,8 +28,8 @@ describe('.generate', function() {
         });
     });
 
-    it('should throw an error when a task is not found (task array)', function() {
-      base.register('fdsslsllsfjssl', function() {});
+    it('should throw an error when a task is not found (task array)', () => {
+      base.register('fdsslsllsfjssl', () => {});
       return base.generate('fdsslsllsfjssl', ['foo'])
         .catch(err => {
           assert(err);
@@ -38,8 +38,8 @@ describe('.generate', function() {
         });
     });
 
-    it('should throw an error when a task is not found (task string)', function() {
-      base.register('fdsslsllsfjssl', function() {});
+    it('should throw an error when a task is not found (task string)', () => {
+      base.register('fdsslsllsfjssl', () => {});
       return base.generate('fdsslsllsfjssl', 'foo')
         .catch(err => {
           assert(err);
@@ -48,8 +48,8 @@ describe('.generate', function() {
         });
     });
 
-    it('should handle task errors', function() {
-      base.task('default', function(next) {
+    it('should handle task errors', () => {
+      base.task('default', next => {
         next(new Error('whatever'));
       });
 
@@ -60,18 +60,18 @@ describe('.generate', function() {
         });
     });
 
-    it('should run a task on the instance', function() {
+    it('should run a task on the instance', () => {
       base.task('abc123', next => next());
       return base.generate('abc123');
     });
 
-    it('should run a task on the instance', function() {
+    it('should run a task on the instance', () => {
       base.task('abc123', next => next());
       return base.generate('abc123');
     });
 
-    it('should run same-named task instead of a generator', function() {
-      base.register('123xyz', function(app) {
+    it('should run same-named task instead of a generator', () => {
+      base.register('123xyz', app => {
         throw new Error('expected the task to run first');
       });
 
@@ -79,9 +79,9 @@ describe('.generate', function() {
       return base.generate('123xyz');
     });
 
-    it('should run a task instead of a generator with a default task', function() {
-      base.register('123xyz', function(app) {
-        app.task('default', function() {
+    it('should run a task instead of a generator with a default task', () => {
+      base.register('123xyz', app => {
+        app.task('default', () => {
           return Promise.resolve(new Error('expected the task to run first'));
         });
       });
@@ -89,28 +89,28 @@ describe('.generate', function() {
       return base.generate('123xyz');
     });
 
-    it('should run a task on a same-named generator when the task is specified', function() {
+    it('should run a task on a same-named generator when the task is specified', () => {
       let count = 0;
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+      base.register('foo', app => {
+        app.task('default', next => {
           count++;
           next();
         });
       });
 
-      base.task('foo', function() {
+      base.task('foo', () => {
         throw new Error('expected the generator to run');
       });
 
       return base.generate('foo', ['default'])
-        .then(function() {
+        .then(() => {
           assert.equal(count, 1);
         });
     });
 
-    it('should run a generator from a task with the same name', function() {
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+    it('should run a generator from a task with the same name', () => {
+      base.register('foo', app => {
+        app.task('default', next => {
           next();
         });
       });
@@ -119,51 +119,51 @@ describe('.generate', function() {
       return base.build('foo');
     });
 
-    it('should run the default task on a generator', function(cb) {
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+    it('should run the default task on a generator', cb => {
+      base.register('foo', app => {
+        app.task('default', next => {
           next();
         });
       });
 
-      base.generate('foo', function(err) {
+      base.generate('foo', err => {
         assert(!err);
         cb();
       });
     });
 
-    it('should run a list of tasks on the instance', function() {
+    it('should run a list of tasks on the instance', () => {
       let count = 0;
-      base.task('a', function(next) {
+      base.task('a', next => {
         count++;
         next();
       });
-      base.task('b', function(next) {
+      base.task('b', next => {
         count++;
         next();
       });
-      base.task('c', function(next) {
+      base.task('c', next => {
         count++;
         next();
       });
 
       return base.generate('a', 'b', 'c')
-        .then(function() {
+        .then(() => {
           assert.equal(count, 3);
         });
     });
 
-    it('should run an array of tasks on the instance', function() {
+    it('should run an array of tasks on the instance', () => {
       let count = 0;
-      base.task('a', function(next) {
+      base.task('a', next => {
         count++;
         next();
       });
-      base.task('b', function(next) {
+      base.task('b', next => {
         count++;
         next();
       });
-      base.task('c', function(next) {
+      base.task('c', next => {
         count++;
         next();
       });
@@ -174,11 +174,11 @@ describe('.generate', function() {
         });
     });
 
-    it('should run the default task on a registered generator', function() {
+    it('should run the default task on a registered generator', () => {
       let count = 0;
 
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+      base.register('foo', app => {
+        app.task('default', next => {
           count++;
           next();
         });
@@ -190,17 +190,17 @@ describe('.generate', function() {
         });
     });
 
-    it('should run an array of generators', function() {
+    it('should run an array of generators', () => {
       let count = 0;
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+      base.register('foo', app => {
+        app.task('default', next => {
           count++;
           next();
         });
       });
 
-      base.register('bar', function(app) {
-        app.task('default', function(next) {
+      base.register('bar', app => {
+        app.task('default', next => {
           count++;
           next();
         });
@@ -212,24 +212,24 @@ describe('.generate', function() {
         });
     });
 
-    it('should run the default tasks on an array of generators', function() {
+    it('should run the default tasks on an array of generators', () => {
       let count = 0;
       base.register('a', function(app) {
-        this.task('default', function(cb) {
+        this.task('default', cb => {
           count++;
           cb();
         });
       });
 
       base.register('b', function(app) {
-        this.task('default', function(cb) {
+        this.task('default', cb => {
           count++;
           cb();
         });
       });
 
       base.register('c', function(app) {
-        this.task('default', function(cb) {
+        this.task('default', cb => {
           count++;
           cb();
         });
@@ -242,11 +242,11 @@ describe('.generate', function() {
     });
   });
 
-  describe('options', function(cb) {
-    it('should pass options to generator.options', function() {
+  describe('options', cb => {
+    it('should pass options to generator.options', () => {
       let count = 0;
       base.register('default', function(app, options) {
-        app.task('default', function(next) {
+        app.task('default', next => {
           count++;
           assert.equal(options.foo, 'bar');
           next();
@@ -259,10 +259,10 @@ describe('.generate', function() {
         });
     });
 
-    it('should expose options on generator options', function() {
+    it('should expose options on generator options', () => {
       let count = 0;
       base.register('default', function(app, options) {
-        app.task('default', function(next) {
+        app.task('default', next => {
           count++;
           assert.equal(options.foo, 'bar');
           next();
@@ -275,10 +275,10 @@ describe('.generate', function() {
         });
     });
 
-    it('should not mutate options on parent instance', function() {
+    it('should not mutate options on parent instance', () => {
       let count = 0;
       base.register('default', function(app, options) {
-        app.task('default', function(next) {
+        app.task('default', next => {
           count++;
           assert.equal(options.foo, 'bar');
           assert(!base.options.foo);
@@ -293,11 +293,11 @@ describe('.generate', function() {
     });
   });
 
-  describe('default tasks', function(cb) {
-    it('should run the default task on the _default_ generator', function() {
+  describe('default tasks', cb => {
+    it('should run the default task on the _default_ generator', () => {
       let count = 0;
       base.register('default', function(app) {
-        app.task('default', function(next) {
+        app.task('default', next => {
           count++;
           next();
         });
@@ -309,11 +309,11 @@ describe('.generate', function() {
         });
     });
 
-    it('should run the default task on the _specified_ generator', function() {
+    it('should run the default task on the _specified_ generator', () => {
       let count = 0;
 
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+      base.register('foo', app => {
+        app.task('default', next => {
           count++;
           next();
         });
@@ -326,16 +326,16 @@ describe('.generate', function() {
     });
   });
 
-  describe('specified tasks', function(cb) {
-    it('should run the specified task on a registered generator', function() {
+  describe('specified tasks', cb => {
+    it('should run the specified task on a registered generator', () => {
       let count = 0;
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+      base.register('foo', app => {
+        app.task('default', next => {
           count++;
           next();
         });
 
-        app.task('abc', function(next) {
+        app.task('abc', next => {
           count++;
           next();
         });
@@ -348,17 +348,17 @@ describe('.generate', function() {
     });
   });
 
-  describe('sub-generators', function(cb) {
-    it('should run the default task on a registered sub-generator', function() {
+  describe('sub-generators', cb => {
+    it('should run the default task on a registered sub-generator', () => {
       let count = 0;
-      base.register('foo', function(app) {
+      base.register('foo', app => {
         app.register('sub', function(sub) {
-          sub.task('default', function(next) {
+          sub.task('default', next => {
             count++;
             next();
           });
 
-          sub.task('abc', function(next) {
+          sub.task('abc', next => {
             count++;
             next();
           });
@@ -371,16 +371,16 @@ describe('.generate', function() {
         });
     });
 
-    it('should run the specified task array on a registered sub-generator', function() {
+    it('should run the specified task array on a registered sub-generator', () => {
       let count = 0;
-      base.register('foo', function(app) {
+      base.register('foo', app => {
         app.register('sub', function(sub) {
-          sub.task('default', function(next) {
+          sub.task('default', next => {
             count++;
             next();
           });
 
-          sub.task('abc', function(next) {
+          sub.task('abc', next => {
             count++;
             next();
           });
@@ -393,18 +393,18 @@ describe('.generate', function() {
         });
     });
 
-    it('should run default tasks on an array of nested sub-generators', function() {
+    it('should run default tasks on an array of nested sub-generators', () => {
       let count = 0;
-      base.register('foo', function(app) {
+      base.register('foo', app => {
         app.register('one', function(one) {
-          one.task('default', function(next) {
+          one.task('default', next => {
             count++;
             next();
           });
         });
 
         app.register('two', function(two) {
-          two.task('default', function(next) {
+          two.task('default', next => {
             count++;
             next();
           });
@@ -417,18 +417,18 @@ describe('.generate', function() {
         });
     });
 
-    it('should run an array of nested sub-generators', function() {
+    it('should run an array of nested sub-generators', () => {
       let count = 0;
-      base.register('foo', function(app) {
+      base.register('foo', app => {
         app.register('one', function(one) {
-          one.task('default', function(next) {
+          one.task('default', next => {
             count++;
             next();
           });
         });
 
         app.register('two', function(two) {
-          two.task('default', function(next) {
+          two.task('default', next => {
             count++;
             next();
           });
@@ -441,26 +441,26 @@ describe('.generate', function() {
         });
     });
 
-    it('should run an array of tasks on a registered sub-generator', function() {
+    it('should run an array of tasks on a registered sub-generator', () => {
       let count = 0;
-      base.register('foo', function(app) {
+      base.register('foo', app => {
         app.register('bar', function(bar) {
-          bar.task('default', function(next) {
+          bar.task('default', next => {
             count++;
             next();
           });
 
-          bar.task('a', function(next) {
+          bar.task('a', next => {
             count++;
             next();
           });
 
-          bar.task('b', function(next) {
+          bar.task('b', next => {
             count++;
             next();
           });
 
-          bar.task('c', function(next) {
+          bar.task('c', next => {
             count++;
             next();
           });
@@ -474,13 +474,13 @@ describe('.generate', function() {
     });
   });
 
-  describe('cross-generator', function(cb) {
-    it('should run a generator from another generator', function() {
+  describe('cross-generator', cb => {
+    it('should run a generator from another generator', () => {
       var res = '';
 
       base.register('foo', function(app, two) {
         app.register('sub', function(sub) {
-          sub.task('default', function(next) {
+          sub.task('default', next => {
             res += 'foo > sub > default ';
             base.generate('bar.sub')
               .then(() => next())
@@ -489,9 +489,9 @@ describe('.generate', function() {
         });
       });
 
-      base.register('bar', function(app) {
+      base.register('bar', app => {
         app.register('sub', function(sub) {
-          sub.task('default', function(next) {
+          sub.task('default', next => {
             res += 'bar > sub > default ';
             next();
           });
@@ -504,16 +504,16 @@ describe('.generate', function() {
         });
     });
 
-    it('should run the specified task on a registered sub-generator', function() {
+    it('should run the specified task on a registered sub-generator', () => {
       let count = 0;
-      base.register('foo', function(app) {
+      base.register('foo', app => {
         app.register('sub', function(sub) {
-          sub.task('default', function(next) {
+          sub.task('default', next => {
             count++;
             next();
           });
 
-          sub.task('abc', function(next) {
+          sub.task('abc', next => {
             count++;
             next();
           });

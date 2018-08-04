@@ -5,99 +5,99 @@ const assert = require('assert');
 const Generator = require('..');
 let base;
 
-describe('.task', function() {
-  beforeEach(function() {
+describe('.task', () => {
+  beforeEach(() => {
     base = new Generator();
   });
 
-  it('should register a task', function() {
+  it('should register a task', () => {
     const fn = cb => cb();
     base.task('default', fn);
     assert.equal(typeof base.tasks.get('default'), 'object');
     assert.equal(base.tasks.get('default').callback, fn);
   });
 
-  it('should register a task with an array of dependencies', function(cb) {
+  it('should register a task with an array of dependencies', cb => {
     let count = 0;
-    base.task('foo', function(next) {
+    base.task('foo', next => {
       count++;
       next();
     });
-    base.task('bar', function(next) {
+    base.task('bar', next => {
       count++;
       next();
     });
-    base.task('default', ['foo', 'bar'], function(next) {
+    base.task('default', ['foo', 'bar'], next => {
       count++;
       next();
     });
     assert.equal(typeof base.tasks.get('default'), 'object');
     assert.deepEqual(base.tasks.get('default').deps, ['foo', 'bar']);
-    base.build('default', function(err) {
+    base.build('default', err => {
       if (err) return cb(err);
       assert.equal(count, 3);
       cb();
     });
   });
 
-  it('should run a glob of tasks', function(cb) {
+  it('should run a glob of tasks', cb => {
     let count = 0;
-    base.task('foo', function(next) {
+    base.task('foo', next => {
       count++;
       next();
     });
-    base.task('bar', function(next) {
+    base.task('bar', next => {
       count++;
       next();
     });
-    base.task('baz', function(next) {
+    base.task('baz', next => {
       count++;
       next();
     });
-    base.task('qux', function(next) {
+    base.task('qux', next => {
       count++;
       next();
     });
     base.task('default', ['b*']);
     assert.equal(typeof base.tasks.get('default'), 'object');
-    base.build('default', function(err) {
+    base.build('default', err => {
       if (err) return cb(err);
       assert.equal(count, 2);
       cb();
     });
   });
 
-  it('should register a task with a list of strings as dependencies', function() {
-    base.task('default', 'foo', 'bar', function(cb) {
+  it('should register a task with a list of strings as dependencies', () => {
+    base.task('default', 'foo', 'bar', cb => {
       cb();
     });
     assert.equal(typeof base.tasks.get('default'), 'object');
     assert.deepEqual(base.tasks.get('default').deps, ['foo', 'bar']);
   });
 
-  it('should run a task', function(cb) {
+  it('should run a task', cb => {
     let count = 0;
-    base.task('default', function(cb) {
+    base.task('default', cb => {
       count++;
       cb();
     });
 
-    base.build('default', function(err) {
+    base.build('default', err => {
       if (err) return cb(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should throw an error when a task with unregistered dependencies is run', function(cb) {
+  it('should throw an error when a task with unregistered dependencies is run', cb => {
     base.task('default', ['foo', 'bar']);
-    base.build('default', function(err) {
+    base.build('default', err => {
       assert(err);
       cb();
     });
   });
 
-  it('should throw an error when a task does not exist', function() {
+  it('should throw an error when a task does not exist', () => {
     return base.build('default')
       .then(() => {
         throw new Error('expected an error');
@@ -107,8 +107,16 @@ describe('.task', function() {
       });
   });
 
-  it('should emit task events', function() {
+  it('should emit task events', () => {
     const expected = [];
+
+    base.on('task-pending', function(task) {
+      expected.push(task.status + '.' + task.name);
+    });
+
+    base.on('task-preparing', function(task) {
+      expected.push(task.status + '.' + task.name);
+    });
 
     base.on('task', function(task) {
       expected.push(task.status + '.' + task.name);
@@ -119,7 +127,7 @@ describe('.task', function() {
     base.task('default', ['bar']);
 
     return base.build('default')
-      .then(function() {
+      .then(() => {
         assert.deepEqual(expected, [
           'pending.foo',
           'pending.bar',
@@ -137,51 +145,51 @@ describe('.task', function() {
       });
   });
 
-  it('should emit an error event when an error is returned in a task callback', function(cb) {
-    base.on('error', function(err) {
+  it('should emit an error event when an error is returned in a task callback', cb => {
+    base.on('error', err => {
       assert(err);
       assert.equal(err.message, 'This is an error');
     });
-    base.task('default', function(cb) {
+    base.task('default', cb => {
       return cb(new Error('This is an error'));
     });
-    base.build('default', function(err) {
+    base.build('default', err => {
       if (err) return cb();
       cb(new Error('Expected an error'));
     });
   });
 
-  it('should emit an error event when an error is thrown in a task', function(cb) {
-    base.on('error', function(err) {
+  it('should emit an error event when an error is thrown in a task', cb => {
+    base.on('error', err => {
       assert(err);
       assert.equal(err.message, 'This is an error');
     });
-    base.task('default', function(cb) {
+    base.task('default', cb => {
       cb(new Error('This is an error'));
     });
-    base.build('default', function(err) {
+    base.build('default', err => {
       assert(err);
       cb();
     });
   });
 
-  it('should run dependencies before running the dependent task', function(cb) {
+  it('should run dependencies before running the dependent task', cb => {
     const expected = [];
 
-    base.task('foo', function(cb) {
+    base.task('foo', cb => {
       expected.push('foo');
       cb();
     });
-    base.task('bar', function(cb) {
+    base.task('bar', cb => {
       expected.push('bar');
       cb();
     });
-    base.task('default', ['foo', 'bar'], function(cb) {
+    base.task('default', ['foo', 'bar'], cb => {
       expected.push('default');
       cb();
     });
 
-    base.build('default', function(err) {
+    base.build('default', err => {
       if (err) return cb(err);
       assert.deepEqual(expected, ['foo', 'bar', 'default']);
       cb();

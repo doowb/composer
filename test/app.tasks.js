@@ -6,44 +6,44 @@ const util = require('util');
 const Generator = require('..');
 let app;
 
-describe('.tasks', function() {
-  beforeEach(function() {
+describe('.tasks', () => {
+  beforeEach(() => {
     app = new Generator();
   });
 
-  it('should throw an error when a name is not given for a task', function() {
+  it('should throw an error when a name is not given for a task', () => {
     assert.throws(() => app.task(), /expected/);
   });
 
-  it('should register a task', function() {
+  it('should register a task', () => {
     app.task('default', () => {});
     assert(app.tasks.get('default'));
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
-  it('should register a noop task when only name is given', function() {
+  it('should register a noop task when only name is given', () => {
     app.task('default');
     assert(app.tasks.get('default'));
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
-  it('should register a noop task when a name and an empty dependencies array is given', function() {
+  it('should register a noop task when a name and an empty dependencies array is given', () => {
     app.task('default', []);
     assert(app.tasks.get('default'));
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
-  it('should register a task with an array of named dependencies', function() {
+  it('should register a task with an array of named dependencies', () => {
     app.task('default', ['foo', 'bar'], cb => cb());
     assert(app.tasks.get('default'));
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.deepEqual(app.tasks.get('default').deps, ['foo', 'bar']);
   });
 
-  it('should register a task with an array of function dependencies', function() {
+  it('should register a task with an array of function dependencies', () => {
     const bar = cb => cb();
     const Baz = cb => cb();
 
@@ -54,104 +54,105 @@ describe('.tasks', function() {
     assert.deepEqual(app.tasks.get('default').deps.length, 4);
   });
 
-  it('should register a task with a list of strings as dependencies', function() {
+  it('should register a task with a list of strings as dependencies', () => {
     app.task('default', 'foo', 'bar', cb => cb());
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.deepEqual(app.tasks.get('default').deps.length, 2);
     assert.deepEqual(app.tasks.get('default').deps, ['foo', 'bar']);
   });
 
-  it('should register a task as a noop function when only dependencies are given', function() {
+  it('should register a task as a noop function when only dependencies are given', () => {
     app.task('default', ['foo', 'bar']);
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
   });
 
-  it('should register a task with options as the second argument', function() {
+  it('should register a task with options as the second argument', () => {
     app.task('default', {flow: 'parallel'}, ['foo', 'bar']);
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
     assert.equal(app.tasks.get('default').options.flow, 'parallel');
   });
 
-  it('should run a task', function(cb) {
+  it('should run a task', cb => {
     let count = 0;
-    app.task('default', function(cb) {
+    app.task('default', cb => {
       count++;
       cb();
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       if (err) return cb(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should run a task and return a promise', function() {
+  it('should run a task and return a promise', () => {
     let count = 0;
-    app.task('default', function(cb) {
+    app.task('default', cb => {
       count++;
       cb();
     });
 
     return app.build('default')
-      .then(function() {
+      .then(() => {
         assert.equal(count, 1);
       });
   });
 
-  it('should run a task with options', function(cb) {
+  it('should run a task with options', cb => {
     let count = 0;
-    app.task('default', { silent: false }, function(cb) {
+    app.task('default', { silent: false }, function(next) {
       assert.equal(this.options.silent, false);
       count++;
-      cb();
+      next();
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       if (err) return cb(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should run a task with options defined on .build', function(cb) {
+  it('should run a task with options defined on .build', cb => {
     let count = 0;
-    app.task('default', { silent: false }, function(cb) {
+    app.task('default', { silent: false }, function(next) {
       assert.equal(this.options.silent, true);
       assert.equal(this.options.foo, 'bar');
       count++;
-      cb();
+      next();
     });
 
-    app.build('default', { silent: true, foo: 'bar' }, function(err) {
+    app.build('default', { silent: true, foo: 'bar' }, err => {
       if (err) return cb(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should run the `default` task when no task is given', function(cb) {
+  it('should run the `default` task when no task is given', cb => {
     let count = 0;
-    app.task('default', function(cb) {
+
+    app.task('default', next => {
       count++;
-      cb();
+      next();
     });
 
-    app.build(function(err) {
+    app.build(err => {
       if (err) return cb(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should skip tasks when `run === false`', function(cb) {
+  it('should skip tasks when `run === false`', cb => {
     const expected = [];
     function callback() {
-      return function(cb) {
+      return function(next) {
         expected.push(this.name);
-        cb();
+        next();
       };
     }
 
@@ -163,19 +164,19 @@ describe('.tasks', function() {
     app.task('boop', callback());
 
     app.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
-    app.build(function(err) {
+    app.build(err => {
       if (err) return cb(err);
       assert.deepEqual(expected, ['foo', 'baz', 'beep', 'boop']);
       cb();
     });
   });
 
-  it('should skip tasks when `run === false` (with deps skipped)', function(cb) {
+  it('should skip tasks when `run === false` (with deps skipped)', cb => {
     const expected = [];
     function callback() {
-      return function(cb) {
+      return function(next) {
         expected.push(this.name);
-        cb();
+        next();
       };
     }
 
@@ -187,93 +188,95 @@ describe('.tasks', function() {
     app.task('boop', ['beep'], callback());
 
     app.task('default', ['boop']);
-    app.build(function(err) {
+    app.build(err => {
       if (err) return cb(err);
       assert.deepEqual(expected, ['beep', 'boop']);
       cb();
     });
   });
 
-  it('should skip tasks when `run === false` (complex flow)', function(cb) {
+  it('should skip tasks when `run === false` (complex flow)', cb => {
     const expected = [];
 
-    app.task('foo', function(cb) {
+    app.task('foo', function(next) {
       expected.push(this.name);
       // disable running the "bar" task
       app.tasks.get('bar').options.run = false;
-      cb();
+      next();
     });
 
-    app.task('bar', function(cb) {
+    app.task('bar', function(next) {
       expected.push(this.name);
-      cb();
+      next();
     });
 
-    app.task('baz', function(cb) {
+    app.task('baz', function(next) {
       expected.push(this.name);
       // enable running the "bang" task
       app.tasks.get('bang').options.run = true;
-      cb();
+      next();
     });
 
-    app.task('bang', {run: false}, function(cb) {
+    app.task('bang', {run: false}, function(next) {
       expected.push(this.name);
-      cb();
+      next();
     });
 
-    app.task('beep', function(cb) {
+    app.task('beep', function(next) {
       expected.push(this.name);
-      cb();
+      next();
     });
 
-    app.task('boop', function(cb) {
+    app.task('boop', function(next) {
       expected.push(this.name);
-      cb();
+      next();
     });
 
     app.task('default', ['foo', 'bar', 'baz', 'bang', 'beep', 'boop']);
-    app.build(function(err) {
+    app.build(err => {
       if (err) return cb(err);
       assert.deepEqual(expected, ['foo', 'baz', 'bang', 'beep', 'boop']);
       cb();
     });
   });
 
-  it('should throw an error when a task with unregistered dependencies is built', function(cb) {
+  it('should throw an error when a task with unregistered dependencies is built', cb => {
     let count = 0;
-    app.task('default', ['foo', 'bar'], function(cb) {
+    app.task('default', ['foo', 'bar'], cb => {
       count++;
       cb();
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       if (!err) return cb(new Error('Expected an error to be thrown.'));
       assert.equal(count, 0);
       cb();
     });
   });
 
-  it('should throw an error when a task with globbed dependencies cannot be found', function(cb) {
+  it('should throw an error when a task with globbed dependencies cannot be found', cb => {
     let count = 0;
-    app.task('default', ['a-*'], function(cb) {
+    app.task('default', ['a-*'], cb => {
       count++;
       cb();
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       if (!err) return cb(new Error('Expected an error to be thrown.'));
       assert.equal(count, 0);
       cb();
     });
   });
 
-  it('should emit task events', function(cb) {
+  it('should emit task events', cb => {
     const events = [];
-    app.on('task', function(task) {
-      events.push(task.status + '.' + task.name);
-    });
+    const push = task => events.push(task.status + '.' + task.name);
 
-    app.on('error', function(err) {
+    app.on('task', push);
+    app.on('task-pending', push);
+    app.on('task-preparing', push);
+
+    app.on('error', err => {
       if (!err.build) {
         events.push('error.' + err.task.name);
       }
@@ -283,7 +286,7 @@ describe('.tasks', function() {
     app.task('bar', ['foo'], cb => cb());
 
     app.task('default', ['bar']);
-    app.build('default', function(err) {
+    app.build('default', err => {
       if (err) return cb(err);
       assert.deepEqual(events, [
         'pending.foo',
@@ -303,36 +306,36 @@ describe('.tasks', function() {
     });
   });
 
-  it('should emit an error event when an error is returned in a callback', function(cb) {
+  it('should emit an error event when an error is returned in a callback', cb => {
     let count = 0;
-    app.on('error', function(err) {
+    app.on('error', err => {
       assert(err);
       count++;
     });
 
-    app.task('default', function(cb) {
+    app.task('default', cb => {
       cb(new Error('This is an error'));
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       assert(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should emit an error event when an error is thrown in a task', function(cb) {
+  it('should emit an error event when an error is thrown in a task', cb => {
     let count = 0;
-    app.on('error', function(err) {
+    app.on('error', err => {
       assert(err);
       count++;
     });
 
-    app.task('default', function() {
+    app.task('default', () => {
       throw new Error('This is an error');
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       assert(err);
       assert(/This is an error/.test(err.message));
       assert.equal(count, 1);
@@ -340,7 +343,7 @@ describe('.tasks', function() {
     });
   });
 
-  it('should emit build events', function() {
+  it('should emit build events', () => {
     const events = [];
     const errors = [];
 
@@ -348,7 +351,7 @@ describe('.tasks', function() {
       events.push(build.status);
     });
 
-    app.on('error', function(err) {
+    app.on('error', err => {
       errors.push(err);
     });
 
@@ -363,34 +366,34 @@ describe('.tasks', function() {
       });
   });
 
-  it('should emit a build error event when an error is passed back in a task', function(cb) {
+  it('should emit a build error event when an error is passed back in a task', cb => {
     let count = 0;
 
-    app.on('error', function(err) {
+    app.on('error', err => {
       assert(err);
       count++;
     });
 
-    app.task('default', function(cb) {
+    app.task('default', cb => {
       cb(new Error('This is an error'));
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       assert(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should emit a build error event when an error is passed back in a task (with promise)', function() {
+  it('should emit a build error event when an error is passed back in a task (with promise)', () => {
     let count = 0;
 
-    app.on('error', function(err) {
+    app.on('error', err => {
       assert(err);
       count++;
     });
 
-    app.task('default', function(next) {
+    app.task('default', next => {
       next(new Error('This is an error'));
     });
 
@@ -401,60 +404,60 @@ describe('.tasks', function() {
       });
   });
 
-  it('should emit a build error event when an error is thrown in a task', function(cb) {
+  it('should emit a build error event when an error is thrown in a task', cb => {
     let count = 0;
 
-    app.on('error', function(err) {
+    app.on('error', err => {
       assert(err);
       assert(/This is an error/.test(err.message));
       count++;
     });
 
-    app.task('default', function() {
+    app.task('default', () => {
       throw new Error('This is an error');
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       assert(err);
       assert.equal(count, 1);
       cb();
     });
   });
 
-  it('should run dependencies before running the dependent task.', function(cb) {
+  it('should run dependencies before running the dependent task.', cb => {
     const seq = [];
-    app.task('foo', function(cb) {
+    app.task('foo', cb => {
       seq.push('foo');
       cb();
     });
 
-    app.task('bar', function(cb) {
+    app.task('bar', cb => {
       seq.push('bar');
       cb();
     });
 
-    app.task('default', ['foo', 'bar'], function(cb) {
+    app.task('default', ['foo', 'bar'], cb => {
       seq.push('default');
       cb();
     });
 
-    app.build('default', function(err) {
+    app.build('default', err => {
       if (err) return cb(err);
       assert.deepEqual(seq, ['foo', 'bar', 'default']);
       cb();
     });
   });
 
-  it('should add inspect function to tasks.', function() {
-    app.task('foo', function(cb) {
+  it('should add inspect function to tasks.', () => {
+    app.task('foo', cb => {
       cb();
     });
 
-    app.task('bar', function(cb) {
+    app.task('bar', cb => {
       cb();
     });
 
-    app.task('default', ['foo', 'bar'], function(cb) {
+    app.task('default', ['foo', 'bar'], cb => {
       cb();
     });
     assert.equal(app.tasks.get('foo')[util.inspect.custom](), '<Task "foo" deps: []>');
@@ -462,47 +465,47 @@ describe('.tasks', function() {
     assert.equal(app.tasks.get('default')[util.inspect.custom](), '<Task "default" deps: [foo, bar]>');
   });
 
-  it('should run globbed dependencies before running the dependent task.', function(cb) {
+  it('should run globbed dependencies before running the dependent task.', cb => {
     const actual = [];
-    app.task('a-foo', function(cb) {
+    app.task('a-foo', cb => {
       actual.push('a-foo');
       cb();
     });
 
-    app.task('a-bar', function(cb) {
+    app.task('a-bar', cb => {
       actual.push('a-bar');
       cb();
     });
 
-    app.task('b-foo', function(cb) {
+    app.task('b-foo', cb => {
       actual.push('b-foo');
       cb();
     });
 
-    app.task('b-bar', function(cb) {
+    app.task('b-bar', cb => {
       actual.push('b-bar');
       cb();
     });
 
-    app.task('default', ['a-*'], function(cb) {
+    app.task('default', ['a-*'], cb => {
       actual.push('default');
       cb();
     });
 
-    app.build(function(err) {
+    app.build(err => {
       if (err) return cb(err);
       assert.deepEqual(actual, ['a-foo', 'a-bar', 'default']);
       cb();
     });
   });
 
-  it('should get the current task name from `this`', function(cb) {
+  it('should get the current task name from `this`', cb => {
     const actual = [];
     const tasks = [];
 
-    const callback = function(cb) {
+    const callback = function(next) {
       actual.push(this.name);
-      cb();
+      next();
     };
 
     for (let i = 0; i < 10; i++) {
@@ -510,7 +513,7 @@ describe('.tasks', function() {
       app.task(String(i), callback);
     }
 
-    app.build(tasks, function(err) {
+    app.build(tasks, err => {
       if (err) return cb(err);
       assert.equal(actual.length, 10);
       assert.deepEqual(actual, ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);

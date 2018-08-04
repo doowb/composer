@@ -10,6 +10,9 @@ Please consider following this project's author, [Brian Woodward](https://github
   * [Tasks](#tasks)
   * [Generators](#generators)
 - [Events](#events)
+  * [task](#task)
+  * [task-pending](#task-pending)
+  * [task-preparing](#task-preparing)
 - [Release history](#release-history)
 - [About](#about)
 
@@ -26,15 +29,22 @@ $ npm install --save composer
 ## Usage
 
 ```js
+// Create an instance of `Composer`
 const Composer = require('composer');
 const composer = new Composer();
 
-composer.task('default', cb => {
-  console.log('Task: ', this.name);
-  cb();
+// Define tasks with the .task() method
+composer.task('foo', callback => {
+  callback(); // do stuff
+});
+composer.task('bar', callback => {
+  callback(); // do stuff
 });
 
-composer.build('default')
+composer.task('baz', ['foo'. 'bar']);
+
+// Run tasks with the .build() method
+composer.build('baz')
   .then(() => console.log('done!'))
   .catch(console.error);
 ```
@@ -76,9 +86,9 @@ const Tasks = require('composer').Tasks;
 const composer = new Tasks();
 ```
 
-### [.task](lib/tasks.js#L81)
+### [.task](lib/tasks.js#L83)
 
-Define a task. Tasks run asynchronously, either in series (by default) or parallel (when `options.parallel` is true). In order for the build to determine when a task is complete, _one of the following_ things must happen: 1) the callback must be called, 2) a promise must be returned, or 3) a stream must be returned.
+Define a task. Tasks run asynchronously, either in series (by default) or parallel (when `options.parallel` is true). In order for the build to determine when a task is complete, _one of the following_ things must happen: 1) the callback must be called, 2) a promise must be returned, or 3) a stream must be returned. Inside tasks, the "this" object is a composer Task instance created for each task with useful properties like the task name, options and timing information, which can be useful for logging, etc.
 
 **Params**
 
@@ -105,7 +115,7 @@ app.task('default', function() {
 });
 ```
 
-### [.build](lib/tasks.js#L206)
+### [.build](lib/tasks.js#L208)
 
 Run one or more tasks.
 
@@ -127,7 +137,7 @@ build(function() {
 });
 ```
 
-### [.series](lib/tasks.js#L248)
+### [.series](lib/tasks.js#L250)
 
 Compose a function to run the given tasks in series.
 
@@ -149,7 +159,7 @@ build(function() {
 });
 ```
 
-### [.parallel](lib/tasks.js#L301)
+### [.parallel](lib/tasks.js#L303)
 
 Compose a function to run the given tasks in parallel.
 
@@ -174,7 +184,7 @@ build(function() {
 app.task('default', build);
 ```
 
-### [.create](lib/generator.js#L26)
+### [.create](lib/generator.js#L28)
 
 Static factory method for creating a custom `Composer` class that extends the given `Emitter`.
 
@@ -186,8 +196,25 @@ Static factory method for creating a custom `Composer` class that extends the gi
 **Example**
 
 ```js
-const Emitter = require('events');
-const Composer = require('composer').create(Emitter);
+// Composer extends a basic event emitter by default
+const Composer = require('composer');
+const composer = new Composer();
+
+// Create a custom Composer class with your even emitter of choice
+const Emitter = require('some-emitter');
+const CustomComposer = Composer.create(Emitter);
+const composer = new CustomComposer();
+```
+
+**Params**
+
+* `name` **{String}**
+* `options` **{Object}**
+* `returns` **{Object}**: Returns an instance of Composer.
+
+**Example**
+
+```js
 const composer = new Composer();
 ```
 
@@ -207,7 +234,7 @@ Returns true if the given value is a Composer generator object.
 * `val` **{object}**
 * `returns` **{boolean}**
 
-### [.register](lib/generator.js#L142)
+### [.register](lib/generator.js#L162)
 
 Alias to `.setGenerator`.
 
@@ -227,7 +254,7 @@ app.register('foo', function(app, base) {
 });
 ```
 
-### [.generator](lib/generator.js#L165)
+### [.generator](lib/generator.js#L185)
 
 Get and invoke generator `name`, or register generator `name` with the given `val` and `options`, then invoke and return the generator instance. This method differs from `.register`, which lazily invokes generator functions when `.generate` is called.
 
@@ -246,7 +273,7 @@ app.generator('foo', function(app, options) {
 });
 ```
 
-### [.setGenerator](lib/generator.js#L197)
+### [.setGenerator](lib/generator.js#L217)
 
 Store a generator by file path or instance with the given `name` and `options`.
 
@@ -266,7 +293,7 @@ app.setGenerator('foo', function(app, options) {
 });
 ```
 
-### [.getGenerator](lib/generator.js#L222)
+### [.getGenerator](lib/generator.js#L242)
 
 Get generator `name` from `app.generators`, same as [findGenerator], but also invokes the returned generator with the current instance. Dot-notation may be used for getting sub-generators.
 
@@ -284,7 +311,7 @@ const foo = app.getGenerator('foo');
 const baz = app.getGenerator('foo.bar.baz');
 ```
 
-### [.findGenerator](lib/generator.js#L255)
+### [.findGenerator](lib/generator.js#L275)
 
 Find generator `name`, by first searching the cache, then searching the cache of the `base` generator. Use this to get a generator without invoking it.
 
@@ -316,7 +343,7 @@ console.log(app.hasGenerator('foo'));
 console.log(app.hasGenerator('foo.bar'));
 ```
 
-### [.generate](lib/generator.js#L337)
+### [.generate](lib/generator.js#L357)
 
 Run one or more tasks or sub-generators and returns a promise.
 
@@ -346,7 +373,7 @@ app.generate('foo');
 app.generate();
 ```
 
-### [.toAlias](lib/generator.js#L389)
+### [.toAlias](lib/generator.js#L407)
 
 Create a generator alias from the given `name`. By default, `generate-` is stripped from beginning of the generator name.
 
@@ -363,7 +390,7 @@ Create a generator alias from the given `name`. By default, `generate-` is strip
 const app = new Generate({ toAlias: require('camel-case') });
 ```
 
-### [.isGenerators](lib/generator.js#L410)
+### [.isGenerators](lib/generator.js#L428)
 
 Returns true if every name in the given array is a registered generator.
 
@@ -372,7 +399,7 @@ Returns true if every name in the given array is a registered generator.
 * `names` **{array}**
 * `returns` **{boolean}**
 
-### [.formatError](lib/generator.js#L447)
+### [.formatError](lib/generator.js#L440)
 
 Format task and generator errors.
 
@@ -381,9 +408,10 @@ Format task and generator errors.
 * `name` **{string}**
 * `returns` **{error}**
 
-### [.base](lib/generator.js#L468)
+### [.base](lib/generator.js#L485)
 
-Get the first ancestor instance when `generator.parent` is defined on nested instances.
+Get the first ancestor instance of Composer. Only works if `generator.parent` is
+defined on child instances.
 
 Get or set the generator name.
 
@@ -423,19 +451,33 @@ Static method that returns true if the given `val` is an instance of Generate.
 * `val` **{object}**
 * `returns` **{boolean}**
 
+Static method for creating a custom Composer class with a custom `Emitter.
+
+**Params**
+
+* `Emitter` **{Function}**
+* `returns` **{Class}**: Returns the custom class.
+
+Static method for creating a custom Tasks class with a custom `Emitter`.
+
+**Params**
+
+* `Emitter` **{Function}**
+* `returns` **{Class}**: Returns the custom class.
+
+**Example**
+
+```js
+const { Task } = require('composer');
+```
+
 ## Events
+
+### task
 
 ```js
 app.on('task', function(task) {
   switch (task.status) {
-    case 'pending':
-      // Task was registered
-      break;
-    case 'preparing':
-      // Task is preparing to run, emitted right before "starting"
-      // (hint: you can use this event to dynamically skip tasks
-      // by updating "task.skip" to "true" or a function)
-      break;
     case 'starting':
       // Task is running
       break;
@@ -445,6 +487,14 @@ app.on('task', function(task) {
   }
 });
 ```
+
+### task-pending
+
+Emitted after a task is registered.
+
+### task-preparing
+
+Emitted when a task is preparing to run, right before it's called. You can use this event to dynamically skip tasks by updating `task.skip` to `true` or a function.
 
 ## Release history
 
@@ -497,7 +547,7 @@ You might also be interested in these projects:
 | **Commits** | **Contributor** | 
 | --- | --- |
 | 226 | [doowb](https://github.com/doowb) |
-| 64 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 69 | [jonschlinkert](https://github.com/jonschlinkert) |
 
 ### Author
 
@@ -514,4 +564,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on July 12, 2018._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on August 04, 2018._

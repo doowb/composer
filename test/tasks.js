@@ -3,20 +3,29 @@
 require('mocha');
 const assert = require('assert');
 const through = require('through2');
-const Tasks = require('..');
+const create = require('../lib/tasks');
+let Tasks;
+let app;
 
-describe('tasks', function() {
-  it('should run a task using a noop when `.run` is called', function() {
-    const tasks = [];
+describe('tasks', () => {
+  beforeEach(() => {
+    Tasks = create();
+    app = new Tasks();
+  });
 
-    const app = new Tasks();
-    app.on('task', task => tasks.push(`${task.name}:${task.status}`));
+  it('should run a task using a noop when `.run` is called', () => {
+    const events = [];
+    const push = task => events.push(task.name + ':' + task.status);
+
+    app.on('task', push);
+    app.on('task-pending', push);
+    app.on('task-preparing', push);
 
     app.task('foo');
     app.task('default', ['foo']);
 
     return app.build('default').then(() => {
-      assert.deepEqual(tasks, [
+      assert.deepEqual(events, [
         'foo:pending',
         'default:pending',
         'default:preparing',
@@ -29,9 +38,9 @@ describe('tasks', function() {
     });
   });
 
-  it('should cause an error if invalid deps are resolved `.run` is called', function() {
+  it('should cause an error if invalid deps are resolved `.run` is called', () => {
     const tasks = [];
-    const app = new Tasks();
+    app = new Tasks();
     app.on('task', task => tasks.push(`${task.name}:${task.status}`));
 
     app.task('foo');
@@ -46,13 +55,15 @@ describe('tasks', function() {
       });
   });
 
-  it('should signal that a task is complete when a stream is returned', function() {
-    const app = new Tasks();
+  it('should signal that a task is complete when a stream is returned', () => {
+    app = new Tasks();
     const events = [];
     let count = 0;
 
+    app.on('task-pending', task => events.push(task.status));
+    app.on('task-preparing', task => events.push(task.status));
     app.on('task', task => events.push(task.status));
-    app.task('default', function() {
+    app.task('default', () => {
       const stream = through.obj(function(data, enc, next) {
         count++;
         next();

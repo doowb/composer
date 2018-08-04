@@ -2,94 +2,94 @@
 
 require('mocha');
 const assert = require('assert');
-const Composer = require('../');
+const Composer = require('..');
 let app;
 
-describe('series', function() {
-  beforeEach(function() {
+describe('series', () => {
+  beforeEach(() => {
     app = new Composer();
   });
 
-  describe('callback', function() {
-    it('should compose tasks into a function that runs in series', function(cb) {
+  describe('callback', () => {
+    it('should compose tasks into a function that runs in series', cb => {
       const actual = [];
 
-      app.task('foo', function(cb) {
-        setTimeout(function() {
+      app.task('foo', cb => {
+        setTimeout(() => {
           actual.push('foo');
           cb();
         }, 20);
       });
 
-      app.task('bar', function(cb) {
-        setTimeout(function() {
+      app.task('bar', cb => {
+        setTimeout(() => {
           actual.push('bar');
           cb();
         }, 10);
       });
 
-      app.task('baz', function(cb) {
+      app.task('baz', cb => {
         actual.push('baz');
         cb();
       });
 
       const build = app.series(['foo', 'bar', 'baz']);
 
-      build(function(err) {
+      build(err => {
         if (err) return cb(err);
         assert.deepEqual(actual, ['foo', 'bar', 'baz']);
         cb();
       });
     });
 
-    it('should compose tasks with options into a function that runs in series', function(cb) {
+    it('should compose tasks with options into a function that runs in series', cb => {
       const actual = [];
 
-      app.task('foo', { silent: false }, function(cb) {
+      app.task('foo', { silent: false }, function(next) {
         assert.equal(this.options.silent, false);
         actual.push('foo');
-        cb();
+        next();
       });
 
-      const build = app.series('foo', function bar(cb) {
+      const build = app.series('foo', function bar(next) {
         actual.push('bar');
-        cb();
+        next();
       });
 
-      build(function(err) {
+      build(err => {
         if (err) return cb(err);
         assert.deepEqual(actual, ['foo', 'bar']);
         cb();
       });
     });
 
-    it('should return an error when no functions are passed to series', function(cb) {
+    it('should return an error when no functions are passed to series', cb => {
       const build = app.series();
 
-      build(function(err) {
+      build(err => {
         assert(/actual/, err.message);
         assert(/tasks/, err.message);
         cb();
       });
     });
 
-    it('should compose tasks with additional options into a function that runs in series', function(cb) {
+    it('should compose tasks with additional options into a function that runs in series', cb => {
       const actual = [];
 
-      app.task('foo', { silent: false }, function(cb) {
+      app.task('foo', { silent: false }, function(next) {
         assert.equal(this.options.silent, true);
         assert.equal(this.options.foo, 'bar');
         actual.push('foo');
-        cb();
+        next();
       });
 
       const options = { silent: true, foo: 'bar' };
-      const build = app.series('foo', function bar(cb) {
+      const build = app.series('foo', function(next) {
         actual.push('bar');
-        cb();
+        next();
       }, options);
 
-      build(function(err) {
+      build(err => {
         if (err) {
           cb(err);
           return;
@@ -99,43 +99,43 @@ describe('series', function() {
       });
     });
 
-    it('should not throw an error when `build` is called without a callback function.', function(cb) {
+    it('should not throw an error when `build` is called without a callback function.', cb => {
       const actual = [];
 
-      app.task('foo', function(next) {
+      app.task('foo', next => {
         actual.push('foo');
         next();
       });
 
-      const build = app.series('foo', function(next) {
+      const build = app.series('foo', next => {
         actual.push('bar');
         next();
       });
 
       build();
 
-      setTimeout(function() {
+      setTimeout(() => {
         assert.deepEqual(actual, ['foo', 'bar']);
         cb();
       }, 10);
     });
 
-    it('should handle errors', function() {
+    it('should handle errors', () => {
       const actual = [];
       let count = 0;
 
-      app.on('error', function(err) {
+      app.on('error', err => {
         actual.push(err.message);
         count++;
       });
 
-      app.task('foo', function(cb) {
+      app.task('foo', cb => {
         actual.push('foo');
         count++;
         cb();
       });
 
-      const build = app.series('foo', function(cb) {
+      const build = app.series('foo', cb => {
         count++;
         cb(new Error('an error'));
       });
@@ -151,11 +151,11 @@ describe('series', function() {
     });
   });
 
-  describe('promise', function() {
-    it('should compose tasks into a function that runs in series', function() {
+  describe('promise', () => {
+    it('should compose tasks into a function that runs in series', () => {
       const actual = [];
 
-      app.task('foo', function(cb) {
+      app.task('foo', cb => {
         actual.push('foo');
         cb();
       });
@@ -171,18 +171,18 @@ describe('series', function() {
         });
     });
 
-    it('should compose tasks with options into a function that runs in series', function() {
+    it('should compose tasks with options into a function that runs in series', () => {
       const actual = [];
 
-      app.task('foo', { silent: false }, function(cb) {
+      app.task('foo', { silent: false }, function(next) {
         assert.equal(this.options.silent, false);
         actual.push('foo');
-        cb();
+        next();
       });
 
-      const build = app.series('foo', function bar(cb) {
+      const build = app.series('foo', function(next) {
         actual.push('bar');
-        cb();
+        next();
       });
 
       return build()
@@ -191,29 +191,29 @@ describe('series', function() {
         });
     });
 
-    it('should return an error when no functions are passed to series', function(cb) {
+    it('should return an error when no functions are passed to series', cb => {
       const build = app.series();
 
-      return build(function(err) {
+      return build(err => {
         assert(err);
         cb();
       });
     });
 
-    it('should compose tasks with additional options into a function that runs in series', function() {
+    it('should compose tasks with additional options into a function that runs in series', () => {
       const actual = [];
 
-      app.task('foo', { silent: false }, function(cb) {
+      app.task('foo', { silent: false }, function(next) {
         assert.equal(this.options.silent, true);
         assert.equal(this.options.foo, 'bar');
         actual.push('foo');
-        cb();
+        next();
       });
 
       const options = { silent: true, foo: 'bar' };
-      const build = app.series('foo', function(cb) {
+      const build = app.series('foo', function(next) {
         actual.push('bar');
-        cb();
+        next();
       }, options);
 
       return build()

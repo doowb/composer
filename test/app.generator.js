@@ -5,62 +5,62 @@ const assert = require('assert');
 const Generator = require('..');
 let base;
 
-describe('.generator', function() {
-  beforeEach(function() {
+describe('.generator', () => {
+  beforeEach(() => {
     base = new Generator();
   });
 
-  describe('generator naming', function() {
-    it('should cache a generator by alias when alias is given', function() {
-      base.generator('foo', function() {});
+  describe('generator naming', () => {
+    it('should cache a generator by alias when alias is given', () => {
+      base.generator('foo', () => {});
       assert(base.generators.has('foo'));
     });
 
-    it('should cache a generator by alias when by full name is given', function() {
-      base.generator('generate-abc', function() {});
+    it('should cache a generator by alias when by full name is given', () => {
+      base.generator('generate-abc', () => {});
       assert(base.generators.has('abc'));
     });
 
-    it('should get a generator by alias, when registered with full name', function() {
+    it('should get a generator by alias, when registered with full name', () => {
       base.register('generate-foo', require('generate-foo'));
       const app = base.getGenerator('foo');
       assert.equal(app.name, 'generate-foo');
       assert.equal(app.alias, 'foo');
     });
 
-    it('should get a generator by alias, when registered with alias', function() {
+    it('should get a generator by alias, when registered with alias', () => {
       base.register('foo', require('generate-foo'));
       const app = base.getGenerator('foo');
       assert.equal(app.name, 'foo');
     });
 
-    it('should get a generator by full name, when registered with full name', function() {
+    it('should get a generator by full name, when registered with full name', () => {
       base.register('generate-foo', require('generate-foo'));
       const app = base.getGenerator('generate-foo');
       assert.equal(app.name, 'generate-foo');
       assert.equal(app.alias, 'foo');
     });
 
-    it('should get a generator by full name, when registered with alias', function() {
+    it('should get a generator by full name, when registered with alias', () => {
       base.register('foo', require('generate-foo'));
       const app = base.getGenerator('generate-foo');
       assert.equal(app.name, 'foo');
     });
   });
 
-  describe('generators', function() {
-    it('should invoke a registered generator when `getGenerator` is called', function(cb) {
-      base.register('foo', function(app) {
-        app.task('default', function() {});
+  describe('generators', () => {
+    it('should invoke a registered generator when `getGenerator` is called', cb => {
+      base.register('foo', app => {
+        app.task('default', () => {});
         cb();
       });
 
       base.getGenerator('foo');
     });
 
-    it('should expose the generator instance on `app`', function(cb) {
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+    it('should expose the generator instance on `app`', cb => {
+      base.register('foo', app => {
+        app.task('default', next => {
           assert.equal(app.a, 'b');
           next();
         });
@@ -68,32 +68,32 @@ describe('.generator', function() {
 
       const foo = base.getGenerator('foo');
       foo.a = 'b';
-      foo.build('default', function(err) {
+      foo.build('default', err => {
         if (err) return cb(err);
         cb();
       });
     });
 
-    it('should expose the "base" instance on `app.base`', function(cb) {
+    it('should expose the "base" instance on `app.base`', cb => {
       base.x = 'z';
-      base.register('foo', function(app) {
-        app.task('default', function(next) {
+      base.register('foo', app => {
+        app.task('default', next => {
           assert.equal(app.base.x, 'z');
           next();
         });
       });
 
       const foo = base.getGenerator('foo');
-      foo.build('default', function(err) {
+      foo.build('default', err => {
         if (err) return cb(err);
         cb();
       });
     });
 
-    it('should expose an app\'s generators on app.generators', function(cb) {
-      base.register('foo', function(app) {
-        app.register('a', function() {});
-        app.register('b', function() {});
+    it('should expose an app\'s generators on app.generators', cb => {
+      base.register('foo', app => {
+        app.register('a', () => {});
+        app.register('b', () => {});
 
         app.generators.has('a');
         app.generators.has('b');
@@ -103,8 +103,8 @@ describe('.generator', function() {
       base.getGenerator('foo');
     });
 
-    it('should expose all root generators on base.generators', function(cb) {
-      base.register('foo', function(app) {
+    it('should expose all root generators on base.generators', cb => {
+      base.register('foo', app => {
         app.base.generators.has('foo');
         app.base.generators.has('bar');
         app.base.generators.has('baz');
@@ -117,9 +117,9 @@ describe('.generator', function() {
     });
   });
 
-  describe('cross-generators', function() {
-    it('should get a generator from another generator', function(cb) {
-      base.register('foo', function(app) {
+  describe('cross-generators', () => {
+    it('should get a generator from another generator', cb => {
+      base.register('foo', app => {
         const bar = app.base.getGenerator('bar');
         assert(bar);
         cb();
@@ -130,18 +130,18 @@ describe('.generator', function() {
       base.getGenerator('foo');
     });
 
-    it('should set options on another generator instance', function(cb) {
-      base.generator('foo', function(app) {
-        app.task('default', function(next) {
+    it('should set options on another generator instance', cb => {
+      base.generator('foo', app => {
+        app.task('default', next => {
           assert.equal(app.options.abc, 'xyz');
           next();
         });
       });
 
-      base.generator('bar', function(app) {
+      base.generator('bar', app => {
         const foo = app.base.getGenerator('foo');
         foo.options.abc = 'xyz';
-        foo.build(function(err) {
+        foo.build(err => {
           if (err) return cb(err);
           cb();
         });
@@ -149,11 +149,11 @@ describe('.generator', function() {
     });
   });
 
-  describe('tasks', function() {
-    it('should expose a generator\'s tasks on app.tasks', function(cb) {
-      base.register('foo', function(app) {
-        app.task('a', function() {});
-        app.task('b', function() {});
+  describe('tasks', () => {
+    it('should expose a generator\'s tasks on app.tasks', cb => {
+      base.register('foo', app => {
+        app.task('a', () => {});
+        app.task('b', () => {});
         assert(app.tasks.has('a'));
         assert(app.tasks.has('b'));
         cb();
@@ -162,8 +162,8 @@ describe('.generator', function() {
       base.getGenerator('foo');
     });
 
-    it('should get tasks from another generator', function(cb) {
-      base.register('foo', function(app) {
+    it('should get tasks from another generator', cb => {
+      base.register('foo', app => {
         const baz = app.base.getGenerator('baz');
         const task = baz.tasks.get('aaa');
         assert(task);
@@ -172,32 +172,32 @@ describe('.generator', function() {
 
       base.register('bar', function(app, base) {});
       base.register('baz', function(app, base) {
-        app.task('aaa', function() {});
+        app.task('aaa', () => {});
       });
 
       base.getGenerator('foo');
     });
   });
 
-  describe('namespace', function() {
-    it('should expose `app.namespace`', function(cb) {
-      base.generator('foo', function(app) {
+  describe('namespace', () => {
+    it('should expose `app.namespace`', cb => {
+      base.generator('foo', app => {
         assert(typeof app.namespace, 'string');
         cb();
       });
     });
 
-    it('should create namespace from generator alias', function(cb) {
-      base.generator('generate-foo', function(app) {
+    it('should create namespace from generator alias', cb => {
+      base.generator('generate-foo', app => {
         assert.equal(app.namespace, 'generate.foo');
         cb();
       });
     });
 
-    it('should create sub-generator namespace from parent namespace and alias', function(cb) {
+    it('should create sub-generator namespace from parent namespace and alias', cb => {
       const name = base.name;
 
-      base.generator('generate-foo', function(app) {
+      base.generator('generate-foo', app => {
         assert.equal(app.namespace, name + '.foo');
 
         app.generator('generate-bar', function(bar) {
@@ -215,7 +215,7 @@ describe('.generator', function() {
       });
     });
 
-    it('should expose namespace on `this`', function(cb) {
+    it('should expose namespace on `this`', cb => {
       base.generator('generate-foo', function(app) {
         assert.equal(this.namespace, 'generate.foo');
 

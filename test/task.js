@@ -41,7 +41,7 @@ describe('task', () => {
 
   it('should run a task function when `.run` is called', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };
@@ -75,7 +75,7 @@ describe('task', () => {
 
   it('should skip a task function when `.options.run === false`', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };
@@ -90,7 +90,7 @@ describe('task', () => {
   });
   it('should skip a task function when `.options.skip` is the task name', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };
@@ -109,7 +109,7 @@ describe('task', () => {
 
   it('should skip a task function when `.options.skip` is an array with the task name', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };
@@ -128,7 +128,7 @@ describe('task', () => {
 
   it('should not skip a task function when `.options.skip` is an array without the task name', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };
@@ -150,7 +150,7 @@ describe('task', () => {
         count++;
         next(null);
       });
-      setImmediate(function() {
+      setImmediate(() => {
         stream.write(count);
         stream.end();
       });
@@ -168,8 +168,8 @@ describe('task', () => {
 
   it('should run a task that returns a non-stream when `.run` is called', () => {
     let count = 0;
-    const callback = function(cb) {
-      setImmediate(function() {
+    const callback = cb => {
+      setImmediate(() => {
         count++;
         cb();
       });
@@ -187,7 +187,7 @@ describe('task', () => {
 
   it('should emit a `starting` event when the task starts running', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };
@@ -206,7 +206,7 @@ describe('task', () => {
 
   it('should emit a `finished` event when the task finishes running', () => {
     let count = 0;
-    const callback = function(cb) {
+    const callback = cb => {
       count++;
       cb();
     };

@@ -5,12 +5,12 @@ const assert = require('assert');
 const Generator = require('..');
 let app;
 
-describe('default generator', function() {
-  beforeEach(function() {
+describe('default generator', () => {
+  beforeEach(() => {
     app = new Generator();
   });
 
-  it('should throw an error when a default generator is not found', function() {
+  it('should throw an error when a default generator is not found', () => {
     return app.generate('default')
       .catch(err => {
         assert(err);
@@ -18,7 +18,7 @@ describe('default generator', function() {
       });
   });
 
-  it('should not throw an error when a default task on default generator is not found', function(cb) {
+  it('should not throw an error when a default task on default generator is not found', cb => {
     app.register('default', () => {});
     app.generate('default', 'default')
       .catch(err => {
@@ -29,7 +29,7 @@ describe('default generator', function() {
       });
   });
 
-  it('should prefer tasks on the default generator over anything on the app instance', function() {
+  it('should prefer tasks on the default generator over anything on the app instance', () => {
     let count = { app: 0, default: 0 };
 
     app.task('foo', next => {
@@ -66,7 +66,7 @@ describe('default generator', function() {
       });
   });
 
-  it('should prefer generators on the default generator over anything on the app instance', function() {
+  it('should prefer generators on the default generator over anything on the app instance', () => {
     let count = { app: 0, default: 0 };
 
     app.task('foo', next => {
@@ -103,21 +103,21 @@ describe('default generator', function() {
       });
   });
 
-  it('should run default tasks on an array of nested sub-generators', function() {
+  it('should run default tasks on an array of nested sub-generators', () => {
     let count = 0;
     const task = async() => count++;
     const def = app => app.task('default', task);
 
     app.register('default', function() {
-      this.register('foo', function(app) {
+      this.register('foo', app => {
         app.register('one', def);
         app.register('two', def);
       });
 
-      this.register('bar', function(app) {
+      this.register('bar', app => {
         app.register('one', def);
         app.register('two', def);
-        app.register('three', function() {
+        app.register('three', () => {
           this.task('zzz', task);
           this.task('default', ['zzz']);
         });
@@ -135,7 +135,7 @@ describe('default generator', function() {
     //   });
   });
 
-  it('should throw an error when default task is called and missing on default generator', function() {
+  it('should throw an error when default task is called and missing on default generator', () => {
     let count = { app: 0, default: 0 };
 
     app.register('default', gen => {
@@ -151,7 +151,7 @@ describe('default generator', function() {
       });
   });
 
-  it('should throw an error when default task is called and missing on default generator', function() {
+  it('should throw an error when default task is called and missing on default generator', () => {
     app.register('default', gen => {});
 
     return app.generate('default')
@@ -162,7 +162,7 @@ describe('default generator', function() {
       });
   });
 
-  it('should handle errors from default generator tasks', function() {
+  it('should handle errors from default generator tasks', () => {
     app.register('default', gen => {
       gen.task('foo', next => {
         next(new Error('huge error!'));

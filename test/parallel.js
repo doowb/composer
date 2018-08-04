@@ -2,27 +2,27 @@
 
 require('mocha');
 const assert = require('assert');
-const Composer = require('../');
+const Composer = require('..');
 let app;
 
-describe('parallel', function() {
-  beforeEach(function() {
+describe('parallel', () => {
+  beforeEach(() => {
     app = new Composer();
   });
 
-  describe('callback', function() {
+  describe('callback', () => {
     it('should compose tasks into a function that runs in parallel', cb => {
       const actual = [];
 
       app.task('foo', function(next) {
-        setTimeout(function() {
+        setTimeout(() => {
           actual.push('foo');
           next();
         }, 6);
       });
 
       app.task('bar', function(next) {
-        setTimeout(function() {
+        setTimeout(() => {
           actual.push('bar');
           next();
         }, 1);
@@ -35,7 +35,7 @@ describe('parallel', function() {
 
       const build = app.parallel(['foo', 'bar', 'baz']);
 
-      build(function(err) {
+      build(err => {
         if (err) return cb(err);
         assert.deepEqual(actual, ['baz', 'bar', 'foo']);
         cb();
@@ -45,7 +45,7 @@ describe('parallel', function() {
     it('should return an error when no functions are passed to parallel', cb => {
       const build = app.parallel();
 
-      build(function(err) {
+      build(err => {
         assert(/actual/, err.message);
         assert(/tasks/, err.message);
         cb();
@@ -65,7 +65,7 @@ describe('parallel', function() {
 
       const build = app.parallel([task(10), task(8), task(6), task(4), task(2)]);
 
-      build(function(err) {
+      build(err => {
         if (err) {
           cb(err);
           return;
@@ -82,7 +82,7 @@ describe('parallel', function() {
         assert.equal(this.options.silent, true);
         assert.equal(this.options.foo, 'bar');
 
-        setTimeout(function() {
+        setTimeout(() => {
           actual.push('foo');
           next();
         }, 2);
@@ -95,7 +95,7 @@ describe('parallel', function() {
         next();
       });
 
-      build(function(err) {
+      build(err => {
         if (err) {
           cb(err);
           return;
@@ -105,32 +105,32 @@ describe('parallel', function() {
       });
     });
 
-    it('should run task dependencies in parallel', function() {
+    it('should run task dependencies in parallel', () => {
       const actual = [];
 
-      app.task('foo', ['baz'], function(next) {
-        setTimeout(function() {
+      app.task('foo', ['baz'], next => {
+        setTimeout(() => {
           actual.push('foo');
           next();
         }, 15);
       });
 
-      app.task('bar', ['qux'], function(next) {
-        setTimeout(function() {
+      app.task('bar', ['qux'], next => {
+        setTimeout(() => {
           actual.push('bar');
           next();
         }, 10);
       });
 
-      app.task('baz', function(next) {
-        setTimeout(function() {
+      app.task('baz', next => {
+        setTimeout(() => {
           actual.push('baz');
           next();
         }, 5);
       });
 
-      app.task('qux', function(next) {
-        setTimeout(function() {
+      app.task('qux', next => {
+        setTimeout(() => {
           actual.push('qux');
           next();
         }, 0);
@@ -145,25 +145,25 @@ describe('parallel', function() {
     });
   });
 
-  describe('promise', function() {
+  describe('promise', () => {
     it('should run registered tasks in parallel', () => {
       const actual = [];
 
-      app.task('foo', function(next) {
-        setTimeout(function() {
+      app.task('foo', next => {
+        setTimeout(() => {
           actual.push('foo');
           next();
         }, 8);
       });
 
-      app.task('bar', function(next) {
-        setTimeout(function() {
+      app.task('bar', next => {
+        setTimeout(() => {
           actual.push('bar');
           next();
         }, 1);
       });
 
-      app.task('baz', function(next) {
+      app.task('baz', next => {
         actual.push('baz');
         next();
       });
@@ -179,7 +179,7 @@ describe('parallel', function() {
     it('should return an error when no functions are passed to parallel', cb => {
       const build = app.parallel();
 
-      build(function(err) {
+      build(err => {
         assert(/actual/, err.message);
         assert(/tasks/, err.message);
         cb();
@@ -212,7 +212,7 @@ describe('parallel', function() {
         assert.equal(this.options.silent, true);
         assert.equal(this.options.foo, 'bar');
 
-        setTimeout(function() {
+        setTimeout(() => {
           actual.push('foo');
           next();
         }, 2);
@@ -235,21 +235,21 @@ describe('parallel', function() {
       const actual = [];
       let count = 0;
 
-      app.on('error', function(err) {
+      app.on('error', err => {
         actual.push('error');
         assert.equal(err.message, 'bar error');
         count++;
       });
 
-      app.task('foo', function(next) {
-        setTimeout(function() {
+      app.task('foo', next => {
+        setTimeout(() => {
           actual.push('foo');
           count++;
           next();
         }, 2);
       });
 
-      const build = app.parallel('foo', function(next) {
+      const build = app.parallel('foo', next => {
         next(new Error('bar error'));
       });
 
