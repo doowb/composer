@@ -3,7 +3,7 @@
 require('mocha');
 const assert = require('assert');
 const through = require('through2');
-const Task = require('../lib/task');
+const { Task } = require('..');
 
 describe('task', () => {
   it('should throw an error when Task is not instantiated', () => {

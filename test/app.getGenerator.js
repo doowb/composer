@@ -225,7 +225,6 @@ describe('.getGenerator', () => {
 
     // the wrapped generator function should not be called, but the
     // original function will be invoked each time
-
     const originalFn = base.findGenerator('one.child').fn;
     assert.equal(called, 0);
     assert.equal(base.findGenerator('one.child').called, 0);

@@ -22,27 +22,27 @@ describe('.generator', () => {
     });
 
     it('should get a generator by alias, when registered with full name', () => {
-      base.register('generate-foo', require('generate-foo'));
+      base.register('generate-foo', () => {});
       const app = base.getGenerator('foo');
       assert.equal(app.name, 'generate-foo');
       assert.equal(app.alias, 'foo');
     });
 
     it('should get a generator by alias, when registered with alias', () => {
-      base.register('foo', require('generate-foo'));
+      base.register('foo', () => {});
       const app = base.getGenerator('foo');
       assert.equal(app.name, 'foo');
     });
 
     it('should get a generator by full name, when registered with full name', () => {
-      base.register('generate-foo', require('generate-foo'));
+      base.register('generate-foo', () => {});
       const app = base.getGenerator('generate-foo');
       assert.equal(app.name, 'generate-foo');
       assert.equal(app.alias, 'foo');
     });
 
     it('should get a generator by full name, when registered with alias', () => {
-      base.register('foo', require('generate-foo'));
+      base.register('foo', () => {});
       const app = base.getGenerator('generate-foo');
       assert.equal(app.name, 'foo');
     });

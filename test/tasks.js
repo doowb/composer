@@ -3,13 +3,11 @@
 require('mocha');
 const assert = require('assert');
 const through = require('through2');
-const create = require('../lib/tasks');
-let Tasks;
+const { Tasks } = require('..');
 let app;
 
 describe('tasks', () => {
   beforeEach(() => {
-    Tasks = create();
     app = new Tasks();
   });
 
@@ -18,7 +16,7 @@ describe('tasks', () => {
     const push = task => events.push(task.name + ':' + task.status);
 
     app.on('task', push);
-    app.on('task-pending', push);
+    app.on('task-registered', push);
     app.on('task-preparing', push);
 
     app.task('foo');
@@ -26,8 +24,8 @@ describe('tasks', () => {
 
     return app.build('default').then(() => {
       assert.deepEqual(events, [
-        'foo:pending',
-        'default:pending',
+        'foo:registered',
+        'default:registered',
         'default:preparing',
         'default:starting',
         'foo:preparing',
@@ -60,7 +58,7 @@ describe('tasks', () => {
     const events = [];
     let count = 0;
 
-    app.on('task-pending', task => events.push(task.status));
+    app.on('task-registered', task => events.push(task.status));
     app.on('task-preparing', task => events.push(task.status));
     app.on('task', task => events.push(task.status));
     app.task('default', () => {
@@ -75,7 +73,7 @@ describe('tasks', () => {
 
     return app.build('default')
       .then(() => {
-        assert.deepEqual(events, [ 'pending', 'preparing', 'starting', 'finished' ]);
+        assert.deepEqual(events, [ 'registered', 'preparing', 'starting', 'finished' ]);
         assert.equal(count, 1);
       });
   });

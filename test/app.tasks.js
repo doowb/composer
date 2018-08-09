@@ -68,10 +68,10 @@ describe('.tasks', () => {
   });
 
   it('should register a task with options as the second argument', () => {
-    app.task('default', {flow: 'parallel'}, ['foo', 'bar']);
+    app.task('default', { one: 'two' }, ['foo', 'bar']);
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
-    assert.equal(app.tasks.get('default').options.flow, 'parallel');
+    assert.equal(app.tasks.get('default').options.one, 'two');
   });
 
   it('should run a task', cb => {
@@ -273,7 +273,7 @@ describe('.tasks', () => {
     const push = task => events.push(task.status + '.' + task.name);
 
     app.on('task', push);
-    app.on('task-pending', push);
+    app.on('task-registered', push);
     app.on('task-preparing', push);
 
     app.on('error', err => {
@@ -289,9 +289,9 @@ describe('.tasks', () => {
     app.build('default', err => {
       if (err) return cb(err);
       assert.deepEqual(events, [
-        'pending.foo',
-        'pending.bar',
-        'pending.default',
+        'registered.foo',
+        'registered.bar',
+        'registered.default',
         'preparing.default',
         'starting.default',
         'preparing.bar',
@@ -463,6 +463,32 @@ describe('.tasks', () => {
     assert.equal(app.tasks.get('foo')[util.inspect.custom](), '<Task "foo" deps: []>');
     assert.equal(app.tasks.get('bar')[util.inspect.custom](), '<Task "bar" deps: []>');
     assert.equal(app.tasks.get('default')[util.inspect.custom](), '<Task "default" deps: [foo, bar]>');
+  });
+
+  it('should add custom inspect function to tasks.', () => {
+    app.on('task-registered', task => {
+      task[util.inspect.custom] = function(task) {
+        return '<Task "' + this.name + '"'
+          + (this.deps.length ? ' [' + this.deps.join(', ') + ']' : '')
+          + '>';
+      };
+    });
+
+    app.task('foo', cb => {
+      cb();
+    });
+
+    app.task('bar', cb => {
+      cb();
+    });
+
+    app.task('default', ['foo', 'bar'], cb => {
+      cb();
+    });
+
+    assert.equal(app.tasks.get('foo')[util.inspect.custom](), '<Task "foo">');
+    assert.equal(app.tasks.get('bar')[util.inspect.custom](), '<Task "bar">');
+    assert.equal(app.tasks.get('default')[util.inspect.custom](), '<Task "default" [foo, bar]>');
   });
 
   it('should run globbed dependencies before running the dependent task.', cb => {

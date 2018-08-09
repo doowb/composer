@@ -127,9 +127,7 @@ describe('.register', () => {
 
   describe('name', () => {
     it('should use a custom function to create the name', () => {
-      base.options.toAlias = function(name) {
-        return name.slice(name.lastIndexOf('-') + 1);
-      };
+      base.options.toAlias = name => name.slice(name.lastIndexOf('-') + 1);
 
       base.register('base-abc-xyz', () => {});
       const xyz = base.getGenerator('xyz');

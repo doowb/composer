@@ -18,7 +18,18 @@ describe('default generator', () => {
       });
   });
 
-  it('should not throw an error when a default task on default generator is not found', cb => {
+  it('should throw an error when a default task on default generator is not found', cb => {
+    app.register('default', () => {});
+    app.generate('default', 'default')
+      .catch(err => {
+        assert(err);
+        assert(/task/i.test(err.message));
+        assert(/is not registered/i.test(err.message));
+        cb();
+      });
+  });
+
+  it('should throw an error when a default task on default generator is not found', cb => {
     app.register('default', () => {});
     app.generate('default', 'default')
       .catch(err => {
@@ -45,24 +56,17 @@ describe('default generator', () => {
     });
 
     app.register('default', gen => {
-      gen.task('bar', next => {
         // I should win
+      gen.task('foo', next => {
         count.default++;
         next();
-      });
-
-      gen.register('bar', bar => {
-        bar.task('default', next => {
-          count.default++;
-          next();
-        });
       });
     });
 
     return app.generate('foo')
       .then(() => {
-        assert.equal(count.app, 1);
-        assert.equal(count.default, 0);
+        assert.equal(count.app, 0);
+        assert.equal(count.default, 1);
       });
   });
 
@@ -90,7 +94,6 @@ describe('default generator', () => {
 
       gen.register('foo', foo => {
         foo.task('default', next => {
-          count.default++;
           next();
         });
       });
@@ -106,7 +109,7 @@ describe('default generator', () => {
   it('should run default tasks on an array of nested sub-generators', () => {
     let count = 0;
     const task = async() => count++;
-    const def = app => app.task('default', task);
+    const def = gen => gen.task('default', task);
 
     app.register('default', function() {
       this.register('foo', app => {
@@ -117,22 +120,17 @@ describe('default generator', () => {
       this.register('bar', app => {
         app.register('one', def);
         app.register('two', def);
-        app.register('three', () => {
+        app.register('three', function() {
           this.task('zzz', task);
           this.task('default', ['zzz']);
         });
       });
     });
 
-    return app.generate(['foo.one'])
+    return app.generate(['foo.one', 'foo.two', 'bar.one', 'bar.two', 'bar.three'])
       .then(() => {
-        assert.equal(count, 1);
+        assert.equal(count, 5);
       });
-
-    // return app.generate(['foo.one', 'foo.two', 'bar.one', 'bar.two', 'bar.three'])
-    //   .then(() => {
-    //     assert.equal(count, 5);
-    //   });
   });
 
   it('should throw an error when default task is called and missing on default generator', () => {
@@ -163,6 +161,27 @@ describe('default generator', () => {
   });
 
   it('should handle errors from default generator tasks', () => {
+    let errors = [];
+
+    app.register('default', gen => {
+      gen.task('foo', next => {
+        next(new Error('huge error!'));
+      });
+    });
+
+    app.on('error', err => {
+      errors.push(err);
+    });
+
+    return app.generate('foo')
+      .catch(err => {
+        assert(err);
+        assert(err === errors[0]);
+        assert(/huge error/.test(err.message));
+      });
+  });
+
+  it('should handle error events from default generator tasks', () => {
     app.register('default', gen => {
       gen.task('foo', next => {
         next(new Error('huge error!'));
@@ -170,6 +189,9 @@ describe('default generator', () => {
     });
 
     return app.generate('foo')
+      .then(() => {
+        throw new Error('expected an error');
+      })
       .catch(err => {
         assert(err);
         assert(/huge error/.test(err.message));

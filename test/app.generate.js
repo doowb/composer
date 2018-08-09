@@ -5,6 +5,10 @@ const assert = require('assert');
 const Generator = require('..');
 let base;
 
+const ensureError = () => {
+  throw new Error('expected an error');
+};
+
 describe('.generate', () => {
   beforeEach(() => {
     base = new Generator();
@@ -13,6 +17,7 @@ describe('.generate', () => {
   describe('generators', () => {
     it('should throw an error when a generator is not found', () => {
       return base.generate('fdsslsllsfjssl')
+        .then(ensureError)
         .catch(err => {
           assert(err);
           assert(/is not registered/i.test(err.message));
@@ -22,6 +27,7 @@ describe('.generate', () => {
     it('should throw an error when the default task is not found', () => {
       base.register('foo', () => {});
       return base.generate('foo', ['default'])
+        .then(ensureError)
         .catch(err => {
           assert(err);
           assert(/is not registered/i.test(err.message));
@@ -31,6 +37,7 @@ describe('.generate', () => {
     it('should throw an error when a task is not found (task array)', () => {
       base.register('fdsslsllsfjssl', () => {});
       return base.generate('fdsslsllsfjssl', ['foo'])
+        .then(ensureError)
         .catch(err => {
           assert(err);
           assert(/task/i.test(err.message));
@@ -41,6 +48,7 @@ describe('.generate', () => {
     it('should throw an error when a task is not found (task string)', () => {
       base.register('fdsslsllsfjssl', () => {});
       return base.generate('fdsslsllsfjssl', 'foo')
+        .then(ensureError)
         .catch(err => {
           assert(err);
           assert(/task/i.test(err.message));
@@ -54,8 +62,28 @@ describe('.generate', () => {
       });
 
       return base.generate('default')
+        .then(ensureError)
         .catch(err => {
           assert(err);
+          assert.equal(err.message, 'whatever');
+        });
+    });
+
+    it('should handle task error event', () => {
+      let errors = [];
+      base.task('default', next => {
+        next(new Error('whatever'));
+      });
+
+      base.on('error', err => {
+        errors.push(err);
+      });
+
+      return base.generate('default')
+        .then(ensureError)
+        .catch(err => {
+          assert(err);
+          assert(err === errors[0]);
           assert.equal(err.message, 'whatever');
         });
     });
@@ -108,7 +136,7 @@ describe('.generate', () => {
         });
     });
 
-    it('should run a generator from a task with the same name', () => {
+    it('should run a generator from inside a task with the same name', () => {
       base.register('foo', app => {
         app.task('default', next => {
           next();
@@ -119,17 +147,20 @@ describe('.generate', () => {
       return base.build('foo');
     });
 
-    it('should run the default task on a generator', cb => {
-      base.register('foo', app => {
-        app.task('default', next => {
+    it('should run the default task on a generator as a promise', () => {
+      base.register('foo', app => app.task('default', next => next()));
+
+      return base.generate('foo');
+    });
+
+    it('should run the default task on a generator with a callback', cb => {
+      base.register('foo', function(app) {
+        app.task('default', function(next) {
           next();
         });
       });
 
-      base.generate('foo', err => {
-        assert(!err);
-        cb();
-      });
+      base.generate('foo', cb);
     });
 
     it('should run a list of tasks on the instance', () => {
@@ -151,6 +182,36 @@ describe('.generate', () => {
         .then(() => {
           assert.equal(count, 3);
         });
+    });
+
+    it('should run tasks in parallel', cb => {
+      const app = new Generator({ parallel: true });
+      const actual = [];
+
+      app.task('foo', function(next) {
+        setTimeout(() => {
+          actual.push('foo');
+          next();
+        }, 5);
+      });
+
+      app.task('bar', function(next) {
+        setTimeout(() => {
+          actual.push('bar');
+          next();
+        }, 1);
+      });
+
+      app.task('baz', function(next) {
+        actual.push('baz');
+        next();
+      });
+
+      app.generate(['foo', 'bar', 'baz'], err => {
+        if (err) return cb(err);
+        assert.deepEqual(actual, ['baz', 'bar', 'foo']);
+        cb();
+      });
     });
 
     it('should run an array of tasks on the instance', () => {
@@ -245,7 +306,7 @@ describe('.generate', () => {
   describe('options', cb => {
     it('should pass options to generator.options', () => {
       let count = 0;
-      base.register('default', function(app, options) {
+      base.register('default', (app, options) => {
         app.task('default', next => {
           count++;
           assert.equal(options.foo, 'bar');
@@ -253,7 +314,7 @@ describe('.generate', () => {
         });
       });
 
-      return base.generate({foo: 'bar'})
+      return base.generate({ foo: 'bar' })
         .then(() => {
           assert.equal(count, 1);
         });
@@ -261,7 +322,7 @@ describe('.generate', () => {
 
     it('should expose options on generator options', () => {
       let count = 0;
-      base.register('default', function(app, options) {
+      base.register('default', (app, options) => {
         app.task('default', next => {
           count++;
           assert.equal(options.foo, 'bar');
@@ -294,6 +355,19 @@ describe('.generate', () => {
   });
 
   describe('default tasks', cb => {
+    it('should run the default task on the base instance', () => {
+      let count = 0;
+      base.task('default', next => {
+        count++;
+        next();
+      });
+
+      return base.generate()
+        .then(() => {
+          assert.equal(count, 1);
+        });
+    });
+
     it('should run the default task on the _default_ generator', () => {
       let count = 0;
       base.register('default', function(app) {

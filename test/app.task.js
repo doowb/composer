@@ -110,7 +110,7 @@ describe('.task', () => {
   it('should emit task events', () => {
     const expected = [];
 
-    base.on('task-pending', function(task) {
+    base.on('task-registered', function(task) {
       expected.push(task.status + '.' + task.name);
     });
 
@@ -129,9 +129,9 @@ describe('.task', () => {
     return base.build('default')
       .then(() => {
         assert.deepEqual(expected, [
-          'pending.foo',
-          'pending.bar',
-          'pending.default',
+          'registered.foo',
+          'registered.bar',
+          'registered.default',
           'preparing.default',
           'starting.default',
           'preparing.bar',

@@ -52,30 +52,26 @@ describe('parallel', () => {
       });
     });
 
-    it('should compose tasks with options into a function that runs in parallel', cb => {
-      const res = [];
-      const task = function(t) {
-        return function(next) {
+    it('should compose tasks with options into a function that runs in parallel', () => {
+      const actual = [];
+      const task = t => {
+        return next => {
           setTimeout(() => {
-            res.push(t);
+            actual.push(t);
             next();
           }, t);
         };
       };
 
-      const build = app.parallel([task(10), task(8), task(6), task(4), task(2)]);
+      const build = app.parallel([task(20), task(15), task(10), task(5), task(0)]);
 
-      build(err => {
-        if (err) {
-          cb(err);
-          return;
-        }
-        assert.deepEqual(res, [2, 4, 6, 8, 10]);
-        cb();
-      });
+      return build()
+        .then(() => {
+          assert.deepEqual(actual, [0, 5, 10, 15, 20]);
+        });
     });
 
-    it('should compose tasks with additional options into a function that runs in parallel', cb => {
+    it('should compose tasks with additional options into a function that runs in parallel', () => {
       const actual = [];
 
       app.task('foo', { silent: false }, function(next) {
@@ -90,19 +86,15 @@ describe('parallel', () => {
 
       const options = { silent: true, foo: 'bar' };
 
-      const build = app.parallel('foo', options, function(next) {
+      const build = app.parallel('foo', options, next => {
         actual.push('bar');
         next();
       });
 
-      build(err => {
-        if (err) {
-          cb(err);
-          return;
-        }
-        assert.deepEqual(actual, ['bar', 'foo']);
-        cb();
-      });
+      return build()
+        .then(() => {
+          assert.deepEqual(actual, ['bar', 'foo']);
+        });
     });
 
     it('should run task dependencies in parallel', () => {

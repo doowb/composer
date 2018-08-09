@@ -61,10 +61,10 @@ describe('composer', () => {
   });
 
   it('should register a task with options as the second argument', () => {
-    app.task('default', { flow: 'parallel' }, ['foo', 'bar']);
+    app.task('default', { one: 'two' }, ['foo', 'bar']);
     assert.equal(typeof app.tasks.get('default'), 'object');
     assert.equal(typeof app.tasks.get('default').callback, 'function');
-    assert.equal(app.tasks.get('default').options.flow, 'parallel');
+    assert.equal(app.tasks.get('default').options.one, 'two');
   });
 
   it('should register a task as a prompt task', () => {
