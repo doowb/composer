@@ -14,7 +14,7 @@ describe('default generator', () => {
     return app.generate('default')
       .catch(err => {
         assert(err);
-        assert(/is not registered/i.test(err.message));
+        assert(/invalid/i.test(err.message));
       });
   });
 

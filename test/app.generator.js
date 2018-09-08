@@ -195,19 +195,31 @@ describe('.generator', () => {
     });
 
     it('should create sub-generator namespace from parent namespace and alias', cb => {
-      const name = base.name;
-
       base.generator('generate-foo', app => {
-        assert.equal(app.namespace, name + '.foo');
+        assert(app !== base);
+        assert(app.base === base);
+        assert.equal(app.namespace, `${base.name}.foo`);
 
-        app.generator('generate-bar', function(bar) {
-          assert.equal(bar.namespace, name + '.foo.bar');
+        app.generator('generate-bar', bar => {
+          assert(bar !== app);
+          assert(bar !== base);
+          assert(bar.base === base);
+          assert.equal(bar.namespace, `${base.name}.foo.bar`);
 
-          bar.generator('generate-baz', function(baz) {
-            assert.equal(baz.namespace, name + '.foo.bar.baz');
+          bar.generator('generate-baz', baz => {
+            assert(baz !== bar);
+            assert(baz !== app);
+            assert(baz !== base);
+            assert(baz.base === base);
+            assert.equal(baz.namespace, `${base.name}.foo.bar.baz`);
 
-            baz.generator('generate-qux', function(qux) {
-              assert.equal(qux.namespace, name + '.foo.bar.baz.qux');
+            baz.generator('generate-qux', qux => {
+              assert(qux !== baz);
+              assert(qux !== bar);
+              assert(qux !== app);
+              assert(qux !== base);
+              assert(qux.base === base);
+              assert.equal(qux.namespace, `${base.name}.foo.bar.baz.qux`);
               cb();
             });
           });

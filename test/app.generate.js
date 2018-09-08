@@ -20,7 +20,7 @@ describe('.generate', () => {
         .then(ensureError)
         .catch(err => {
           assert(err);
-          assert(/is not registered/i.test(err.message));
+          assert(/invalid/i.test(err.message));
         });
     });
 
@@ -52,7 +52,7 @@ describe('.generate', () => {
         .catch(err => {
           assert(err);
           assert(/task/i.test(err.message));
-          assert(/is not registered/i.test(err.message));
+          assert(/invalid/i.test(err.message));
         });
     });
 
@@ -271,6 +271,31 @@ describe('.generate', () => {
         .then(() => {
           assert.equal(count, 2);
         });
+    });
+
+    it('should throw an error when an invalid name is passed on an array', () => {
+      let count = 0;
+      base.register('foo', app => {
+        app.task('default', next => {
+          count++;
+          next();
+        });
+      });
+
+      base.register('bar', app => {
+        app.task('default', next => {
+          count++;
+          next();
+        });
+      });
+
+      return base.generate(['foo', 'bar', 'lfdsflsjfsjflksjfsfjs'])
+        .then(() => {
+          throw new Error('expected an error');
+        })
+        .catch(err => {
+          assert(/invalid/i.test(err));
+        })
     });
 
     it('should run the default tasks on an array of generators', () => {

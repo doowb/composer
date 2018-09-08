@@ -365,10 +365,11 @@ describe('composer', () => {
       count++;
     });
 
-    return app.build(['foo', 'bar']).catch(err => {
-      assert(err);
-      assert.equal(count, 0);
-    });
+    return app.build(['foo', 'bar'])
+      .catch(err => {
+        assert(err);
+        assert.equal(count, 0);
+      });
   });
 
   it('should emit an error event when an error is thrown in a task', () => {

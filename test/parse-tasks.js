@@ -29,7 +29,7 @@ describe('parse-tasks', () => {
 
     app.register('baz', () => {});
     app.register('qux', () => {});
-    parse = (...tasks) => parseTasks(app, ...tasks);
+    parse = (...tasks) => parseTasks()(app, ...tasks);
   });
 
   it('should parse task arguments', () => {
@@ -118,13 +118,15 @@ describe('parse-tasks', () => {
     assert.deepEqual(parse('foo.one:abc bar.two:xyz'), {
       callback: void 0,
       options: {},
-      tasks: [{ name: 'foo.one', tasks: ['abc'] }, { name: 'bar.two', tasks: ['xyz'] }]
+      tasks: [{ name: 'foo.one', tasks: ['abc'] }, { name: 'bar.two', tasks: ['xyz'] }],
+      missing: []
     });
 
     assert.deepEqual(parse(['foo.one:abc', { foo: 'bar' }, 'bar.two:xyz']), {
       callback: void 0,
       options: { foo: 'bar' },
-      tasks: [{ name: 'foo.one', tasks: ['abc'] }, { name: 'bar.two', tasks: ['xyz'] }]
+      tasks: [{ name: 'foo.one', tasks: ['abc'] }, { name: 'bar.two', tasks: ['xyz'] }],
+      missing: []
     });
   });
 });
