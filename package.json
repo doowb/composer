@@ -66,6 +66,7 @@
     ],
     "related": {
       "list": [
+        "enquirer",
         "assemble",
         "generate",
         "update",

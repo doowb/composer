@@ -51,7 +51,7 @@ composer.build('baz')
 
 ## API
 
-### [.create](lib/tasks.js#L28)
+### [.factory](lib/tasks.js#L27)
 
 Factory for creating a custom `Tasks` class that extends the given `Emitter`. Or, simply call the factory function to use the built-in emitter.
 
@@ -71,7 +71,7 @@ const Tasks = require('composer/lib/tasks')();
 const composer = new Tasks();
 ```
 
-### [Tasks](lib/tasks.js#L43)
+### [Tasks](lib/tasks.js#L42)
 
 Create an instance of `Tasks` with the given `options`.
 
@@ -86,7 +86,7 @@ const Tasks = require('composer').Tasks;
 const composer = new Tasks();
 ```
 
-### [.task](lib/tasks.js#L83)
+### [.task](lib/tasks.js#L86)
 
 Define a task. Tasks run asynchronously, either in series (by default) or parallel (when `options.parallel` is true). In order for the build to determine when a task is complete, _one of the following_ things must happen: 1) the callback must be called, 2) a promise must be returned, or 3) a stream must be returned. Inside tasks, the "this" object is a composer Task instance created for each task with useful properties like the task name, options and timing information, which can be useful for logging, etc.
 
@@ -115,7 +115,7 @@ app.task('default', function() {
 });
 ```
 
-### [.build](lib/tasks.js#L208)
+### [.build](lib/tasks.js#L209)
 
 Run one or more tasks.
 
@@ -137,7 +137,7 @@ build(function() {
 });
 ```
 
-### [.series](lib/tasks.js#L250)
+### [.series](lib/tasks.js#L251)
 
 Compose a function to run the given tasks in series.
 
@@ -159,7 +159,7 @@ build(function() {
 });
 ```
 
-### [.parallel](lib/tasks.js#L303)
+### [.parallel](lib/tasks.js#L304)
 
 Compose a function to run the given tasks in parallel.
 
@@ -184,13 +184,22 @@ build(function() {
 app.task('default', build);
 ```
 
-### [.create](lib/generator.js#L28)
+### [.create](lib/tasks.js#L388)
+
+Static method for creating a custom Tasks class with the given `Emitter.
+
+**Params**
+
+* `Emitter` **{Function}**
+* `returns` **{Class}**: Returns the custom class.
+
+### [.create](lib/generator.js#L30)
 
 Static factory method for creating a custom `Composer` class that extends the given `Emitter`.
 
 **Params**
 
-* `Emitter` **{function}**: Event emitter.
+* `Emitter` **{Function}**: Event emitter.
 * `returns` **{Class}**: Returns a custom `Composer` class.
 
 **Example**
@@ -222,28 +231,28 @@ Create a wrapped generator function with the given `name`, `config`, and `fn`.
 
 **Params**
 
-* `name` **{string}**
-* `config` **{object}**: (optional)
-* `fn` **{function}**
-* `returns` **{function}**
+* `name` **{String}**
+* `config` **{Object}**: (optional)
+* `fn` **{Function}**
+* `returns` **{Function}**
 
 Returns true if the given value is a Composer generator object.
 
 **Params**
 
-* `val` **{object}**
-* `returns` **{boolean}**
+* `val` **{Object}**
+* `returns` **{Boolean}**
 
-### [.register](lib/generator.js#L162)
+### [.register](lib/generator.js#L167)
 
 Alias to `.setGenerator`.
 
 **Params**
 
-* `name` **{string}**: The generator's name
-* `options` **{object|Function|String}**: or generator
-* `generator` **{object|Function|String}**: Generator function, instance or filepath.
-* `returns` **{object}**: Returns the generator instance.
+* `name` **{String}**: The generator's name
+* `options` **{Object|Function|String}**: or generator
+* `generator` **{Object|Function|String}**: Generator function, instance or filepath.
+* `returns` **{Object}**: Returns the generator instance.
 
 **Example**
 
@@ -254,15 +263,15 @@ app.register('foo', function(app, base) {
 });
 ```
 
-### [.generator](lib/generator.js#L185)
+### [.generator](lib/generator.js#L190)
 
 Get and invoke generator `name`, or register generator `name` with the given `val` and `options`, then invoke and return the generator instance. This method differs from `.register`, which lazily invokes generator functions when `.generate` is called.
 
 **Params**
 
-* `name` **{string}**
-* `fn` **{function|Object}**: Generator function, instance or filepath.
-* `returns` **{object}**: Returns the generator instance or undefined if not resolved.
+* `name` **{String}**
+* `fn` **{Function|Object}**: Generator function, instance or filepath.
+* `returns` **{Object}**: Returns the generator instance or undefined if not resolved.
 
 **Example**
 
@@ -273,16 +282,16 @@ app.generator('foo', function(app, options) {
 });
 ```
 
-### [.setGenerator](lib/generator.js#L217)
+### [.setGenerator](lib/generator.js#L222)
 
 Store a generator by file path or instance with the given `name` and `options`.
 
 **Params**
 
-* `name` **{string}**: The generator's name
-* `options` **{object|Function|String}**: or generator
-* `generator` **{object|Function|String}**: Generator function, instance or filepath.
-* `returns` **{object}**: Returns the generator instance.
+* `name` **{String}**: The generator's name
+* `options` **{Object|Function|String}**: or generator
+* `generator` **{Object|Function|String}**: Generator function, instance or filepath.
+* `returns` **{Object}**: Returns the generator instance.
 
 **Example**
 
@@ -293,14 +302,14 @@ app.setGenerator('foo', function(app, options) {
 });
 ```
 
-### [.getGenerator](lib/generator.js#L242)
+### [.getGenerator](lib/generator.js#L247)
 
 Get generator `name` from `app.generators`, same as [findGenerator], but also invokes the returned generator with the current instance. Dot-notation may be used for getting sub-generators.
 
 **Params**
 
-* `name` **{string}**: Generator name.
-* `returns` **{object|undefined}**: Returns the generator instance or undefined.
+* `name` **{String}**: Generator name.
+* `returns` **{Object|undefined}**: Returns the generator instance or undefined.
 
 **Example**
 
@@ -311,15 +320,15 @@ const foo = app.getGenerator('foo');
 const baz = app.getGenerator('foo.bar.baz');
 ```
 
-### [.findGenerator](lib/generator.js#L275)
+### [.findGenerator](lib/generator.js#L280)
 
 Find generator `name`, by first searching the cache, then searching the cache of the `base` generator. Use this to get a generator without invoking it.
 
 **Params**
 
-* `name` **{string}**
-* `options` **{function}**: Optionally supply a rename function on `options.toAlias`
-* `returns` **{object|undefined}**: Returns the generator instance if found, or undefined.
+* `name` **{String}**
+* `options` **{Function}**: Optionally supply a rename function on `options.toAlias`
+* `returns` **{Object|undefined}**: Returns the generator instance if found, or undefined.
 
 **Example**
 
@@ -333,8 +342,8 @@ const foo = app.findGenerator('generate-foo');
 
 **Params**
 
-* `name` **{string}**
-* `returns` **{boolean}**
+* `name` **{String}**
+* `returns` **{Boolean}**
 
 **Example**
 
@@ -343,15 +352,15 @@ console.log(app.hasGenerator('foo'));
 console.log(app.hasGenerator('foo.bar'));
 ```
 
-### [.generate](lib/generator.js#L357)
+### [.generate](lib/generator.js#L362)
 
 Run one or more tasks or sub-generators and returns a promise.
 
 **Params**
 
-* `name` **{string}**
-* `tasks` **{string|Array}**
-* `returns` **{promise}**
+* `name` **{String}**
+* `tasks` **{String|Array}**
+* `returns` **{Promise}**
 
 **Events**
 
@@ -373,15 +382,15 @@ app.generate('foo');
 app.generate();
 ```
 
-### [.toAlias](lib/generator.js#L407)
+### [.toAlias](lib/generator.js#L413)
 
 Create a generator alias from the given `name`. By default, `generate-` is stripped from beginning of the generator name.
 
 **Params**
 
-* `name` **{string}**
-* `options` **{object}**
-* `returns` **{string}**: Returns the alias.
+* `name` **{String}**
+* `options` **{Object}**
+* `returns` **{String}**: Returns the alias.
 
 **Example**
 
@@ -390,80 +399,111 @@ Create a generator alias from the given `name`. By default, `generate-` is strip
 const app = new Generate({ toAlias: require('camel-case') });
 ```
 
-### [.isGenerators](lib/generator.js#L428)
+### [.isGenerators](lib/generator.js#L434)
 
 Returns true if every name in the given array is a registered generator.
 
 **Params**
 
-* `names` **{array}**
-* `returns` **{boolean}**
+* `names` **{Array}**
+* `returns` **{Boolean}**
 
-### [.formatError](lib/generator.js#L440)
+### [.formatError](lib/generator.js#L446)
 
 Format task and generator errors.
 
 **Params**
 
-* `name` **{string}**
-* `returns` **{error}**
+* `name` **{String}**
+* `returns` **{Error}**
 
-### [.base](lib/generator.js#L485)
+### [.disableInspect](lib/generator.js#L466)
+
+Disable inspect. Returns a function to re-enable inspect. Useful for debugging.
+
+### [.base](lib/generator.js#L504)
 
 Get the first ancestor instance of Composer. Only works if `generator.parent` is
 defined on child instances.
+
+### [.name](lib/generator.js#L517)
 
 Get or set the generator name.
 
 **Params**
 
-* **{string}**
+* **{String}**
 
-* `returns` **{string}**
+* `returns` **{String}**
+
+### [.alias](lib/generator.js#L534)
 
 Get or set the generator `alias`. By default, the generator alias is created
 by passing the generator name to the [.toAlias](#toAlias) method.
 
 **Params**
 
-* **{string}**
+* **{String}**
 
-* `returns` **{string}**
+* `returns` **{String}**
+
+### [.namespace](lib/generator.js#L551)
 
 Get the generator namespace. The namespace is created by joining the generator's `alias`
 to the alias of each ancestor generator.
 
 **Params**
 
-* **{string}**
+* **{String}**
 
-* `returns` **{string}**
+* `returns` **{String}**
+
+### [.depth](lib/generator.js#L564)
 
 Get the depth of a generator - useful for debugging. The root generator
 has a depth of `0`, sub-generators add `1` for each level of nesting.
 
-* `returns` **{number}**
+* `returns` **{Number}**
+
+### [Composer#parse](lib/generator.js#L577)
+
+Static method that returns a function for parsing task arguments.
+
+**Params**
+
+* `register` **{Function}**: Function that receives a name of a task or generator that cannot be found by the parse function. This allows the `register` function to dynamically register tasks or generators.
+* `returns` **{Function}**: Returns a function for parsing task args.
+
+### [Composer#isGenerator](lib/generator.js#L590)
 
 Static method that returns true if the given `val` is an instance of Generate.
 
 **Params**
 
-* `val` **{object}**
-* `returns` **{boolean}**
+* `val` **{Object}**
+* `returns` **{Boolean}**
 
-Static method for creating a custom Composer class with a custom `Emitter.
+### [Composer#create](lib/generator.js#L603)
 
-**Params**
-
-* `Emitter` **{Function}**
-* `returns` **{Class}**: Returns the custom class.
-
-Static method for creating a custom Tasks class with a custom `Emitter`.
+Static method for creating a custom Composer class with the given `Emitter.
 
 **Params**
 
 * `Emitter` **{Function}**
 * `returns` **{Class}**: Returns the custom class.
+
+### [Composer#Tasks](lib/generator.js#L617)
+
+Static getter for getting the Tasks class with the same `Emitter` class as Composer.
+
+**Params**
+
+* `Emitter` **{Function}**
+* `returns` **{Class}**: Returns the Tasks class.
+
+### [Composer#Task](lib/generator.js#L633)
+
+Static getter for getting the `Task` class.
 
 **Example**
 
@@ -538,24 +578,25 @@ $ npm install -g verbose/verb#dev verb-generate-readme && verb
 You might also be interested in these projects:
 
 * [assemble](https://www.npmjs.com/package/assemble): Get the rocks out of your socks! Assemble makes you fast at creating web projects… [more](https://github.com/assemble/assemble) | [homepage](https://github.com/assemble/assemble "Get the rocks out of your socks! Assemble makes you fast at creating web projects. Assemble is used by thousands of projects for rapid prototyping, creating themes, scaffolds, boilerplates, e-books, UI components, API documentation, blogs, building websit")
+* [enquirer](https://www.npmjs.com/package/enquirer): Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and… [more](https://github.com/enquirer/enquirer) | [homepage](https://github.com/enquirer/enquirer "Stylish, intuitive and user-friendly prompt system. Fast and lightweight enough for small projects, powerful and extensible enough for the most advanced use cases.")
 * [generate](https://www.npmjs.com/package/generate): Command line tool and developer framework for scaffolding out new GitHub projects. Generate offers the… [more](https://github.com/generate/generate) | [homepage](https://github.com/generate/generate "Command line tool and developer framework for scaffolding out new GitHub projects. Generate offers the robustness and configurability of Yeoman, the expressiveness and simplicity of Slush, and more powerful flow control and composability than either.")
 * [update](https://www.npmjs.com/package/update): Be scalable! Update is a new, open source developer framework and CLI for automating updates… [more](https://github.com/update/update) | [homepage](https://github.com/update/update "Be scalable! Update is a new, open source developer framework and CLI for automating updates of any kind in code projects.")
 * [verb](https://www.npmjs.com/package/verb): Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used… [more](https://github.com/verbose/verb) | [homepage](https://github.com/verbose/verb "Documentation generator for GitHub projects. Verb is extremely powerful, easy to use, and is used on hundreds of projects of all sizes to generate everything from API docs to readmes.")
 
 ### Contributors
 
-| **Commits** | **Contributor** | 
-| --- | --- |
-| 226 | [doowb](https://github.com/doowb) |
-| 69 | [jonschlinkert](https://github.com/jonschlinkert) |
+| **Commits** | **Contributor** |  
+| --- | --- |  
+| 227 | [doowb](https://github.com/doowb) |  
+| 72  | [jonschlinkert](https://github.com/jonschlinkert) |  
 
 ### Author
 
 **Brian Woodward**
 
-* [LinkedIn Profile](https://linkedin.com/in/woodwardbrian)
 * [GitHub Profile](https://github.com/doowb)
 * [Twitter Profile](https://twitter.com/doowb)
+* [LinkedIn Profile](https://linkedin.com/in/woodwardbrian)
 
 ### License
 
@@ -564,4 +605,4 @@ Released under the [MIT License](LICENSE).
 
 ***
 
-_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.6.0, on August 04, 2018._
+_This file was generated by [verb-generate-readme](https://github.com/verbose/verb-generate-readme), v0.8.0, on November 11, 2018._
